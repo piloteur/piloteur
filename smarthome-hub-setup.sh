@@ -18,6 +18,8 @@ fi
 
 mkdir logs locks
 
+wget https://github.com/stedolan/jq/raw/gh-pages/download/linux64/jq
+chmod +x jq
 REMOTEHOST=$(./jq --raw-output .remotehost config.json)
 ssh-keyscan "$REMOTEHOST" >> ~/.ssh/known_hosts
 
