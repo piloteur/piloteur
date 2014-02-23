@@ -18,8 +18,8 @@ class Syncer():
         rsync_cmd = ["rsync", "-avz", "--append"]
         rsync_cmd += ["-e", 'ssh -i ./smarthome-remote-key']
         rsync_cmd += [os.path.expanduser("~/data/")]
-        rsync_cmd += ["%s@%s:/var/smarthome/data/" % (
-            self.config['remoteuser'], self.config['remotehost'])]
+        rsync_cmd += ["%s@%s:%s" % (self.config['remoteuser'],
+            self.config['remotehost'], self.config['remotepath'])]
         self.log.debug('rsync command line: %s', rsync_cmd)
 
         self.log.info('Starting rsync...')
