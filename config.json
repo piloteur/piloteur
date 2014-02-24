@@ -1,5 +1,5 @@
 {
-    "remoteuser": "",
-    "remotehost": "",
-    "remotepath": ""
+    "remoteuser": "8882",
+    "remotehost": "usw-s008.rsync.net",
+    "remotepath": "smarthome-data"
 }
