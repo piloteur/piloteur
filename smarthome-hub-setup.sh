@@ -13,6 +13,8 @@ cd "$DIR"
 virtualenv ENV
 if [ -f requirements.txt ]
 then
+    sudo apt-get install python-dev build-essential
+    # TODO: prebuild wheels of the dependencies
     ENV/bin/pip install -r requirements.txt
 fi
 

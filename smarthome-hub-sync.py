@@ -5,6 +5,9 @@ import os.path
 import os
 import operator
 import time
+import psutil
+import uptime
+import datetime
 
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
@@ -14,10 +17,18 @@ listfiles = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
                 if os.path.isfile(os.path.join(dirname, x))]
 
+def get_device(path):
+    output = subprocess.check_output(["df", path])
+    device, size, used, available, percent, mountpoint = \
+        output.split("\n")[1].split()
+    return device
+
+
 class Syncer():
     TIMESTAMP_PATH = './var/smarthome-hub-sync.timestamp'
     LOCAL_PATH = os.path.expanduser("~/data/")
     KEYFILE_PATH = './smarthome-remote-key'
+    MONITORING_PATH = './logs/smarthome-hub-sync.json'
 
     def __init__(self):
         FORMAT = '[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s'
@@ -94,7 +105,28 @@ class Syncer():
             os.remove(f)
 
     def finish(self):
-        pass
+        data = {}
+
+        data["uptime"] = uptime.uptime()
+        data["timestamp"] = datetime.datetime.now().isoformat()
+        data["cpu_percent"] = psutil.cpu_percent(0)
+        data["free_memory"] = psutil.virtual_memory().available
+        data["free_disk"] = psutil.disk_usage(self.LOCAL_PATH).free
+
+        device = os.path.basename(get_device(self.LOCAL_PATH))
+        iostat = psutil.disk_io_counters(perdisk=True)[device]
+        data["iostat"] = {
+            "read_bytes": iostat.read_bytes,
+            "write_bytes": iostat.write_bytes,
+            "read_count": iostat.read_count,
+            "write_count": iostat.write_count
+        }
+
+        self.log.debug(data)
+
+        with open(self.MONITORING_PATH, 'a') as f:
+            json.dump(data, f, sort_keys=True)
+            f.write('\n')
 
 
 
