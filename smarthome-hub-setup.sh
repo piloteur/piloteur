@@ -16,7 +16,7 @@ then
     ENV/bin/pip install -r requirements.txt
 fi
 
-mkdir logs locks
+mkdir logs var
 
 wget https://github.com/stedolan/jq/raw/gh-pages/download/linux64/jq
 chmod +x jq

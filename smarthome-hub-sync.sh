@@ -7,4 +7,4 @@
 
     ENV/bin/python smarthome-hub-sync.py >> ./logs/smarthome-hub-sync 2>&1
 
-) 200>./locks/smarthome-hub-sync.lock
+) 200>./var/smarthome-hub-sync.lock
