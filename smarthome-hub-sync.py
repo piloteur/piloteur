@@ -8,6 +8,7 @@ import time
 import psutil
 import uptime
 import datetime
+import traceback
 
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
@@ -46,8 +47,12 @@ class Syncer():
     def run(self):
         self.start_time = time.time()
 
-        if self.sync():
-            self.after_success()
+        try:
+            success = self.sync()
+        except:
+            traceback.print_exc()
+        else:
+            if success: self.after_success()
 
         self.finish()
 
