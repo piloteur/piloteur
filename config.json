@@ -5,6 +5,9 @@
     "remote_logs_path": "smarthome/logs/",
     "data_path": "~/smarthome/data/",
     "logs_path": "~/smarthome/logs/",
-    "logging_modules": [ "monitor" ],
+    "logging_modules": [
+        "monitor",
+        "timesync"
+    ],
     "keyfile_path": "./smarthome-remote-key"
 }

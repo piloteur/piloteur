@@ -9,6 +9,7 @@ import psutil
 import uptime
 import datetime
 import traceback
+import ntplib
 
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
@@ -66,6 +67,7 @@ class Syncer():
             if success: self.after_success()
 
         self.monitor()
+        self.timesync()
 
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
@@ -147,6 +149,20 @@ class Syncer():
         with open(MONITOR_PATH, 'a') as f:
             json.dump(data, f, sort_keys=True)
             f.write('\n')
+
+    def timesync(self):
+        TIMESYNC_PATH = os.path.join(self.LOGS_PATH, "timesync/timesync-log.csv")
+
+        self.log.info('doing a NTP request...')
+
+        r = ntplib.NTPClient().request('us.pool.ntp.org')
+        local = datetime.datetime.utcfromtimestamp(r.dest_time)
+        remote = datetime.datetime.utcfromtimestamp(
+            r.tx_time - r.delay / 2)
+
+        with open(TIMESYNC_PATH, 'a') as f:
+            f.write('%s,%s,%f\n' %(local.isoformat(), remote.isoformat(),
+                r.offset))
 
 
 
