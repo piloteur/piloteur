@@ -9,6 +9,8 @@ import psutil
 import uptime
 import datetime
 import traceback
+import errno
+import pipes
 
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
@@ -24,16 +26,30 @@ def get_device(path):
         output.split("\n")[1].split()
     return device
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path): pass
+        else: raise
+
+def mkdir_p_remote(run_remote_command, path):
+    command = "mkdir -p %s" % pipes.quote(path)
+    run_remote_command(command)
+
 
 class Syncer():
-    TIMESTAMP_PATH = './var/smarthome-hub-sync.timestamp'
-    LOCAL_PATH = os.path.expanduser("~/data/")
+    DATA_PATH = os.path.expanduser("~/smarthome/data/")
+    LOGS_PATH = os.path.expanduser("~/smarthome/logs/")
+
+    LOGGING_PATH = os.path.join(LOGS_PATH, 'smarthome-hub-sync.log')
+    TIMESTAMP_PATH = os.path.join(LOGS_PATH, 'last_good_sync')
+
     KEYFILE_PATH = './smarthome-remote-key'
-    MONITORING_PATH = './logs/smarthome-hub-sync.json'
 
     def __init__(self):
         FORMAT = '[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s'
-        logging.basicConfig(format=FORMAT)
+        logging.basicConfig(filename=self.LOGGING_PATH, format=FORMAT)
         self.log = logging.getLogger('HUB')
         if os.environ.get('DEBUG'):
             self.log.setLevel(logging.DEBUG)
@@ -44,28 +60,48 @@ class Syncer():
             self.config = json.load(f)
         self.log.debug('Loaded config: %s', self.config)
 
+        mkdir_p(self.DATA_PATH)
+        mkdir_p(self.LOGS_PATH)
+        mkdir_p(os.path.join(self.LOGS_PATH, "monitor"))
+
+        mkdir_p_remote(self.run_remote_command, self.config['remote_data_path'])
+        mkdir_p_remote(self.run_remote_command, self.config['remote_local_path'])
+
+    def run_remote_command(self, command):
+        ssh_cmd = ["ssh", "-i", self.KEYFILE_PATH]
+        ssh_cmd += ["%s@%s" % (self.config['remoteuser'], self.config['remotehost'])]
+        ssh_cmd += [command]
+
+        self.log.info('Running remote command "%s"', command)
+        subprocess.check_call(ssh_cmd)
+
     def run(self):
+        self.log.info('---')
         self.start_time = time.time()
 
         try:
-            success = self.sync()
+            # Maybe running rsync two times might have to be reconsidered
+            success = self.sync(self.DATA_PATH, self.config['remote_data_path'])
+            success &= self.sync(self.LOGS_PATH, self.config['remote_logs_path'])
         except:
             traceback.print_exc()
         else:
             if success: self.after_success()
 
-        self.finish()
+        self.monitor()
 
-    def sync(self):
+    def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
         rsync_cmd += ["--timeout", "5"]
         rsync_cmd += ["-e", 'ssh -i %s' % self.KEYFILE_PATH]
-        rsync_cmd += [self.LOCAL_PATH]
+
+        rsync_cmd += [local_path]
         rsync_cmd += ["%s@%s:%s" % (self.config['remoteuser'],
-            self.config['remotehost'], self.config['remotepath'])]
+            self.config['remotehost'], remote_path)]
+
         self.log.debug('rsync command line: %s', rsync_cmd)
 
-        self.log.info('Starting rsync...')
+        self.log.info('Starting rsync %s -> %s...', local_path, remote_path)
         ecode = subprocess.call(rsync_cmd)
         if ecode == 0:
             self.log.info('rsync finished successfully.')
@@ -109,7 +145,8 @@ class Syncer():
                 % (f, t))
             os.remove(f)
 
-    def finish(self):
+    MONITOR_PATH = os.path.join(LOGS_PATH, "monitor/monitor-log.json")
+    def monitor(self):
         data = {}
 
         data["uptime"] = uptime.uptime()
@@ -129,7 +166,7 @@ class Syncer():
 
         self.log.debug(data)
 
-        with open(self.MONITORING_PATH, 'a') as f:
+        with open(self.MONITOR_PATH, 'a') as f:
             json.dump(data, f, sort_keys=True)
             f.write('\n')
 

@@ -5,6 +5,6 @@
 
 ( flock -n 200 || exit 99
 
-    ~/ENV/bin/python smarthome-hub-sync.py >> ./logs/smarthome-hub-sync 2>&1
+    ~/ENV/bin/python smarthome-hub-sync.py 2>&1
 
-) 200>./var/smarthome-hub-sync.lock
+) 200>~/smarthome-hub-sync.lock

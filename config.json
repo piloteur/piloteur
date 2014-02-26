@@ -1,5 +1,6 @@
 {
     "remoteuser": "8882",
     "remotehost": "usw-s008.rsync.net",
-    "remotepath": "smarthome-data"
+    "remote_data_path": "smarthome/data/",
+    "remote_logs_path": "smarthome/logs/"
 }
