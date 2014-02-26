@@ -7,6 +7,6 @@
 
 for i in {0..5}
 do
-    ./smarthome-hub-sync.sh
+    ./smarthome-hub-sync.sh &
     sleep 10
 done
