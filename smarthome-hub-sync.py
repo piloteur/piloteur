@@ -39,9 +39,10 @@ class Syncer():
             self.config = json.load(f)
         self.log.debug('Loaded config: %s', self.config)
 
-        self.DATA_PATH = self.config['data_path']
-        self.LOGS_PATH = self.config['logs_path']
-        self.TIMESTAMP_PATH = os.path.join(self.LOGS_PATH, 'last_good_sync')
+        self.DATA_PATH = os.path.expanduser(self.config['data_path'])
+        self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
+        self.TIMESTAMP_PATH = os.path.expanduser(
+            os.path.join(self.LOGS_PATH, 'last_good_sync'))
 
     # def run_remote_command(self, command):
     #     ssh_cmd = ["ssh", "-i", self.config['keyfile_path']]
