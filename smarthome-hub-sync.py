@@ -9,8 +9,6 @@ import psutil
 import uptime
 import datetime
 import traceback
-import errno
-import pipes
 
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
@@ -26,30 +24,11 @@ def get_device(path):
         output.split("\n")[1].split()
     return device
 
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path): pass
-        else: raise
-
-def mkdir_p_remote(run_remote_command, path):
-    command = "mkdir -p %s" % pipes.quote(path)
-    run_remote_command(command)
-
 
 class Syncer():
-    DATA_PATH = os.path.expanduser("~/smarthome/data/")
-    LOGS_PATH = os.path.expanduser("~/smarthome/logs/")
-
-    LOGGING_PATH = os.path.join(LOGS_PATH, 'smarthome-hub-sync.log')
-    TIMESTAMP_PATH = os.path.join(LOGS_PATH, 'last_good_sync')
-
-    KEYFILE_PATH = './smarthome-remote-key'
-
     def __init__(self):
         FORMAT = '[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s'
-        logging.basicConfig(filename=self.LOGGING_PATH, format=FORMAT)
+        logging.basicConfig(format=FORMAT)
         self.log = logging.getLogger('HUB')
         if os.environ.get('DEBUG'):
             self.log.setLevel(logging.DEBUG)
@@ -60,20 +39,17 @@ class Syncer():
             self.config = json.load(f)
         self.log.debug('Loaded config: %s', self.config)
 
-        mkdir_p(self.DATA_PATH)
-        mkdir_p(self.LOGS_PATH)
-        mkdir_p(os.path.join(self.LOGS_PATH, "monitor"))
+        self.DATA_PATH = self.config['data_path']
+        self.LOGS_PATH = self.config['logs_path']
+        self.TIMESTAMP_PATH = os.path.join(self.LOGS_PATH, 'last_good_sync')
 
-        mkdir_p_remote(self.run_remote_command, self.config['remote_data_path'])
-        mkdir_p_remote(self.run_remote_command, self.config['remote_local_path'])
+    # def run_remote_command(self, command):
+    #     ssh_cmd = ["ssh", "-i", self.config['keyfile_path']]
+    #     ssh_cmd += ["%s@%s" % (self.config['remoteuser'], self.config['remotehost'])]
+    #     ssh_cmd += [command]
 
-    def run_remote_command(self, command):
-        ssh_cmd = ["ssh", "-i", self.KEYFILE_PATH]
-        ssh_cmd += ["%s@%s" % (self.config['remoteuser'], self.config['remotehost'])]
-        ssh_cmd += [command]
-
-        self.log.info('Running remote command "%s"', command)
-        subprocess.check_call(ssh_cmd)
+    #     self.log.info('Running remote command "%s"', command)
+    #     subprocess.check_call(ssh_cmd)
 
     def run(self):
         self.log.info('---')
@@ -93,7 +69,7 @@ class Syncer():
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
         rsync_cmd += ["--timeout", "5"]
-        rsync_cmd += ["-e", 'ssh -i %s' % self.KEYFILE_PATH]
+        rsync_cmd += ["-e", 'ssh -i %s' % self.config['keyfile_path']]
 
         rsync_cmd += [local_path]
         rsync_cmd += ["%s@%s:%s" % (self.config['remoteuser'],
@@ -118,7 +94,7 @@ class Syncer():
             if content.isdigit():
                 last_sync = int(content)
 
-        sensor_kind_folders = listdirs(self.LOCAL_PATH)
+        sensor_kind_folders = listdirs(self.DATA_PATH)
         for sensor_kind_folder in sensor_kind_folders:
             sensor_folders = listdirs(sensor_kind_folder)
             for sensor_folder in sensor_folders:
@@ -145,17 +121,18 @@ class Syncer():
                 % (f, t))
             os.remove(f)
 
-    MONITOR_PATH = os.path.join(LOGS_PATH, "monitor/monitor-log.json")
     def monitor(self):
+        MONITOR_PATH = os.path.join(self.LOGS_PATH, "monitor/monitor-log.json")
+
         data = {}
 
         data["uptime"] = uptime.uptime()
         data["timestamp"] = datetime.datetime.now().isoformat()
         data["cpu_percent"] = psutil.cpu_percent(0)
         data["free_memory"] = psutil.virtual_memory().available
-        data["free_disk"] = psutil.disk_usage(self.LOCAL_PATH).free
+        data["free_disk"] = psutil.disk_usage(self.DATA_PATH).free
 
-        device = os.path.basename(get_device(self.LOCAL_PATH))
+        device = os.path.basename(get_device(self.DATA_PATH))
         iostat = psutil.disk_io_counters(perdisk=True)[device]
         data["iostat"] = {
             "read_bytes": iostat.read_bytes,
@@ -166,7 +143,7 @@ class Syncer():
 
         self.log.debug(data)
 
-        with open(self.MONITOR_PATH, 'a') as f:
+        with open(MONITOR_PATH, 'a') as f:
             json.dump(data, f, sort_keys=True)
             f.write('\n')
 

@@ -2,5 +2,9 @@
     "remoteuser": "8882",
     "remotehost": "usw-s008.rsync.net",
     "remote_data_path": "smarthome/data/",
-    "remote_logs_path": "smarthome/logs/"
+    "remote_logs_path": "smarthome/logs/",
+    "data_path": "~/smarthome/data/",
+    "logs_path": "~/smarthome/logs/",
+    "logging_modules": [ "monitor" ],
+    "keyfile_path": "./smarthome-remote-key"
 }
