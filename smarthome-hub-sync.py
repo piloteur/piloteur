@@ -42,8 +42,6 @@ class Syncer():
 
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
-        self.TIMESTAMP_PATH = os.path.expanduser(
-            os.path.join(self.LOGS_PATH, 'last_good_sync'))
 
     # def run_remote_command(self, command):
     #     ssh_cmd = ["ssh", "-i", self.config['keyfile_path']]
@@ -90,23 +88,16 @@ class Syncer():
             return False
 
     def after_success(self):
-        last_sync = 0
-        if os.path.isfile(self.TIMESTAMP_PATH):
-            with open(self.TIMESTAMP_PATH) as f:
-                content = f.read().strip()
-            if content.isdigit():
-                last_sync = int(content)
-
         sensor_kind_folders = listdirs(self.DATA_PATH)
         for sensor_kind_folder in sensor_kind_folders:
             sensor_folders = listdirs(sensor_kind_folder)
             for sensor_folder in sensor_folders:
-                self.prune_old(sensor_folder, last_sync)
+                self.prune_old(sensor_folder)
 
-        with open(self.TIMESTAMP_PATH, 'w') as f:
-            print >> f, int(self.start_time)
+    def prune_old(self, sensor_folder):
+        # Please note the (unavoidable?) race condition between
+        # os.path.getmtime and os.remove
 
-    def prune_old(self, sensor_folder, last_sync):
         files = [(name, os.path.getmtime(name))
             for name in listfiles(sensor_folder)]
         files.sort(key=operator.itemgetter(1), reverse=True)
