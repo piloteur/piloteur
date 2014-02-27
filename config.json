@@ -9,5 +9,6 @@
         "monitor",
         "timesync"
     ],
-    "keyfile_path": "./smarthome-remote-key"
+    "keyfile_path": "./smarthome-remote-key",
+    "log_format": "[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s"
 }

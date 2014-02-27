@@ -27,17 +27,16 @@ def get_device(path):
 
 
 class Syncer():
-    def __init__(self):
-        FORMAT = '[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s'
-        logging.basicConfig(format=FORMAT)
+    def __init__(self, config):
+        self.config = config
+
+        logging.basicConfig(format=self.config['log_format'])
         self.log = logging.getLogger('HUB')
         if os.environ.get('DEBUG'):
             self.log.setLevel(logging.DEBUG)
         else:
             self.log.setLevel(logging.INFO)
 
-        with open('config.json') as f:
-            self.config = json.load(f)
         self.log.debug('Loaded config: %s', self.config)
 
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
@@ -165,7 +164,10 @@ class Syncer():
 
 
 def main():
-    s = Syncer()
+    with open('config.json') as f:
+        config = json.load(f)
+
+    s = Syncer(config)
     s.run()
 
 if __name__ == '__main__':
