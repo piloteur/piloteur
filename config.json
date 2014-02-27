@@ -5,9 +5,11 @@
     "remote_logs_path": "smarthome/logs/",
     "data_path": "~/smarthome/data/",
     "logs_path": "~/smarthome/logs/",
+    "watchdog_path": "~/smarthome/watchdog/",
     "logging_modules": [
         "monitor",
-        "timesync"
+        "timesync",
+        "watchdog"
     ],
     "keyfile_path": "./smarthome-remote-key",
     "log_format": "[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s"
