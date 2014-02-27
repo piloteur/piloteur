@@ -7,6 +7,7 @@
 
     LOGS_PATH=$(~/jq --raw-output .logs_path config.json)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
-    ~/ENV/bin/python smarthome-hub-sync.py >> ${LOGS_PATH}smarthome-hub-sync.log 2>&1
+    LOG_HOUR=$(date +%Y-%m-%d-%H)
+    ~/ENV/bin/python smarthome-hub-sync.py >> ${LOGS_PATH}smarthome-hub-sync.${LOG_HOUR}.log 2>&1
 
 ) 200>~/smarthome-hub-sync.lock

@@ -43,6 +43,8 @@ class Syncer():
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
 
+        self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
+
     # def run_remote_command(self, command):
     #     ssh_cmd = ["ssh", "-i", self.config['keyfile_path']]
     #     ssh_cmd += ["%s@%s" % (self.config['remoteuser'], self.config['remotehost'])]
@@ -94,6 +96,11 @@ class Syncer():
             for sensor_folder in sensor_folders:
                 self.prune_old(sensor_folder)
 
+        self.prune_old(self.LOGS_PATH)
+        log_modules_folders = listdirs(self.LOGS_PATH)
+        for log_modules_folder in log_modules_folders:
+            self.prune_old(log_modules_folder)
+
     def prune_old(self, sensor_folder):
         # Please note the (unavoidable?) race condition between
         # os.path.getmtime and os.remove
@@ -116,7 +123,7 @@ class Syncer():
             os.remove(f)
 
     def monitor(self):
-        MONITOR_PATH = os.path.join(self.LOGS_PATH, "monitor/monitor-log.json")
+        MONITOR_PATH = os.path.join(self.LOGS_PATH, "monitor/monitor-log.%s.json" % self.LOG_HOUR)
 
         data = {}
 
@@ -142,7 +149,7 @@ class Syncer():
             f.write('\n')
 
     def timesync(self):
-        TIMESYNC_PATH = os.path.join(self.LOGS_PATH, "timesync/timesync-log.csv")
+        TIMESYNC_PATH = os.path.join(self.LOGS_PATH, "timesync/timesync-log.%s.csv" % self.LOG_HOUR)
 
         self.log.info('doing a NTP request...')
 
