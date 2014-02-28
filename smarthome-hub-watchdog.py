@@ -4,6 +4,11 @@ import os.path
 import os
 import psutil
 import subprocess
+import socket
+import traceback
+import fcntl
+import struct
+import netifaces
 
 # Note: for a script to be relaunched, it has to be executable, end in
 # .py and accept running with working directory ~. The watchdog has to
@@ -31,6 +36,15 @@ listfiles = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
                 if os.path.isfile(os.path.join(dirname, x))]
 
+def is_interface_up(ifname):
+    SIOCGIFFLAGS = 0x8913
+    null256 = '\0'*256
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    result = fcntl.ioctl(s.fileno(), SIOCGIFFLAGS, ifname + null256)
+    flags, = struct.unpack('H', result[16:18])
+    up = flags & 1
+    return up
+
 class Watchdog():
     def __init__(self, config):
         self.config = config
@@ -49,6 +63,10 @@ class Watchdog():
     def run(self):
         self.log.info('Watchdog starting...')
 
+        self.monitor_services()
+        self.monitor_network()
+
+    def monitor_services(self):
         watched_scripts = set(f for f in listfiles(self.WATCH_PATH)
             if f.endswith('.py') and os.access(f, os.X_OK))
         running_scripts = set(running_python_scripts())
@@ -62,6 +80,69 @@ class Watchdog():
             p = subprocess.Popen(failed, close_fds=True,
                 cwd=os.path.expanduser('~'))
             self.log.info('restarted %s with pid %i', failed, p.pid)
+
+    REMOTE_FAILURE = 'REMOTE_FAILURE'
+    DNS_FAILURE = 'DNS_FAILURE'
+    CONN_FAILURE = 'CONN_FAILURE'
+    IFACE_FAILURE = 'IFACE_FAILURE'
+    def monitor_network(self):
+        try:
+            s = socket.create_connection((self.config['remotehost'], 22), 5)
+            banner = s.recv(256)
+            s.close()
+        except socket.error as e:
+            error = traceback.format_exception_only(type(e), e)[-1].strip()
+            self.log.error('remote endpoint unreachable: %s' % error)
+        else:
+            if not banner.startswith('SSH'):
+                self.log.error('remote endpoint misbehaved, sent: %s' % banner)
+                return self.report_failure(self.REMOTE_FAILURE)
+            return # all good!
+
+        try:
+            s = socket.create_connection(('google.com', 80), 5)
+            s.send('GET /\n\n')
+            s.recv(65535)
+            s.close()
+        except socket.error as e:
+            error = traceback.format_exception_only(type(e), e)[-1].strip()
+            self.log.error('google.com unreachable: %s' % error)
+        else:
+            # if this works but we reached this far, it's the remotehost
+            return self.report_failure(self.REMOTE_FAILURE)
+
+        try:
+            s = socket.create_connection(('173.194.116.0', 80), 5)
+            s.send('GET /\n\n')
+            s.recv(65535)
+            s.close()
+        except socket.error as e:
+            error = traceback.format_exception_only(type(e), e)[-1].strip()
+            self.log.error('173.194.116.0 unreachable: %s' % error)
+        else:
+            # if this works but we reached this far, it's the DNS
+            return self.report_failure(self.DNS_FAILURE)
+
+        interfaces = list((iface, is_interface_up(iface))
+            for iface in netifaces.interfaces()
+            if any(iface.startswith(prefix)
+                for prefix in ('eth', 'wlan', 'hci')))
+
+        if len(interfaces) == 0:
+            self.log.error('no eth*, wlan*, hci* interfaces configured')
+            return self.report_failure(self.IFACE_FAILURE)
+
+        interfaces_down = list(iface for iface, up in interfaces if not up)
+
+        if len(interfaces_down) != 0:
+            self.log.error('interface down: %s' % ' '.join(interfaces_down))
+            return self.report_failure(self.IFACE_FAILURE)
+
+        # if it's not IFACE_FAILURE but we reached here, it's the connection
+        return self.report_failure(self.CONN_FAILURE)
+
+    def report_failure(self, failure):
+        self.log.error('reported network failure: %s' % failure)
 
 def main():
     with open('config.json') as f:
