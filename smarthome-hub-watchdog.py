@@ -7,7 +7,7 @@ import subprocess
 
 # Note: for a script to be relaunched, it has to be executable, end in
 # .py and accept running with working directory ~. The watchdog has to
-# run as the same user as the script.
+# run as the same user as the script. Please consider python-daemon.
 
 def running_python_scripts():
     for p in psutil.process_iter():
@@ -53,10 +53,14 @@ class Watchdog():
             if f.endswith('.py') and os.access(f, os.X_OK))
         running_scripts = set(running_python_scripts())
 
+        self.log.debug(watched_scripts)
+        self.log.debug(running_scripts)
+
         for failed in watched_scripts - running_scripts:
             self.log.error('%s is not running' % failed)
 
-            p = subprocess.Popen(failed)
+            p = subprocess.Popen(failed, close_fds=True,
+                cwd=os.path.expanduser('~'))
             self.log.info('restarted %s with pid %i', failed, p.pid)
 
 def main():

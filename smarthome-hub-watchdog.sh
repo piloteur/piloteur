@@ -8,6 +8,6 @@
     LOGS_PATH=$(~/jq --raw-output .logs_path config.json)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
     LOG_HOUR=$(date +%Y-%m-%d-%H)
-    ~/ENV/bin/python smarthome-hub-watchdog.py >> ${LOGS_PATH}smarthome-hub-watchdog.${LOG_HOUR}.log 2>&1
+    ~/ENV/bin/python smarthome-hub-watchdog.py >> ${LOGS_PATH}watchdog/watchdog.${LOG_HOUR}.log 2>&1
 
 ) 200>~/smarthome-hub-watchdog.lock
