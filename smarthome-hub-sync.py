@@ -39,8 +39,14 @@ class Syncer():
 
         self.log.debug('Loaded config: %s', self.config)
 
+        with open(os.path.expanduser('~/.hub-id')) as f:
+            self.HUB_ID = f.read().strip()
+
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
+
+        self.DATA_PATH = os.path.join(self.DATA_PATH, self.HUB_ID)
+        self.LOGS_PATH = os.path.join(self.LOGS_PATH, self.HUB_ID)
 
         self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
 

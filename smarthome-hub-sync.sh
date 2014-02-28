@@ -5,9 +5,14 @@
 
 ( flock -n 200 || exit 99
 
+    UUID=$(cat ~/.hub-id)
+
     LOGS_PATH=$(~/jq --raw-output .logs_path config.json)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
+    LOGS_PATH="$LOGS_PATH$UUID/"
+
     LOG_HOUR=$(date +%Y-%m-%d-%H)
+
     ~/ENV/bin/python smarthome-hub-sync.py >> ${LOGS_PATH}smarthome-hub-sync.${LOG_HOUR}.log 2>&1
 
 ) 200>~/smarthome-hub-sync.lock
