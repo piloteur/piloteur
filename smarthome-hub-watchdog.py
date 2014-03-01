@@ -10,6 +10,7 @@ import fcntl
 import struct
 import netifaces
 import sys
+import time
 
 # Note: for a script to be relaunched, it has to be executable, end in
 # .py and accept running with working directory ~. The watchdog has to
@@ -52,9 +53,20 @@ def traceroute(host):
     return p.communicate()[0]
 
 def reboot():
-    command = ["/usr/bin/sudo", "/sbin/shutdown", "-r", "now"]
+    command = ["sudo", "shutdown", "-r", "now"]
     subprocess.Popen(command)
     sys.exit(2)
+
+def local_network_reset():
+    interface_reset()
+    subprocess.call(['sudo', 'google-dns'])
+
+def interface_reset():
+    for iface in ('eth0', 'wlan0'):
+        subprocess.call(['sudo', 'ifdown', iface])
+        time.sleep(1)
+        subprocess.call(['sudo', 'ifup', iface])
+        time.sleep(15)
 
 
 class Watchdog():
@@ -173,7 +185,11 @@ class Watchdog():
 
         self.record_strike()
 
-        pass
+        if failure in (self.DNS_FAILURE, self.CONN_FAILURE):
+            local_network_reset()
+
+        if failure == self.IFACE_FAILURE:
+            interface_reset()
 
     def reset_strikes(self):
         with open(self.STRIKES_PATH, 'w') as f:
@@ -201,7 +217,7 @@ class Watchdog():
 
             reboot()
 
-        self.log.error('strikes:%i strikes_limit:%i' % (strikes, strikes_limit))
+        self.log.info('strikes:%i strikes_limit:%i' % (strikes, strikes_limit))
         with open(self.STRIKES_PATH, 'w') as f:
             f.write('%i:%i' % (strikes, strikes_limit))
 
