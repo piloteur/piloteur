@@ -158,7 +158,10 @@ class Syncer():
 
         self.log.info('doing a NTP request...')
 
-        r = ntplib.NTPClient().request('us.pool.ntp.org')
+        try: r = ntplib.NTPClient().request('us.pool.ntp.org')
+        except ntplib.NTPException:
+            self.log.error('NTP request failed')
+            return
         local = datetime.datetime.utcfromtimestamp(r.dest_time)
         remote = datetime.datetime.utcfromtimestamp(
             r.tx_time - r.delay / 2)
