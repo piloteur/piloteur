@@ -54,6 +54,7 @@ def traceroute(host):
 def reboot():
     command = ["/usr/bin/sudo", "/sbin/shutdown", "-r", "now"]
     subprocess.Popen(command)
+    sys.exit(2)
 
 
 class Watchdog():
@@ -165,8 +166,7 @@ class Watchdog():
             return 1
 
         self.record_strike()
-
-        pass
+        return 1
 
     def reset_strikes(self):
         with open(self.STRIKES_PATH, 'w') as f:
@@ -183,14 +183,18 @@ class Watchdog():
         strikes += 1
 
         if strikes == strikes_limit:
-            if strikes_limit < self.config['min_network_strikes_limit']:
+            if strikes_limit < self.config['max_network_strikes_limit']:
                 strikes_limit += 10
 
             with open(self.STRIKES_PATH, 'w') as f:
                 f.write('%i:%i' % (0, strikes_limit))
 
+            self.log.error('strikes_limit reached, rebooting...')
+            self.log.info('new strikes_limit: %i' % strikes_limit)
+
             reboot()
 
+        self.log.error('strikes:%i strikes_limit:%i' % (strikes, strikes_limit))
         with open(self.STRIKES_PATH, 'w') as f:
             f.write('%i:%i' % (strikes, strikes_limit))
 
