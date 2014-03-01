@@ -9,6 +9,7 @@ import traceback
 import fcntl
 import struct
 import netifaces
+import sys
 
 # Note: for a script to be relaunched, it has to be executable, end in
 # .py and accept running with working directory ~. The watchdog has to
@@ -45,6 +46,16 @@ def is_interface_up(ifname):
     up = flags & 1
     return up
 
+def traceroute(host):
+    p = subprocess.Popen(["traceroute", host], stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    return p.communicate()[0]
+
+def reboot():
+    command = ["/usr/bin/sudo", "/sbin/shutdown", "-r", "now"]
+    subprocess.Popen(command)
+
+
 class Watchdog():
     def __init__(self, config):
         self.config = config
@@ -59,12 +70,17 @@ class Watchdog():
         self.log.debug('Loaded config: %s', self.config)
 
         self.WATCH_PATH = os.path.expanduser(self.config['watchdog_path'])
+        self.STRIKES_PATH = os.path.expanduser('~/network_strikes')
 
     def run(self):
         self.log.info('Watchdog starting...')
 
         self.monitor_services()
-        self.monitor_network()
+
+        if self.monitor_network():
+            sys.exit(1)
+        else:
+            self.reset_strikes()
 
     def monitor_services(self):
         watched_scripts = set(f for f in listfiles(self.WATCH_PATH)
@@ -143,6 +159,41 @@ class Watchdog():
 
     def report_failure(self, failure):
         self.log.error('reported network failure: %s' % failure)
+        self.log.info('\n%s' % traceroute(self.config['remotehost']))
+
+        if failure == self.REMOTE_FAILURE:
+            return 1
+
+        self.record_strike()
+
+        pass
+
+    def reset_strikes(self):
+        with open(self.STRIKES_PATH, 'w') as f:
+            f.write('%i:%i' % (0, self.config['min_network_strikes_limit']))
+
+    def record_strike(self):
+        strikes, strikes_limit = 0, 10
+        if os.path.isfile(self.STRIKES_PATH):
+            with open(self.STRIKES_PATH) as f:
+                content = f.read().strip()
+            if ':' in content and content.replace(':', '', 1).isdigit():
+                strikes, strikes_limit = map(int, content.split(':'))
+
+        strikes += 1
+
+        if strikes == strikes_limit:
+            if strikes_limit < self.config['min_network_strikes_limit']:
+                strikes_limit += 10
+
+            with open(self.STRIKES_PATH, 'w') as f:
+                f.write('%i:%i' % (0, strikes_limit))
+
+            reboot()
+
+        with open(self.STRIKES_PATH, 'w') as f:
+            f.write('%i:%i' % (strikes, strikes_limit))
+
 
 def main():
     with open('config.json') as f:

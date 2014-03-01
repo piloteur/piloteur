@@ -12,5 +12,7 @@
         "watchdog"
     ],
     "keyfile_path": "./smarthome-remote-key",
-    "log_format": "[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s"
+    "log_format": "[%(asctime)-15s] [%(levelname)s] %(name)s: %(message)s",
+    "min_network_strikes_limit": 10,
+    "max_network_strikes_limit": 30
 }
