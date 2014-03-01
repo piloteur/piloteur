@@ -223,8 +223,7 @@ class Watchdog():
 
 
 def main():
-    with open('config.json') as f:
-        config = json.load(f)
+    config = json.loads(subprocess.check_output('./config.sh'))
 
     s = Watchdog(config)
     s.run()
