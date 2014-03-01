@@ -79,9 +79,9 @@ class Watchdog():
         self.monitor_services()
 
         if self.monitor_network():
-            sys.exit(1)
-        else:
             self.reset_strikes()
+        else:
+            sys.exit(1)
 
     def monitor_services(self):
         watched_scripts = set(f for f in listfiles(self.WATCH_PATH)
@@ -113,8 +113,9 @@ class Watchdog():
         else:
             if not banner.startswith('SSH'):
                 self.log.error('remote endpoint misbehaved, sent: %s' % banner)
-                return self.report_failure(self.REMOTE_FAILURE)
-            return # all good!
+                self.report_failure(self.REMOTE_FAILURE)
+                return False
+            return True # all good!
 
         try:
             s = socket.create_connection(('google.com', 80), 5)
@@ -126,7 +127,8 @@ class Watchdog():
             self.log.error('google.com unreachable: %s' % error)
         else:
             # if this works but we reached this far, it's the remotehost
-            return self.report_failure(self.REMOTE_FAILURE)
+            self.report_failure(self.REMOTE_FAILURE)
+            return False
 
         try:
             s = socket.create_connection(('173.194.116.0', 80), 5)
@@ -138,7 +140,8 @@ class Watchdog():
             self.log.error('173.194.116.0 unreachable: %s' % error)
         else:
             # if this works but we reached this far, it's the DNS
-            return self.report_failure(self.DNS_FAILURE)
+            self.report_failure(self.DNS_FAILURE)
+            return False
 
         interfaces = list((iface, is_interface_up(iface))
             for iface in netifaces.interfaces()
@@ -147,26 +150,30 @@ class Watchdog():
 
         if len(interfaces) == 0:
             self.log.error('no eth*, wlan*, hci* interfaces configured')
-            return self.report_failure(self.IFACE_FAILURE)
+            self.report_failure(self.IFACE_FAILURE)
+            return False
 
         interfaces_down = list(iface for iface, up in interfaces if not up)
 
         if len(interfaces_down) != 0:
             self.log.error('interface down: %s' % ' '.join(interfaces_down))
-            return self.report_failure(self.IFACE_FAILURE)
+            self.report_failure(self.IFACE_FAILURE)
+            return False
 
         # if it's not IFACE_FAILURE but we reached here, it's the connection
-        return self.report_failure(self.CONN_FAILURE)
+        self.report_failure(self.CONN_FAILURE)
+        return False
 
     def report_failure(self, failure):
         self.log.error('reported network failure: %s' % failure)
         self.log.info('\n%s' % traceroute(self.config['remotehost']))
 
         if failure == self.REMOTE_FAILURE:
-            return 1
+            return
 
         self.record_strike()
-        return 1
+
+        pass
 
     def reset_strikes(self):
         with open(self.STRIKES_PATH, 'w') as f:
