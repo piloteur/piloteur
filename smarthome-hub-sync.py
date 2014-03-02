@@ -23,7 +23,7 @@ def get_device(path):
     output = subprocess.check_output(["df", path])
     device, size, used, available, percent, mountpoint = \
         output.split("\n")[1].split()
-    return device
+    return os.path.realpath(device)
 
 
 class Syncer():
