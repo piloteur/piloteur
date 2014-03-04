@@ -50,8 +50,10 @@ class Syncer():
 
         self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
 
+        self.KEYFILE_PATH = os.path.expanduser(self.config['keyfile_path'])
+
     # def run_remote_command(self, command):
-    #     ssh_cmd = ["ssh", "-i", self.config['keyfile_path']]
+    #     ssh_cmd = ["ssh", "-i", self.KEYFILE_PATH]
     #     ssh_cmd += ["%s@%s" % (self.config['remoteuser'], self.config['remotehost'])]
     #     ssh_cmd += [command]
 
@@ -77,7 +79,7 @@ class Syncer():
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
         rsync_cmd += ["--timeout", "5"]
-        rsync_cmd += ["-e", 'ssh -i %s' % self.config['keyfile_path']]
+        rsync_cmd += ["-e", 'ssh -i %s' % self.KEYFILE_PATH]
 
         rsync_cmd += [local_path]
         rsync_cmd += ["%s@%s:%s" % (self.config['remoteuser'],
