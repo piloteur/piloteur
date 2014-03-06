@@ -5,11 +5,12 @@
 
 ( flock -n 200 || exit 99
 
-    UUID=$(cat ~/.hub-id)
 
     LOGS_PATH=$(./config.sh | jq --raw-output .logs_path)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
-    LOGS_PATH="$LOGS_PATH$UUID/"
+
+    # UUID=$(cat ~/.hub-id)
+    # LOGS_PATH="$LOGS_PATH$UUID/"
 
     LOG_HOUR=$(date +%Y-%m-%d-%H)
 

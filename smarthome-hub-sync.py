@@ -48,8 +48,8 @@ class Syncer():
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
 
-        self.OUR_DATA_PATH = os.path.join(self.DATA_PATH, self.HUB_ID)
-        self.OUR_LOGS_PATH = os.path.join(self.LOGS_PATH, self.HUB_ID)
+        self.REMOTE_DATA_PATH = os.path.join(self.config['remote_data_path'], self.HUB_ID)
+        self.REMOTE_LOGS_PATH = os.path.join(self.config['remote_logs_path'], self.HUB_ID)
 
         self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
 
@@ -69,8 +69,8 @@ class Syncer():
 
         try:
             # Maybe running rsync two times might have to be reconsidered
-            success = self.sync(self.DATA_PATH, self.config['remote_data_path'])
-            success &= self.sync(self.LOGS_PATH, self.config['remote_logs_path'])
+            success = self.sync(self.DATA_PATH, self.REMOTE_DATA_PATH)
+            success &= self.sync(self.LOGS_PATH, self.REMOTE_LOGS_PATH)
         except:
             traceback.print_exc()
         else:
@@ -100,14 +100,14 @@ class Syncer():
             return False
 
     def after_success(self):
-        sensor_kind_folders = listdirs(self.OUR_DATA_PATH)
+        sensor_kind_folders = listdirs(self.DATA_PATH)
         for sensor_kind_folder in sensor_kind_folders:
             sensor_folders = listdirs(sensor_kind_folder)
             for sensor_folder in sensor_folders:
                 self.prune_old(sensor_folder)
 
-        self.prune_old(self.OUR_LOGS_PATH)
-        log_modules_folders = listdirs(self.OUR_LOGS_PATH)
+        self.prune_old(self.LOGS_PATH)
+        log_modules_folders = listdirs(self.LOGS_PATH)
         for log_modules_folder in log_modules_folders:
             self.prune_old(log_modules_folder)
 
@@ -133,7 +133,7 @@ class Syncer():
             os.remove(f)
 
     def monitor(self):
-        MONITOR_PATH = os.path.join(self.OUR_LOGS_PATH, "monitor/monitor-log.%s.json" % self.LOG_HOUR)
+        MONITOR_PATH = os.path.join(self.LOGS_PATH, "monitor/monitor-log.%s.json" % self.LOG_HOUR)
 
         data = {}
 
@@ -159,7 +159,7 @@ class Syncer():
             f.write('\n')
 
     def timesync(self):
-        TIMESYNC_PATH = os.path.join(self.OUR_LOGS_PATH, "timesync/timesync-log.%s.csv" % self.LOG_HOUR)
+        TIMESYNC_PATH = os.path.join(self.LOGS_PATH, "timesync/timesync-log.%s.csv" % self.LOG_HOUR)
 
         self.log.info('doing a NTP request...')
 
