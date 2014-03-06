@@ -16,6 +16,8 @@ import time
 # .py and accept running with working directory ~. The watchdog has to
 # run as the same user as the script. Please consider python-daemon.
 
+socket.setdefaulttimeout(60)
+
 def running_python_scripts():
     for p in psutil.process_iter():
         if not p.cmdline: continue
@@ -130,7 +132,7 @@ class Watchdog():
             return True # all good!
 
         try:
-            s = socket.create_connection(('google.com', 80), 5)
+            s = socket.create_connection(('google.com', 80), 10)
             s.send('GET /\n\n')
             s.recv(65535)
             s.close()
@@ -143,7 +145,7 @@ class Watchdog():
             return False
 
         try:
-            s = socket.create_connection(('173.194.116.0', 80), 5)
+            s = socket.create_connection(('173.194.116.0', 80), 30)
             s.send('GET /\n\n')
             s.recv(65535)
             s.close()

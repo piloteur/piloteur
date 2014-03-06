@@ -11,6 +11,9 @@ import datetime
 import traceback
 import ntplib
 
+import socket
+socket.setdefaulttimeout(60)
+
 listdirs = lambda dirname: [os.path.join(dirname, x)
                 for x in os.listdir(dirname)
                 if os.path.isdir(os.path.join(dirname, x))]
@@ -78,7 +81,7 @@ class Syncer():
 
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
-        rsync_cmd += ["--timeout", "5"]
+        rsync_cmd += ["--timeout", "30"]
         rsync_cmd += ["-e", 'ssh -i %s' % self.KEYFILE_PATH]
 
         rsync_cmd += [local_path]
