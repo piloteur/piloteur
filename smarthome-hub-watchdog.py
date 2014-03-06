@@ -195,33 +195,33 @@ class Watchdog():
 
     def reset_strikes(self):
         with open(self.STRIKES_PATH, 'w') as f:
-            f.write('%i:%i' % (0, self.config['min_network_strikes_limit']))
+            f.write('%i:%i' % (0, 1))
 
     def record_strike(self):
-        strikes, strikes_limit = 0, 10
+        strikes, reboot_num = 0, 1
         if os.path.isfile(self.STRIKES_PATH):
             with open(self.STRIKES_PATH) as f:
                 content = f.read().strip()
             if ':' in content and content.replace(':', '', 1).isdigit():
-                strikes, strikes_limit = map(int, content.split(':'))
+                strikes, reboot_num = map(int, content.split(':'))
 
+        strikes_limit = self.config['network_strikes_limit_mult'] * (reboot_num ** 2)
         strikes += 1
 
         if strikes == strikes_limit:
-            if strikes_limit < self.config['max_network_strikes_limit']:
-                strikes_limit += 10
-
             with open(self.STRIKES_PATH, 'w') as f:
-                f.write('%i:%i' % (0, strikes_limit))
+                f.write('%i:%i' % (0, reboot_num + 1))
 
             self.log.error('strikes_limit reached, rebooting...')
-            self.log.info('new strikes_limit: %i' % strikes_limit)
+            self.log.info('%i-th reboot; strikes_limit: %i'
+                % (reboot_num, strikes_limit))
 
             reboot()
 
-        self.log.info('strikes:%i strikes_limit:%i' % (strikes, strikes_limit))
+        self.log.info('strikes:%i strikes_limit:%i reboot_num:%i'
+            % (strikes, strikes_limit, reboot_num))
         with open(self.STRIKES_PATH, 'w') as f:
-            f.write('%i:%i' % (strikes, strikes_limit))
+            f.write('%i:%i' % (strikes, reboot_num))
 
 
 def main():
