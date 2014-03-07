@@ -15,7 +15,7 @@ class DriversManager():
         self.DRIVERS_PATH = os.path.expanduser('~/smarthome-drivers/drivers')
 
     def run(self):
-        running_scripts = running_python_scripts()
+        running_scripts = set(running_python_scripts())
         self.log.debug(running_scripts)
 
         for driver_name in self.config['loaded_drivers']:
