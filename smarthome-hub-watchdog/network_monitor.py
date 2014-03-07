@@ -1,121 +1,36 @@
-import json
-import logging
-import os.path
-import os
-import psutil
-import subprocess
-import socket
 import traceback
-import fcntl
-import struct
 import netifaces
+import os
+import socket
 import sys
-import time
 
-# Note: for a script to be relaunched, it has to be executable, end in
-# .py and accept running with working directory ~. The watchdog has to
-# run as the same user as the script. Please consider python-daemon.
+from .utils import (
+    is_interface_up,
+    traceroute,
+    reboot,
+    local_network_reset,
+    interface_reset
+)
 
-socket.setdefaulttimeout(60)
+class NetworkMonitor():
+    REMOTE_FAILURE = 'REMOTE_FAILURE'
+    DNS_FAILURE = 'DNS_FAILURE'
+    CONN_FAILURE = 'CONN_FAILURE'
+    IFACE_FAILURE = 'IFACE_FAILURE'
 
-def running_python_scripts():
-    for p in psutil.process_iter():
-        if not p.cmdline: continue
-        if not os.path.basename(p.cmdline[0]).startswith('python'):
-            continue
-        try: cwd = p.getcwd()
-        except psutil._error.AccessDenied: continue
-        for n, arg in enumerate(p.cmdline[1:]):
-            if arg == '--':
-                if len(p.cmdline) > n+1 and p.cmdline[n+1] != '-':
-                    path = p.cmdline[n+1]
-                    yield os.path.normpath(os.path.join(cwd, path))
-                break
-            if arg in ('-c', '-m', '-'): break
-            if arg.startswith('-'): continue
-            yield os.path.normpath(os.path.join(cwd, arg))
-            break
+    def __init__(self, watchdog):
+        self.watchdog = watchdog
+        self.config = watchdog.config
+        self.log = watchdog.log
 
-listfiles = lambda dirname: [os.path.join(dirname, x)
-                for x in os.listdir(dirname)
-                if os.path.isfile(os.path.join(dirname, x))]
-
-def is_interface_up(ifname):
-    SIOCGIFFLAGS = 0x8913
-    null256 = '\0'*256
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    result = fcntl.ioctl(s.fileno(), SIOCGIFFLAGS, ifname + null256)
-    flags, = struct.unpack('H', result[16:18])
-    up = flags & 1
-    return up
-
-def traceroute(host):
-    p = subprocess.Popen(["traceroute", host], stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
-    return p.communicate()[0]
-
-def reboot():
-    command = ["sudo", "shutdown", "-r", "now"]
-    subprocess.Popen(command)
-    sys.exit(2)
-
-def local_network_reset():
-    interface_reset()
-    subprocess.call(['sudo', 'google-dns'])
-
-def interface_reset():
-    for iface in ('eth0', 'wlan0'):
-        subprocess.call(['sudo', 'ifdown', iface])
-        time.sleep(1)
-        subprocess.call(['sudo', 'ifup', iface])
-        time.sleep(15)
-
-
-class Watchdog():
-    def __init__(self, config):
-        self.config = config
-
-        logging.basicConfig(format=self.config['log_format'])
-        self.log = logging.getLogger('WATCH')
-        if os.environ.get('DEBUG'):
-            self.log.setLevel(logging.DEBUG)
-        else:
-            self.log.setLevel(logging.INFO)
-
-        self.log.debug('Loaded config: %s', self.config)
-
-        self.WATCH_PATH = os.path.expanduser(self.config['watchdog_path'])
         self.STRIKES_PATH = os.path.expanduser('~/network_strikes')
 
     def run(self):
-        self.log.info('Watchdog starting...')
-
-        self.monitor_services()
-
         if self.monitor_network():
             self.reset_strikes()
         else:
             sys.exit(1)
 
-    def monitor_services(self):
-        watched_scripts = set(f for f in listfiles(self.WATCH_PATH)
-            if f.endswith('.py') and os.access(f, os.X_OK))
-        running_scripts = set(running_python_scripts())
-
-        self.log.debug(watched_scripts)
-        self.log.debug(running_scripts)
-
-        for failed in watched_scripts - running_scripts:
-            self.log.error('%s is not running' % failed)
-
-            p = subprocess.Popen(failed, close_fds=True,
-                cwd=os.path.expanduser('~'))
-            self.log.info('restarted %s with pid %i', failed, p.pid)
-
-    REMOTE_FAILURE = 'REMOTE_FAILURE'
-    DNS_FAILURE = 'DNS_FAILURE'
-    CONN_FAILURE = 'CONN_FAILURE'
-    IFACE_FAILURE = 'IFACE_FAILURE'
     def monitor_network(self):
         try:
             s = socket.create_connection((self.config['remotehost'], 22), 5)
@@ -126,7 +41,8 @@ class Watchdog():
             self.log.error('remote endpoint unreachable: %s' % error)
         else:
             if not banner.startswith('SSH'):
-                self.log.error('remote endpoint misbehaved, sent: %s' % banner)
+                self.log.error('remote endpoint misbehaved, sent: %s'
+                    % banner)
                 self.report_failure(self.REMOTE_FAILURE)
                 return False
             return True # all good!
@@ -205,7 +121,8 @@ class Watchdog():
             if ':' in content and content.replace(':', '', 1).isdigit():
                 strikes, reboot_num = map(int, content.split(':'))
 
-        strikes_limit = self.config['network_strikes_limit_mult'] * (reboot_num ** 2)
+        strikes_limit = (self.config['network_strikes_limit_mult']
+            * (reboot_num ** 2))
         strikes += 1
 
         if strikes == strikes_limit:
@@ -222,13 +139,3 @@ class Watchdog():
             % (strikes, strikes_limit, reboot_num))
         with open(self.STRIKES_PATH, 'w') as f:
             f.write('%i:%i' % (strikes, reboot_num))
-
-
-def main():
-    config = json.loads(subprocess.check_output('./config.sh'))
-
-    s = Watchdog(config)
-    s.run()
-
-if __name__ == '__main__':
-    main()
