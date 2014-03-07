@@ -8,6 +8,7 @@ import socket
 socket.setdefaulttimeout(60)
 
 from .network_monitor import NetworkMonitor
+from .drivers_manager import DriversManager
 from .utils import (
     running_python_scripts,
     listfiles
@@ -28,6 +29,7 @@ class Watchdog():
         self.log.debug('Loaded config: %s', self.config)
 
         self.network_monitor = NetworkMonitor(self)
+        self.drivers_manager = DriversManager(self)
 
     def run(self):
         self.log.info('Watchdog starting...')
@@ -35,6 +37,7 @@ class Watchdog():
         self.monitor_old_services()
 
         self.network_monitor.run()
+        self.drivers_manager.run()
 
 
     def monitor_old_services(self):
