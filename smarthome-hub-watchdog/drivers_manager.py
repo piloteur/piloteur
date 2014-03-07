@@ -33,5 +33,5 @@ class DriversManager():
 
                 p = subprocess.Popen(
                     [self.DRIVER_WRAPPER, driver_name, driver_path],
-                    close_fds=True, cwd=os.path.expanduser('~'))
+                    close_fds=True)
                 self.log.info('restarted %s with pid %i', driver_name, p.pid)
