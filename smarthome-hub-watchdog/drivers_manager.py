@@ -1,5 +1,6 @@
 import os
 import subprocess
+import imp
 
 from .utils import (
     running_python_scripts
@@ -17,21 +18,19 @@ class DriversManager():
         self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
 
     def run(self):
-        running_scripts = set(running_python_scripts())
-        self.log.debug(running_scripts)
+        running_modules = set(running_python_scripts(True))
+        self.log.debug(running_modules)
 
         for driver_name in self.config['loaded_drivers']:
-            driver_path = os.path.join(self.DRIVERS_PATH, driver_name,
-                '__main__.py')
-
-            if not os.path.isfile(driver_path):
+            try:
+                imp.find_module(driver_name, [self.DRIVERS_PATH])
+            except ImportError:
                 self.log.error('driver %s not found' % driver_name)
                 continue
 
-            if driver_path not in running_scripts:
+            if driver_name not in running_modules:
                 self.log.error('%s is not running' % driver_name)
 
                 p = subprocess.Popen(
-                    [self.DRIVER_WRAPPER, driver_name, driver_path],
-                    close_fds=True)
+                    [self.DRIVER_WRAPPER, driver_name], close_fds=True)
                 self.log.info('restarted %s with pid %i', driver_name, p.pid)

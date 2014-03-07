@@ -8,7 +8,7 @@ import subprocess
 import sys
 import socket
 
-def running_python_scripts():
+def running_python_scripts(modules=False):
     for p in psutil.process_iter():
         if not p.cmdline: continue
         if not os.path.basename(p.cmdline[0]).startswith('python'):
@@ -19,11 +19,18 @@ def running_python_scripts():
             if arg == '--':
                 if len(p.cmdline) > n+1 and p.cmdline[n+1] != '-':
                     path = p.cmdline[n+1]
-                    yield os.path.normpath(os.path.join(cwd, path))
+                    if not modules:
+                        yield os.path.normpath(os.path.join(cwd, path))
                 break
-            if arg in ('-c', '-m', '-'): break
+            if arg == '-m':
+                if len(p.cmdline) > n+1 and p.cmdline[n+1] != '-':
+                    module_name = p.cmdline[n+1]
+                    if modules: yield module_name
+                break
+            if arg in ('-c', '-'): break
             if arg.startswith('-'): continue
-            yield os.path.normpath(os.path.join(cwd, arg))
+            if not modules:
+                yield os.path.normpath(os.path.join(cwd, arg))
             break
 
 listfiles = lambda dirname: [os.path.join(dirname, x)
