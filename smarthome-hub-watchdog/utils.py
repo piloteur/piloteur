@@ -17,14 +17,14 @@ def running_python_scripts(modules=False):
         except psutil._error.AccessDenied: continue
         for n, arg in enumerate(p.cmdline[1:]):
             if arg == '--':
-                if len(p.cmdline) > n+1 and p.cmdline[n+1] != '-':
-                    path = p.cmdline[n+1]
+                if len(p.cmdline) > n+2 and p.cmdline[n+2] != '-':
+                    path = p.cmdline[n+2]
                     if not modules:
                         yield os.path.normpath(os.path.join(cwd, path))
                 break
             if arg == '-m':
-                if len(p.cmdline) > n+1 and p.cmdline[n+1] != '-':
-                    module_name = p.cmdline[n+1]
+                if len(p.cmdline) > n+2 and p.cmdline[n+2] != '-':
+                    module_name = p.cmdline[n+2]
                     if modules: yield module_name
                 break
             if arg in ('-c', '-'): break
