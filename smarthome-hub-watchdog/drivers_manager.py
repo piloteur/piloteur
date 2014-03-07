@@ -14,6 +14,8 @@ class DriversManager():
         # TODO: un-hardcode this repo path
         self.DRIVERS_PATH = os.path.expanduser('~/smarthome-drivers/drivers')
 
+        self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
+
     def run(self):
         running_scripts = set(running_python_scripts())
         self.log.debug(running_scripts)
@@ -29,6 +31,7 @@ class DriversManager():
             if driver_path not in running_scripts:
                 self.log.error('%s is not running' % driver_name)
 
-                p = subprocess.Popen(['python', driver_path],
+                p = subprocess.Popen(
+                    [self.DRIVER_WRAPPER, driver_name, driver_path],
                     close_fds=True, cwd=os.path.expanduser('~'))
                 self.log.info('restarted %s with pid %i', driver_name, p.pid)
