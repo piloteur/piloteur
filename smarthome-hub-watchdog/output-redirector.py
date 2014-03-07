@@ -19,20 +19,23 @@ if sys.argv[1] == '-d':
     filename = os.path.join(DATA_PATH, '%(name)s-%(hour)s.data')
     prefix = ''
 elif sys.argv[1] == '-l':
-    filename = os.path.join(DATA_PATH, '%(name)s-driver',
+    filename = os.path.join(LOGS_PATH, '%(name)s-driver',
         '%(name)s-%(hour)s.log')
     prefix = '[%(timestamp)s] '
 else:
     sys.exit(1)
 
 hour, f = None, None
-for line in sys.stdin:
+while True:
+    try: line = raw_input()
+    except EOFError: break
     hour_now = datetime.datetime.now().strftime('%Y-%m-%d-%H')
     if hour_now != hour:
         hour = hour_now
         if f: f.close()
         f = open(filename % {'name': driver_name, 'hour': hour}, 'a')
     timestamp = datetime.datetime.now().isoformat()
-    print >> f, prefix % {'timestamp': timestamp} + line
+    f.write(prefix % {'timestamp': timestamp} + line + '\n')
+    f.flush()
 
 if f: f.close()
