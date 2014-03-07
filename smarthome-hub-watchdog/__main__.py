@@ -4,6 +4,7 @@ import os.path
 import os
 import subprocess
 import socket
+import sys
 
 socket.setdefaulttimeout(60)
 
@@ -35,9 +36,10 @@ class Watchdog():
         self.log.info('Watchdog starting...')
 
         self.monitor_old_services()
-
-        self.network_monitor.run()
         self.drivers_manager.run()
+
+        if self.network_monitor.run():
+            sys.exit(1)
 
 
     def monitor_old_services(self):

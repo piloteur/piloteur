@@ -2,7 +2,6 @@ import traceback
 import netifaces
 import os
 import socket
-import sys
 
 from .utils import (
     is_interface_up,
@@ -29,7 +28,7 @@ class NetworkMonitor():
         if self.monitor_network():
             self.reset_strikes()
         else:
-            sys.exit(1)
+            return 1
 
     def monitor_network(self):
         try:
