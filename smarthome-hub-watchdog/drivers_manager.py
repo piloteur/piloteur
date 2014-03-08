@@ -10,6 +10,15 @@ from .utils import (
     running_python_scripts
 )
 
+def parse_ls_tree(stdout):
+    result = {}
+    if not stdout: return result
+    for line in stdout.split('\n'):
+        obj, name = line.split('\t')
+        if name.endswith('.py'): name = name[:-3]
+        result[name] = obj
+    return result
+
 class DriversManager():
     def __init__(self, watchdog):
         self.watchdog = watchdog
@@ -23,13 +32,18 @@ class DriversManager():
 
         self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
 
-        self.FINGERPRINT_PATH = os.path.expanduser('~/.version_fingerprint')
+        self.GEN_FINGER_PATH = os.path.expanduser('~/.general_fingerprints')
+        self.DRV_FINGER_PATH = os.path.expanduser('~/.drivers_fingerprints')
 
     def run(self):
         self.check_changes()
         self.watch()
 
     def check_changes(self):
+        self.check_global_changes()
+        self.check_drivers_changes()
+
+    def check_global_changes(self):
         hub_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
             cwd=os.path.expanduser('~/smarthome-hub-sync'))
         config = hashlib.md5(subprocess.check_output(["./config.py"],
@@ -37,8 +51,8 @@ class DriversManager():
 
         fingerprint = hub_head + '\n' + config
 
-        if os.path.isfile(self.FINGERPRINT_PATH):
-            with open(self.FINGERPRINT_PATH) as f:
+        if os.path.isfile(self.GEN_FINGER_PATH):
+            with open(self.GEN_FINGER_PATH) as f:
                 old_fingerprint = f.read()
         else:
             old_fingerprint = ''
@@ -46,8 +60,31 @@ class DriversManager():
         if fingerprint != old_fingerprint:
             self.terminate_all()
 
-        with open(self.FINGERPRINT_PATH, 'w') as f:
+        with open(self.GEN_FINGER_PATH, 'w') as f:
             f.write(fingerprint)
+
+    # git ls-tree HEAD
+    def check_drivers_changes(self):
+        ls_tree = subprocess.check_output(["git", "ls-tree", "HEAD"],
+            cwd=self.DRIVERS_PATH).strip()
+
+        if os.path.isfile(self.DRV_FINGER_PATH):
+            with open(self.DRV_FINGER_PATH) as f:
+                old_ls_tree = f.read()
+        else:
+            old_ls_tree = ''
+
+        for module_name, pid in running_python_scripts(True):
+            if (parse_ls_tree(old_ls_tree).get(module_name) !=
+                parse_ls_tree(ls_tree).get(module_name) and
+                not module_name in self.stopped_drivers):
+
+                self.log.info('terminating driver %s' % module_name)
+                self.stopped_drivers.append(module_name)
+                self.terminate(pid)
+
+        with open(self.DRV_FINGER_PATH, 'w') as f:
+            f.write(ls_tree)
 
     def terminate_all(self):
         """
