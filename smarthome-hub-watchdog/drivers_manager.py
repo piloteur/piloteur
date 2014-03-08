@@ -4,6 +4,7 @@ import imp
 import signal
 import time
 import psutil
+import hashlib
 
 from .utils import (
     running_python_scripts
@@ -20,8 +21,31 @@ class DriversManager():
 
         self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
 
+        self.FINGERPRINT_PATH = os.path.expanduser('~/.version_fingerprint')
+
     def run(self):
+        self.check_changes()
         self.watch()
+
+    def check_changes(self):
+        hub_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
+            cwd=os.path.expanduser('~/smarthome-hub-sync'))
+        config = hashlib.md5(subprocess.check_output(["./config.py"],
+            cwd=os.path.expanduser('~/smarthome-hub-sync'))).hexdigest()
+
+        fingerprint = hub_head + '\n' + config
+
+        if os.path.isfile(self.FINGERPRINT_PATH):
+            with open(self.FINGERPRINT_PATH) as f:
+                old_fingerprint = f.read()
+        else:
+            old_fingerprint = ''
+
+        if fingerprint != old_fingerprint:
+            self.terminate_all()
+
+        with open(self.FINGERPRINT_PATH, 'w') as f:
+            f.write(fingerprint)
 
     def terminate_all(self):
         """
@@ -47,7 +71,10 @@ class DriversManager():
 
     def terminate(self, pid):
         os.kill(pid, signal.SIGTERM)
-        time.sleep(3)
+        if not psutil.pid_exists(pid): return
+        time.sleep(1)
+        if not psutil.pid_exists(pid): return
+        time.sleep(2)
         if psutil.pid_exists(pid):
             self.log.warning('pid %s failed to terminate in 3s, killing' % pid)
             os.kill(pid, signal.SIGKILL)
