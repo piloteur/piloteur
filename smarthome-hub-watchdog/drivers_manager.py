@@ -16,6 +16,8 @@ class DriversManager():
         self.config = watchdog.config
         self.log = watchdog.log
 
+        self.stopped_drivers = []
+
         # TODO: un-hardcode this repo path
         self.DRIVERS_PATH = os.path.expanduser('~/smarthome-drivers/drivers')
 
@@ -58,6 +60,7 @@ class DriversManager():
                 continue
 
             self.log.info('terminating driver %s' % module_name)
+            self.stopped_drivers.append(module_name)
             self.terminate(pid)
 
     def terminate_name(self, name):
@@ -67,11 +70,11 @@ class DriversManager():
             return
 
         self.log.info('terminating driver %s' % name)
+        self.stopped_drivers.append(name)
         self.terminate(running_modules[name])
 
     def terminate(self, pid):
         os.kill(pid, signal.SIGTERM)
-        if not psutil.pid_exists(pid): return
         time.sleep(1)
         if not psutil.pid_exists(pid): return
         time.sleep(2)
@@ -91,7 +94,10 @@ class DriversManager():
                 continue
 
             if driver_name not in running_modules:
-                self.log.error('%s is not running' % driver_name)
+                if driver_name in self.stopped_drivers:
+                    self.log.info('restarting %s' % driver_name)
+                else:
+                    self.log.error('%s is not running' % driver_name)
 
                 p = subprocess.Popen(
                     [self.DRIVER_WRAPPER, driver_name], close_fds=True)
