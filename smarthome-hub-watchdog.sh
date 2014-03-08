@@ -6,7 +6,7 @@
 ( flock -n 200 || exit 99
 
 
-    LOGS_PATH=$(./config.sh | jq --raw-output .logs_path)
+    LOGS_PATH=$(./config.py | jq --raw-output .logs_path)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
 
     # UUID=$(cat ~/.hub-id)

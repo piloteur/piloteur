@@ -8,7 +8,7 @@ import os.path
 Usage: output-redirector {-d|-l} name
 """
 
-config = json.loads(subprocess.check_output('./config.sh'))
+config = json.loads(subprocess.check_output('./config.py'))
 
 driver_name = sys.argv[2]
 

@@ -178,7 +178,7 @@ class Syncer():
 
 
 def main():
-    config = json.loads(subprocess.check_output('./config.sh'))
+    config = json.loads(subprocess.check_output('./config.py'))
 
     s = Syncer(config)
     s.run()
