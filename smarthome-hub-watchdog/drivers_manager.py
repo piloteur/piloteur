@@ -1,6 +1,9 @@
 import os
 import subprocess
 import imp
+import signal
+import time
+import psutil
 
 from .utils import (
     running_python_scripts
@@ -18,7 +21,39 @@ class DriversManager():
         self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
 
     def run(self):
-        running_modules = set(running_python_scripts(True))
+        self.watch()
+
+    def terminate_all(self):
+        """
+        This will terminate all the running modules named like a module in DRIVERS_PATH
+        """
+        for module_name, pid in running_python_scripts(True):
+            try:
+                imp.find_module(module_name, [self.DRIVERS_PATH])
+            except ImportError:
+                continue
+
+            self.log.info('terminating driver %s' % module_name)
+            self.terminate(pid)
+
+    def terminate_name(self, name):
+        running_modules = dict(running_python_scripts(True))
+        if not name in running_modules:
+            self.log.warning('got asked to terminate module %s, but it is not running' % name)
+            return
+
+        self.log.info('terminating driver %s' % name)
+        self.terminate(running_modules[name])
+
+    def terminate(self, pid):
+        os.kill(pid, signal.SIGTERM)
+        time.sleep(3)
+        if psutil.pid_exists(pid):
+            self.log.warning('pid %s failed to terminate in 3s, killing' % pid)
+            os.kill(pid, signal.SIGKILL)
+
+    def watch(self):
+        running_modules = set(n for n, p in running_python_scripts(True))
         self.log.debug(running_modules)
 
         for driver_name in self.config['loaded_drivers']:

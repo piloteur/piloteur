@@ -20,17 +20,17 @@ def running_python_scripts(modules=False):
                 if len(p.cmdline) > n+2 and p.cmdline[n+2] != '-':
                     path = p.cmdline[n+2]
                     if not modules:
-                        yield os.path.normpath(os.path.join(cwd, path))
+                        yield (os.path.normpath(os.path.join(cwd, path)), p.pid)
                 break
             if arg == '-m':
                 if len(p.cmdline) > n+2 and p.cmdline[n+2] != '-':
                     module_name = p.cmdline[n+2]
-                    if modules: yield module_name
+                    if modules: yield (module_name, p.pid)
                 break
             if arg in ('-c', '-'): break
             if arg.startswith('-'): continue
             if not modules:
-                yield os.path.normpath(os.path.join(cwd, arg))
+                yield (os.path.normpath(os.path.join(cwd, arg)), p.pid)
             break
 
 listfiles = lambda dirname: [os.path.join(dirname, x)

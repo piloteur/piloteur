@@ -51,7 +51,7 @@ class Watchdog():
 
         watched_scripts = set(f for f in listfiles(WATCH_PATH)
             if f.endswith('.py') and os.access(f, os.X_OK))
-        running_scripts = set(running_python_scripts())
+        running_scripts = set(n for n, p in running_python_scripts())
 
         self.log.debug(watched_scripts)
         self.log.debug(running_scripts)
