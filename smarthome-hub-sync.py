@@ -10,6 +10,7 @@ import uptime
 import datetime
 import traceback
 import ntplib
+import itertools
 
 import socket
 socket.setdefaulttimeout(60)
@@ -100,23 +101,23 @@ class Syncer():
             return False
 
     def after_success(self):
-        sensor_kind_folders = listdirs(self.DATA_PATH)
-        for sensor_kind_folder in sensor_kind_folders:
-            sensor_folders = listdirs(sensor_kind_folder)
-            for sensor_folder in sensor_folders:
-                self.prune_old(sensor_folder)
+        data_files = listfiles(self.DATA_PATH)
+        groupfunc = lambda x: os.path.basename(x).split('-')[0]
+        data_files = sorted(data_files, key=groupfunc)
+        for k, g in itertools.groupby(data_files, groupfunc):
+            self.prune_old(list(g))
 
-        self.prune_old(self.LOGS_PATH)
+        self.prune_old(listfiles(self.LOGS_PATH))
         log_modules_folders = listdirs(self.LOGS_PATH)
         for log_modules_folder in log_modules_folders:
-            self.prune_old(log_modules_folder)
+            self.prune_old(listfiles(log_modules_folder))
 
-    def prune_old(self, sensor_folder):
+    def prune_old(self, files):
         # Please note the (unavoidable?) race condition between
         # os.path.getmtime and os.remove
 
         files = [(name, os.path.getmtime(name))
-            for name in listfiles(sensor_folder)]
+            for name in files]
         files.sort(key=operator.itemgetter(1), reverse=True)
 
         self.log.debug(files)
