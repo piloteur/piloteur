@@ -4,6 +4,9 @@ import json
 import time
 import threading
 import signal
+import os
+
+DEVNULL = open(os.devnull, 'w')
 
 class BLE_driver():
     def __init__(self):
@@ -37,7 +40,8 @@ class BLE_driver():
 
     def monitor(self):
         t = threading.Timer(15, self.monitor); t.daemon = True; t.start()
-        code = subprocess.call(["sudo", "hciconfig", "hci0", "lestates"])
+        code = subprocess.call(["sudo", "hciconfig", "hci0", "lestates"],
+            stdout=DEVNULL, stderr=subprocess.STDOUT)
         if code != 0:
             self.KILLED_BY_US = True
             print >> sys.stderr, 'adapter dead, resetting'
