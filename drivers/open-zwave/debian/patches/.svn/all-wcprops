@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/703/trunk/debian/patches
+END
+soname.patch
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/529/trunk/debian/patches/soname.patch
+END
+SIS.diff
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/703/trunk/debian/patches/SIS.diff
+END
+awake.patch
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/596/trunk/debian/patches/awake.patch
+END
+series
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/663/trunk/debian/patches/series
+END
