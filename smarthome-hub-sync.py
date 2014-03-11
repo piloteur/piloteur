@@ -83,6 +83,7 @@ class Syncer():
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
         rsync_cmd += ["--timeout", "30"]
+        rsync_cmd += ["--chmod", self.config['remote_chmod']]
         rsync_cmd += ["-e", 'ssh -i %s' % self.KEYFILE_PATH]
 
         rsync_cmd += [local_path]
