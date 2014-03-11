@@ -136,6 +136,9 @@ class DriversManager():
                 else:
                     self.log.error('%s is not running' % driver_name)
 
+                find_mod = imp.find_module(driver_name, [self.DRIVERS_PATH])
+                cwd = os.path.dirname(find_mod[1]) if find_mod[0] else find_mod[1]
                 p = subprocess.Popen(
-                    [self.DRIVER_WRAPPER, driver_name], close_fds=True)
+                    [self.DRIVER_WRAPPER, driver_name, cwd],
+                    close_fds=True)
                 self.log.info('restarted %s with pid %i', driver_name, p.pid)
