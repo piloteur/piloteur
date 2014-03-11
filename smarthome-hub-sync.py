@@ -9,7 +9,8 @@ import psutil
 import uptime
 import datetime
 import traceback
-import ntplib
+import email.utils
+import urllib2
 import itertools
 
 import socket
@@ -163,19 +164,13 @@ class Syncer():
     def timesync(self):
         TIMESYNC_PATH = os.path.join(self.LOGS_PATH, "timesync/timesync-log.%s.csv" % self.LOG_HOUR)
 
-        self.log.info('doing a NTP request...')
-
-        try: r = ntplib.NTPClient().request('us.pool.ntp.org')
-        except ntplib.NTPException:
-            self.log.error('NTP request failed')
-            return
-        local = datetime.datetime.utcfromtimestamp(r.dest_time)
-        remote = datetime.datetime.utcfromtimestamp(
-            r.tx_time - r.delay / 2)
+        remote = datetime.datetime(*email.utils.parsedate(
+            urllib2.urlopen('http://google.com').info().getheader('Date'))[:6])
+        local = datetime.datetime.utcnow()
 
         with open(TIMESYNC_PATH, 'a') as f:
             f.write('%s,%s,%f\n' %(local.isoformat(), remote.isoformat(),
-                r.offset))
+                (remote - local).total_seconds()))
 
 
 
