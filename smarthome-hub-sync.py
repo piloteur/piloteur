@@ -50,8 +50,8 @@ class Syncer():
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
 
-        self.REMOTE_DATA_PATH = os.path.join(self.config['remote_data_path'], self.HUB_ID)
-        self.REMOTE_LOGS_PATH = os.path.join(self.config['remote_logs_path'], self.HUB_ID)
+        self.REMOTE_DATA_PATH = os.path.join('data', self.HUB_ID)
+        self.REMOTE_LOGS_PATH = os.path.join('logs', self.HUB_ID)
 
         self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
 
