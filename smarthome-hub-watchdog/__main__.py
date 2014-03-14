@@ -35,7 +35,7 @@ class Watchdog():
     def run(self):
         self.log.info('Watchdog starting...')
 
-        self.monitor_old_services()
+        # self.monitor_old_services()
         self.drivers_manager.run()
 
         if self.network_monitor.run():
