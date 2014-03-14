@@ -147,13 +147,16 @@ class Syncer():
         data["free_disk"] = psutil.disk_usage(self.DATA_PATH).free
 
         device = os.path.basename(get_device(self.DATA_PATH))
-        iostat = psutil.disk_io_counters(perdisk=True)[device]
-        data["iostat"] = {
-            "read_bytes": iostat.read_bytes,
-            "write_bytes": iostat.write_bytes,
-            "read_count": iostat.read_count,
-            "write_count": iostat.write_count
-        }
+        if device == 'tmpfs':
+            data["iostat"] = None
+        else:
+            iostat = psutil.disk_io_counters(perdisk=True)[device]
+            data["iostat"] = {
+                "read_bytes": iostat.read_bytes,
+                "write_bytes": iostat.write_bytes,
+                "read_count": iostat.read_count,
+                "write_count": iostat.write_count
+            }
 
         self.log.debug(data)
 
