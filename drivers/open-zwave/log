@@ -1,0 +1,32 @@
+Downloading/unpacking distribute==0.6.24 (from -r requirements.txt (line 2))
+  Running setup.py (path:/home/pi/ENV/build/distribute/setup.py) egg_info for package distribute
+    
+    warning: no files found matching 'Makefile' under directory 'docs'
+    warning: no files found matching 'indexsidebar.html' under directory 'docs'
+Downloading/unpacking wsgiref==0.1.2 (from -r requirements.txt (line 3))
+  Downloading wsgiref-0.1.2.zip
+  Running setup.py (path:/home/pi/ENV/build/wsgiref/setup.py) egg_info for package wsgiref
+    
+Building wheels for collected packages: distribute,wsgiref
+  Running setup.py bdist_wheel for distribute
+  Destination directory: /home/pi/smarthome-drivers/wheelhouse
+  Complete output from command /home/pi/ENV/bin/python -c "import setuptools;__file__='/home/pi/ENV/build/distribute/setup.py';exec(compile(open(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" bdist_wheel -d /home/pi/smarthome-drivers/wheelhouse:
+  usage: -c [global_opts] cmd1 [cmd1_opts] [cmd2 [cmd2_opts] ...]
+
+   or: -c --help [cmd1 cmd2 ...]
+
+   or: -c --help-commands
+
+   or: -c cmd --help
+
+
+
+error: invalid command 'bdist_wheel'
+
+----------------------------------------
+  Failed building wheel for distribute
+  Running setup.py bdist_wheel for wsgiref
+  Destination directory: /home/pi/smarthome-drivers/wheelhouse
+Successfully built wsgiref
+Failed to build distribute
+Cleaning up...

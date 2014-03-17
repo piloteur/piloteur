@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/585/trunk/cpp/hidapi/m4
+END
+pkg.m4
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/585/trunk/cpp/hidapi/m4/pkg.m4
+END
+ax_pthread.m4
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/585/trunk/cpp/hidapi/m4/ax_pthread.m4
+END

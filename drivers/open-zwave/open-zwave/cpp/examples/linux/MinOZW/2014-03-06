@@ -1,0 +1,100 @@
+2014-03-06 08:54:41.528 mgr,     Added driver for controller /dev/ttyUSB0
+2014-03-06 08:54:41.531   Opening controller /dev/ttyUSB0
+2014-03-06 08:54:41.534 Trying to open serial port /dev/ttyUSB0 (attempt 1)
+2014-03-06 08:54:41.538 ERROR: Cannot get exclusive lock for serial port /dev/ttyUSB0. Error code 11
+2014-03-06 08:54:41.542 Serial port /dev/ttyUSB0 opened (attempt 1)
+2014-03-06 08:54:41.546 contrlr, Queuing (Command) FUNC_ID_ZW_GET_VERSION: 0x01, 0x03, 0x00, 0x15, 0xe9
+2014-03-06 08:54:41.550 contrlr, Queuing (Command) FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 08:54:41.552 contrlr, Queuing (Command) FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 08:54:41.555 contrlr, Queuing (Command) FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 08:54:41.558 contrlr, Queuing (Command) FUNC_ID_ZW_GET_SUC_NODE_ID: 0x01, 0x03, 0x00, 0x56, 0xaa
+2014-03-06 08:54:41.562 
+2014-03-06 08:54:41.564 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x15) - FUNC_ID_ZW_GET_VERSION: 0x01, 0x03, 0x00, 0x15, 0xe9
+2014-03-06 08:54:41.573 contrlr,   Received: 0x01, 0x10, 0x01, 0x15, 0x5a, 0x2d, 0x57, 0x61, 0x76, 0x65, 0x20, 0x32, 0x2e, 0x37, 0x38, 0x00, 0x01, 0x9b
+2014-03-06 08:54:41.576 
+2014-03-06 08:54:41.579 contrlr, Received reply to FUNC_ID_ZW_GET_VERSION:
+2014-03-06 08:54:41.582 contrlr,     Static Controller library, version Z-Wave 2.78
+2014-03-06 08:54:41.585 contrlr,   Expected reply was received
+2014-03-06 08:54:41.588 contrlr,   Message transaction complete
+2014-03-06 08:54:41.591 
+2014-03-06 08:54:41.593 contrlr, Removing current message
+2014-03-06 08:54:41.597 
+2014-03-06 08:54:41.599 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 08:54:42.603 
+2014-03-06 08:54:42.606 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 08:54:43.610 
+2014-03-06 08:54:43.613 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 08:54:44.617 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 08:54:44.619 contrlr, Removing current message
+2014-03-06 08:54:44.623 
+2014-03-06 08:54:44.626 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 08:54:45.630 
+2014-03-06 08:54:45.632 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 08:54:46.637 
+2014-03-06 08:54:46.652 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 08:54:47.654 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 08:54:47.657 contrlr, Removing current message
+2014-03-06 08:54:47.661 
+2014-03-06 08:54:47.663 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x07) - FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 08:54:47.742 Unsolicited message received while waiting for ACK.
+2014-03-06 08:54:47.745 contrlr,   Received: 0x01, 0x25, 0x01, 0x1c, 0x01, 0x20, 0x70, 0x48, 0x43, 0xa7, 0xe5, 0xa4, 0xef, 0x6b, 0x5c, 0x83, 0x68, 0xc7, 0xa5, 0x1f, 0xe8, 0x49, 0xaf, 0x56, 0x8f, 0xc0, 0xa9, 0xec, 0xf6, 0x53, 0xeb, 0x63, 0xcc, 0x36, 0x48, 0x0d, 0x34, 0x66, 0xa7
+2014-03-06 08:54:47.748 
+2014-03-06 08:54:47.751 contrlr, Received reply to FUNC_ID_ZW_GET_RANDOM: true
+2014-03-06 08:54:48.754 
+2014-03-06 08:54:48.757 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x07) - FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 08:54:49.762 
+2014-03-06 08:54:49.765 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x07) - FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 08:54:50.770 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 08:54:50.772 contrlr, Removing current message
+2014-03-06 08:54:50.776 
+2014-03-06 08:54:50.779 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x56) - FUNC_ID_ZW_GET_SUC_NODE_ID: 0x01, 0x03, 0x00, 0x56, 0xaa
+2014-03-06 08:54:51.783 
+2014-03-06 08:54:51.797 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x56) - FUNC_ID_ZW_GET_SUC_NODE_ID: 0x01, 0x03, 0x00, 0x56, 0xaa
+2014-03-06 08:54:52.802 
+2014-03-06 08:54:52.804 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x56) - FUNC_ID_ZW_GET_SUC_NODE_ID: 0x01, 0x03, 0x00, 0x56, 0xaa
+2014-03-06 08:54:53.809 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 08:54:53.812 contrlr, Removing current message
+2014-03-06 09:02:15.379 mgr,     Added driver for controller /dev/ttyUSB0
+2014-03-06 09:02:15.386   Opening controller /dev/ttyUSB0
+2014-03-06 09:02:15.389 Trying to open serial port /dev/ttyUSB0 (attempt 1)
+2014-03-06 09:02:15.392 ERROR: Cannot get exclusive lock for serial port /dev/ttyUSB0. Error code 11
+2014-03-06 09:02:15.396 Serial port /dev/ttyUSB0 opened (attempt 1)
+2014-03-06 09:02:15.400 contrlr, Queuing (Command) FUNC_ID_ZW_GET_VERSION: 0x01, 0x03, 0x00, 0x15, 0xe9
+2014-03-06 09:02:15.403 contrlr, Queuing (Command) FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 09:02:15.406 contrlr, Queuing (Command) FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 09:02:15.409 contrlr, Queuing (Command) FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 09:02:15.412 contrlr, Queuing (Command) FUNC_ID_ZW_GET_SUC_NODE_ID: 0x01, 0x03, 0x00, 0x56, 0xaa
+2014-03-06 09:02:15.416 
+2014-03-06 09:02:15.418 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x15) - FUNC_ID_ZW_GET_VERSION: 0x01, 0x03, 0x00, 0x15, 0xe9
+2014-03-06 09:02:15.427 contrlr,   Received: 0x01, 0x10, 0x01, 0x15, 0x5a, 0x2d, 0x57, 0x61, 0x76, 0x65, 0x20, 0x32, 0x2e, 0x37, 0x38, 0x00, 0x01, 0x9b
+2014-03-06 09:02:15.430 
+2014-03-06 09:02:15.433 contrlr, Received reply to FUNC_ID_ZW_GET_VERSION:
+2014-03-06 09:02:15.436 contrlr,     Static Controller library, version Z-Wave 2.78
+2014-03-06 09:02:15.439 contrlr,   Expected reply was received
+2014-03-06 09:02:15.441 contrlr,   Message transaction complete
+2014-03-06 09:02:15.444 
+2014-03-06 09:02:15.447 contrlr, Removing current message
+2014-03-06 09:02:15.451 
+2014-03-06 09:02:15.453 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 09:02:16.457 
+2014-03-06 09:02:16.460 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 09:02:17.464 
+2014-03-06 09:02:17.467 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x20) - FUNC_ID_ZW_MEMORY_GET_ID: 0x01, 0x03, 0x00, 0x20, 0xdc
+2014-03-06 09:02:18.471 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 09:02:18.474 contrlr, Removing current message
+2014-03-06 09:02:18.478 
+2014-03-06 09:02:18.480 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 09:02:19.484 
+2014-03-06 09:02:19.487 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 09:02:20.491 
+2014-03-06 09:02:20.493 contrlr, Sending (Command) message (Attempt 3, Callback ID=0x00, Expected Reply=0x05) - FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES: 0x01, 0x03, 0x00, 0x05, 0xf9
+2014-03-06 09:02:21.498 contrlr, ERROR: Dropping command, expected response not received after 3 attempt(s)
+2014-03-06 09:02:21.500 contrlr, Removing current message
+2014-03-06 09:02:21.504 
+2014-03-06 09:02:21.507 contrlr, Sending (Command) message (Callback ID=0x00, Expected Reply=0x07) - FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
+2014-03-06 09:02:21.584 Unsolicited message received while waiting for ACK.
+2014-03-06 09:02:21.588 contrlr,   Received: 0x01, 0x25, 0x01, 0x1c, 0x01, 0x20, 0x35, 0x93, 0xac, 0x4f, 0x89, 0xd5, 0x6a, 0xe3, 0xab, 0x36, 0x9f, 0x74, 0x70, 0x1b, 0x52, 0x96, 0x43, 0xb2, 0xa3, 0x08, 0x49, 0x2d, 0xf5, 0x73, 0xcc, 0x4f, 0xb0, 0xdc, 0xa3, 0xab, 0x40, 0xfc, 0x4c
+2014-03-06 09:02:21.591 
+2014-03-06 09:02:21.594 contrlr, Received reply to FUNC_ID_ZW_GET_RANDOM: true
+2014-03-06 09:02:22.597 
+2014-03-06 09:02:22.603 contrlr, Sending (Command) message (Attempt 2, Callback ID=0x00, Expected Reply=0x07) - FUNC_ID_SERIAL_API_GET_CAPABILITIES: 0x01, 0x03, 0x00, 0x07, 0xfb
