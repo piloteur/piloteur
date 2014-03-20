@@ -4,6 +4,7 @@ import os.path
 import json
 import copy
 import sys
+import re
 
 def dmerge(d1, d2):
     if not isinstance(d2, dict):
@@ -19,16 +20,19 @@ def dmerge(d1, d2):
 # TODO: un-hardcode this?
 CONFIG_DIR = os.path.expanduser('~/smart-home-config/config')
 
-with open(os.path.expanduser('~/.hub-id')) as f:
-    UUID = f.read().strip()
-
 with open(os.path.join(CONFIG_DIR, "config.json")) as f:
     config = json.load(f)
 
-HUB_CONFIG = os.path.join(CONFIG_DIR, "hubs", UUID, "config.%s.json" % UUID)
-if os.path.isfile(HUB_CONFIG):
-    with open(HUB_CONFIG) as f:
-        hub_config = json.load(f)
-    config = dmerge(config, hub_config)
+with open(os.path.expanduser('~/.hub-id')) as f:
+    UUID = f.read().strip()
+with open(os.path.expanduser('~/.hub-classes')) as f:
+    classes = re.split(r'[^a-z0-9-]+', f.read().strip())
+
+for name in classes + [UUID]:
+    new_config_path = os.path.join(CONFIG_DIR, "hubs", name, "config.%s.json" % name)
+    if os.path.isfile(new_config_path):
+        with open(new_config_path) as f:
+            new_config = json.load(f)
+        config = dmerge(config, new_config)
 
 json.dump(config, sys.stdout, indent=4)
