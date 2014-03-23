@@ -24,14 +24,14 @@ def main():
 	if(count == 0):
 
        		#os.system("echo" + " \"" + str(datetime.now())  +  " Starting Code\" >> RestartLog.txt")
-		os.chdir(" /home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW/")
+		os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	os.system(nameCode)
 
 	if(count > 1):
 
         	os.system("sudo pkill " + nameCode )
         	#os.system("echo" + " \"" + str(datetime.now())  + " Killed Duplicate\" >> RestartLog.txt")
-		os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW/")
+		os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	os.system(nameCode)
 
 	#Since Pi code ensures this code will always run
