@@ -12,7 +12,7 @@
     # UUID=$(cat ~/.hub-id)
     # LOGS_PATH="$LOGS_PATH$UUID/"
 
-    LOG_HOUR=$(date +%Y-%m-%d-%H)
+    LOG_HOUR=$(date --utc +%Y-%m-%d-%H)
 
     ~/ENV/bin/python -m smarthome-hub-watchdog >> ${LOGS_PATH}watchdog/watchdog.${LOG_HOUR}.log 2>&1
 

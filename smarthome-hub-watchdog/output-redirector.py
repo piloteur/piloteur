@@ -29,12 +29,12 @@ hour, f = None, None
 while True:
     try: line = raw_input()
     except EOFError: break
-    hour_now = datetime.datetime.now().strftime('%Y-%m-%d-%H')
+    hour_now = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
     if hour_now != hour:
         hour = hour_now
         if f: f.close()
         f = open(filename % {'name': driver_name, 'hour': hour}, 'a')
-    timestamp = datetime.datetime.now().isoformat()
+    timestamp = datetime.datetime.utcnow().isoformat()
     f.write(prefix % {'timestamp': timestamp} + line + '\n')
     f.flush()
 

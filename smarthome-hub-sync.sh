@@ -11,7 +11,7 @@
     # UUID=$(cat ~/.hub-id)
     # LOGS_PATH="$LOGS_PATH$UUID/"
 
-    LOG_HOUR=$(date +%Y-%m-%d-%H)
+    LOG_HOUR=$(date --utc +%Y-%m-%d-%H)
 
     ~/ENV/bin/python smarthome-hub-sync.py >> ${LOGS_PATH}smarthome-hub-sync.${LOG_HOUR}.log 2>&1
 

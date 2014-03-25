@@ -53,7 +53,7 @@ class Syncer():
         self.REMOTE_DATA_PATH = os.path.join('data', self.HUB_ID)
         self.REMOTE_LOGS_PATH = os.path.join('logs', self.HUB_ID)
 
-        self.LOG_HOUR = datetime.datetime.now().strftime('%Y-%m-%d-%H')
+        self.LOG_HOUR = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
 
         self.KEYFILE_PATH = os.path.expanduser(self.config['keyfile_path'])
 
@@ -141,7 +141,7 @@ class Syncer():
         data = {}
 
         data["uptime"] = uptime.uptime()
-        data["timestamp"] = datetime.datetime.now().isoformat()
+        data["timestamp"] = datetime.datetime.utcnow().isoformat()
         data["cpu_percent"] = psutil.cpu_percent(0)
         data["free_memory"] = psutil.virtual_memory().available
         data["free_disk"] = psutil.disk_usage(self.DATA_PATH).free
