@@ -44,7 +44,7 @@ class NestThermostat():
 
     def get(self):
         blob = {}
-        blob["timestamp"] = datetime.datetime.now().isoformat()
+        blob["timestamp"] = datetime.datetime.utcnow().isoformat()
         blob["accounts"] = {}
 
         for account in self.devices:
