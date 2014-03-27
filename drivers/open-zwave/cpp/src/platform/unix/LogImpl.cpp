@@ -62,10 +62,14 @@ LogImpl::LogImpl
 		
 		char fpname[10000];
 		char tmpStr[10000];
+		char timeS1[50];
 
 		strftime(fpname, 10000, "%F",timeinfo1);
-		strcpy(tmpStr,"/home/pi/data/logs/zwave-driver/zwave-driver.");
+		strcpy(tmpStr,"/home/pi/data/open-zwave/open-zwave-");
 		strcat(tmpStr,fpname);
+		strcat(tmpStr,"-");
+		strftime(timeS1,50,"%H",timeinfo1);
+		strcat(tmpStr,timeS1);
 		strcat(tmpStr,".data");
 		m_filename.assign(tmpStr,10000);
 		//strcpy(m_filename,fpname);
@@ -73,7 +77,7 @@ LogImpl::LogImpl
 		//fprintf(tmp,"%s",m_filename.c_str());
 		//fclose(tmp);
 
-		FILE* pFile = fopen(m_filename.c_str(), "w" );
+		FILE* pFile = fopen(m_filename.c_str(), "a" );
 		if( pFile != NULL )
 		{
 			fclose( pFile );
@@ -129,17 +133,23 @@ void LogImpl::Write
 			// save to file
 			char fpname[10000];
 			char tmpStr[10000];
+			char timeS1[50];
+
 			time_t rawtime2;
 			struct tm* timeinfo2;
 			time(&rawtime2);
 			timeinfo2 = localtime(&rawtime2);
 			strftime(fpname,10000,"%F",timeinfo2);
-			strcpy(tmpStr,"/data/logs/zwaveLogs/");
+			strcpy(tmpStr,"/home/pi/data/open-zwave/open-zwave-");
 			strcat(tmpStr,fpname);
+			strcat(tmpStr,"-");
+			strftime(timeS1,50,"%H",timeinfo2);
+			strcat(tmpStr,timeS1);
+			strcat(tmpStr,".data");
 			m_filename.assign(tmpStr,10000);
-			FILE *tmp = fopen("tmp","a");
-			fprintf(tmp,"%s",m_filename.c_str());
-			fclose(tmp);
+			//FILE *tmp = fopen("tmp","a");
+			//fprintf(tmp,"%s",m_filename.c_str());
+			//fclose(tmp);
 			//strcpy(m_filename,fpname);
 			FILE* pFile = fopen(m_filename.c_str(),"a" );
 			if ( pFile != NULL || m_bConsoleOutput )

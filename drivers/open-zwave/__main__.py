@@ -7,7 +7,7 @@ def main():
 	
 
 	
-	"""count = 0
+	count = 0
 	lineNo = -1
 	i = 0
 	nameCode = "./test"
@@ -27,7 +27,7 @@ def main():
        		
 		#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	#os.system(nameCode)
-		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
+		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 		while True:
 			line = p.stdout.readline().rstrip()
 			if not line: break
@@ -39,7 +39,7 @@ def main():
         	#os.system("echo" + " \"" + str(datetime.now())  + " Killed Duplicate\" >> RestartLog.txt")
 		#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	#os.system(nameCode)
-		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
+		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 		while True:
 			line = p.stdout.readline().rstrip()
 			if not line: break
@@ -49,10 +49,6 @@ def main():
 
 	time.sleep( 600 )
 
-	"""
-	while True:
-                print subprocess.check_output(["echo", "Is it zwave?"])
-                time.sleep(1)
 
 
 if __name__ == "__main__":
