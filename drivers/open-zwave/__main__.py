@@ -24,10 +24,10 @@ def main():
 	#count = 1 means all ok
 	if(count == 0):
 
-       		#os.system("echo" + " \"" + str(datetime.now())  +  " Starting Code\" >> RestartLog.txt")
-		os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
+       		
+		#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	#os.system(nameCode)
-		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE)
+		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
 		while True:
 			line = p.stdout.readline().rstrip()
 			if not line: break
@@ -37,9 +37,9 @@ def main():
 
         	os.system("sudo pkill " + nameCode )
         	#os.system("echo" + " \"" + str(datetime.now())  + " Killed Duplicate\" >> RestartLog.txt")
-		os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
+		#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	#os.system(nameCode)
-		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE)
+		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
 		while True:
 			line = p.stdout.readline().rstrip()
 			if not line: break
