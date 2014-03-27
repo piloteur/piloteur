@@ -51,8 +51,9 @@ def main():
 
 	"""
 	while True:
-		print "Testing"
-		time.sleep(1)
+                print subprocess.check_output(["echo", "Is it zwave?"])
+                time.sleep(1)
+
 
 if __name__ == "__main__":
 	main()

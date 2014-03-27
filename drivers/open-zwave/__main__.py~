@@ -6,8 +6,8 @@ import subprocess
 def main():
 	
 
-	"""
-	count = 0
+	
+	"""count = 0
 	lineNo = -1
 	i = 0
 	nameCode = "./test"
