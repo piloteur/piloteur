@@ -39,7 +39,7 @@ def main():
         	#os.system("echo" + " \"" + str(datetime.now())  + " Killed Duplicate\" >> RestartLog.txt")
 		#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
         	#os.system(nameCode)
-		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE)
+		p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/open-zwave/cpp/examples/linux/MinOZW")
 		while True:
 			line = p.stdout.readline().rstrip()
 			if not line: break
