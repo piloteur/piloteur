@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/585/trunk/cpp/hidapi/linux
+END
+hid.c
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/585/trunk/cpp/hidapi/linux/hid.c
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/207/trunk/cpp/hidapi/linux/.gitignore
+END
+Makefile-manual
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/585/trunk/cpp/hidapi/linux/Makefile-manual
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/585/trunk/cpp/hidapi/linux/Makefile.am
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/243/trunk/cpp/hidapi/linux/README.txt
+END
