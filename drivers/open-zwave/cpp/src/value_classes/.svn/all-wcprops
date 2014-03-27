@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/644/trunk/cpp/src/value_classes
+END
+ValueID.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueID.h
+END
+ValueStore.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/243/trunk/cpp/src/value_classes/ValueStore.h
+END
+ValueSchedule.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/609/trunk/cpp/src/value_classes/ValueSchedule.h
+END
+ValueByte.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueByte.cpp
+END
+ValueDecimal.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueDecimal.h
+END
+ValueShort.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueShort.h
+END
+ValueString.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueString.cpp
+END
+ValueByte.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/609/trunk/cpp/src/value_classes/ValueByte.h
+END
+ValueList.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/622/trunk/cpp/src/value_classes/ValueList.cpp
+END
+ValueString.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueString.h
+END
+ValueButton.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/471/trunk/cpp/src/value_classes/ValueButton.cpp
+END
+Value.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/644/trunk/cpp/src/value_classes/Value.cpp
+END
+ValueButton.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/464/trunk/cpp/src/value_classes/ValueButton.h
+END
+ValueList.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/471/trunk/cpp/src/value_classes/ValueList.h
+END
+Value.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/621/trunk/cpp/src/value_classes/Value.h
+END
+ValueRaw.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/638/trunk/cpp/src/value_classes/ValueRaw.cpp
+END
+ValueInt.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueInt.cpp
+END
+ValueBool.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueBool.cpp
+END
+ValueSchedule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/609/trunk/cpp/src/value_classes/ValueSchedule.cpp
+END
+ValueStore.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/443/trunk/cpp/src/value_classes/ValueStore.cpp
+END
+ValueRaw.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueRaw.h
+END
+ValueDecimal.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueDecimal.cpp
+END
+ValueShort.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/620/trunk/cpp/src/value_classes/ValueShort.cpp
+END
+ValueInt.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/609/trunk/cpp/src/value_classes/ValueInt.h
+END
+ValueBool.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/471/trunk/cpp/src/value_classes/ValueBool.h
+END

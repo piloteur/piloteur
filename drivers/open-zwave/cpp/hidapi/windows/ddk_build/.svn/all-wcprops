@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/585/trunk/cpp/hidapi/windows/ddk_build
+END
+sources
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/585/trunk/cpp/hidapi/windows/ddk_build/sources
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/207/trunk/cpp/hidapi/windows/ddk_build/.gitignore
+END
+hidapi.def
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/207/trunk/cpp/hidapi/windows/ddk_build/hidapi.def
+END
+makefile
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/207/trunk/cpp/hidapi/windows/ddk_build/makefile
+END

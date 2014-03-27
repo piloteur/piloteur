@@ -1,0 +1,125 @@
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/711/trunk/cpp/src
+END
+Options.h
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/482/trunk/cpp/src/Options.h
+END
+Utils.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/243/trunk/cpp/src/Utils.cpp
+END
+Driver.h
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/711/trunk/cpp/src/Driver.h
+END
+Group.h
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/243/trunk/cpp/src/Group.h
+END
+Scene.h
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/638/trunk/cpp/src/Scene.h
+END
+Utils.h
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/243/trunk/cpp/src/Utils.h
+END
+Manager.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/638/trunk/cpp/src/Manager.cpp
+END
+Manager.h
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/628/trunk/cpp/src/Manager.h
+END
+Node.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/655/trunk/cpp/src/Node.cpp
+END
+Msg.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/631/trunk/cpp/src/Msg.cpp
+END
+Defs.h
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/638/trunk/cpp/src/Defs.h
+END
+DoxygenMain.h
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/243/trunk/cpp/src/DoxygenMain.h
+END
+Bitfield.h
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/301/trunk/cpp/src/Bitfield.h
+END
+Node.h
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/641/trunk/cpp/src/Node.h
+END
+Driver.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/655/trunk/cpp/src/Driver.cpp
+END
+Options.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/640/trunk/cpp/src/Options.cpp
+END
+Notification.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/638/trunk/cpp/src/Notification.h
+END
+Msg.h
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/641/trunk/cpp/src/Msg.h
+END
+Group.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/640/trunk/cpp/src/Group.cpp
+END
+Scene.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/638/trunk/cpp/src/Scene.cpp
+END
