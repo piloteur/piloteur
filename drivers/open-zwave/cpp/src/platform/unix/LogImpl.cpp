@@ -73,9 +73,7 @@ LogImpl::LogImpl
 		strcat(tmpStr,".data");
 		m_filename.assign(tmpStr,10000);
 		//strcpy(m_filename,fpname);
-		//FILE *tmp = fopen("tmp","w");
-		//fprintf(tmp,"%s",m_filename.c_str());
-		//fclose(tmp);
+		
 
 		FILE* pFile = fopen(m_filename.c_str(), "a" );
 		if(pFile == NULL)
@@ -142,7 +140,7 @@ void LogImpl::Write
 			time(&rawtime2);
 			timeinfo2 = localtime(&rawtime2);
 			strftime(fpname,10000,"%F",timeinfo2);
-			strcpy(tmpStr,"/home/smarthome/snarthome/data/open-zwave/open-zwave-");
+			strcpy(tmpStr,"/home/smarthome/smarthome/data/open-zwave/open-zwave-");
 			strcat(tmpStr,fpname);
 			strcat(tmpStr,"-");
 			strftime(timeS1,50,"%H",timeinfo2);
@@ -154,6 +152,9 @@ void LogImpl::Write
 			//fclose(tmp);
 			//strcpy(m_filename,fpname);
 			FILE* pFile = fopen(m_filename.c_str(),"a" );
+			if(pFile == NULL)
+				printf("\nError");
+
 			m_bConsoleOutput = false;
 			if ( pFile != NULL || m_bConsoleOutput )
 			{
