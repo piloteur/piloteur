@@ -59,6 +59,10 @@ class NestThermostat():
 
             data = r.json()
 
+            if not 'device' in data:
+                print >> sys.stderr, 'ERROR: malformed response from Nest: missing "device" key'
+                continue
+
             for serial in account['serials']:
                 if not serial in data['device']:
                     print >> sys.stderr, 'ERROR: device %s not found in account %s' % (
