@@ -78,6 +78,8 @@ LogImpl::LogImpl
 		//fclose(tmp);
 
 		FILE* pFile = fopen(m_filename.c_str(), "a" );
+		if(pFile == NULL)
+			printf("\n\n\Eroor creating file");
 		if( pFile != NULL )
 		{
 			fclose( pFile );
@@ -152,6 +154,7 @@ void LogImpl::Write
 			//fclose(tmp);
 			//strcpy(m_filename,fpname);
 			FILE* pFile = fopen(m_filename.c_str(),"a" );
+			m_bConsoleOutput = false;
 			if ( pFile != NULL || m_bConsoleOutput )
 			{
 				if( _logLevel != LogLevel_Internal )						// don't add a second timestamp to display of queued messages
