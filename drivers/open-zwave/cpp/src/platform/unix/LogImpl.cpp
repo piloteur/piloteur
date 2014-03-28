@@ -65,7 +65,7 @@ LogImpl::LogImpl
 		char timeS1[50];
 
 		strftime(fpname, 10000, "%F",timeinfo1);
-		strcpy(tmpStr,"/home/pi/data/open-zwave/open-zwave-");
+		strcpy(tmpStr,"/home/smarthome/smarthome/data/open-zwave/open-zwave-");
 		strcat(tmpStr,fpname);
 		strcat(tmpStr,"-");
 		strftime(timeS1,50,"%H",timeinfo1);
@@ -140,7 +140,7 @@ void LogImpl::Write
 			time(&rawtime2);
 			timeinfo2 = localtime(&rawtime2);
 			strftime(fpname,10000,"%F",timeinfo2);
-			strcpy(tmpStr,"/home/pi/data/open-zwave/open-zwave-");
+			strcpy(tmpStr,"/home/smarthome/snarthome/data/open-zwave/open-zwave-");
 			strcat(tmpStr,fpname);
 			strcat(tmpStr,"-");
 			strftime(timeS1,50,"%H",timeinfo2);
