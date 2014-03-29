@@ -20,6 +20,8 @@ def main():
                      lineNo = i
      		i = i + 1
 
+	if not os.path.exists("/home/smarthome/smarthome/data/open-zwave"):
+    		os.makedirs("/home/smarthome/smarthome/data/open-zwave")
 
 	#count = 1 means all ok
 	if(count == 0):
