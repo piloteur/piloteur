@@ -35,7 +35,7 @@ def main():
 			if not line: break
 			print line
 
-	"""if(count > 1):
+	if(count > 1):
 
         	os.system("sudo pkill " + nameCode )
         	#os.system("echo" + " \"" + str(datetime.now())  + " Killed Duplicate\" >> RestartLog.txt")
@@ -48,7 +48,7 @@ def main():
 			print line
 
 	#Since Pi code ensures this code will always run
-	"""
+	
 	#time.sleep( 3600 )
 
 
