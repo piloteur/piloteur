@@ -49,7 +49,7 @@ def main():
 
 	#Since Pi code ensures this code will always run
 	
-	#time.sleep( 3600 )
+	time.sleep( 3600 )
 
 
 
