@@ -4,6 +4,7 @@ from datetime import datetime
 import subprocess
 
 def startDriver():
+	nameCode = './test'
 	p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 	while True:
 		if p.returncode != None:
