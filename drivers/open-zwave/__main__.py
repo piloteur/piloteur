@@ -11,7 +11,7 @@ def main():
 	lineNo = -1
 	i = 0
 	nameCode = "./test"
-
+	"""
 	for line in os.popen("ps "):
         	if(line.find(nameCode) > -1):
                      #os.command("echo \"OK\" >> RestartLog.txt")
@@ -19,10 +19,10 @@ def main():
 
                      lineNo = i
      		i = i + 1
-
+	"""
 	if not os.path.exists("/home/smarthome/smarthome/data/open-zwave"):
     		os.makedirs("/home/smarthome/smarthome/data/open-zwave")
-
+	count = 0
 	#count = 1 means all ok
 	if(count == 0):
 
