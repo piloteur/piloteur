@@ -23,7 +23,7 @@ def main():
     		os.makedirs("/home/smarthome/smarthome/data/open-zwave")
 	
 	while True:
-			time.sleep(10)
+			time.sleep(2)
 			startDriver()
 		
 
