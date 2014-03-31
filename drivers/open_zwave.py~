@@ -16,7 +16,7 @@ def startDriver():
 		#if p.returncode != None:
 			#print "Exiti ng-------------------------"
 			#break
-
+	
 def main():
 	
 	if not os.path.exists("/home/smarthome/smarthome/data/open-zwave"):
