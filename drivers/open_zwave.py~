@@ -10,8 +10,8 @@ def startDriver():
 	
 	while True:
 		line = p.stdout.readline().rstrip()
-			if not line: break
-			print line
+		if not line: break
+		print line
 
 		if p.returncode != None:
 			print "Exiti ng-------------------------"
