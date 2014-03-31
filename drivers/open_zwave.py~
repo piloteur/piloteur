@@ -9,9 +9,9 @@ def startDriver():
 	p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 	
 	while True:
-		line = p.stdout.readline().rstrip()
-		if not line: break
-		print line
+		#line = p.stdout.readline().rstrip()
+		#if not line: break
+		#print line
 
 		#if p.returncode != None:
 			#print "Exiti ng-------------------------"
