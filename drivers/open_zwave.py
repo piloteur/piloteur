@@ -5,7 +5,7 @@ import subprocess
 
 def startDriver():
 	
-	nameCode = ["./test"]
+	nameCode = ["sudo","./test"]
 
 	#p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 	subprocess.call(nameCode)
