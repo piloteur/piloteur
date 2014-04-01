@@ -5,7 +5,7 @@ import subprocess
 
 def startDriver():
 	
-	nameCode = ["./test"]
+	nameCode = ["sudo","/usr/local/bin/start_zwave"]
 
 	#p = subprocess.Popen(nameCode,stdout=subprocess.PIPE,cwd="/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
 	subprocess.call(nameCode)
@@ -25,8 +25,8 @@ def main():
 	if not os.path.exists("/home/smarthome/smarthome/data/open-zwave"):
     		os.makedirs("/home/smarthome/smarthome/data/open-zwave")
 	
-	os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
-	while True:
+	#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
+		while True:
 			time.sleep(2)
 			startDriver()
 		
