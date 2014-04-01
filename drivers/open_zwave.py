@@ -26,9 +26,9 @@ def main():
     		os.makedirs("/home/smarthome/smarthome/data/open-zwave")
 	
 	#os.chdir("/home/smarthome/smarthome-drivers/drivers/open-zwave/cpp/examples/linux/MinOZW")
-		while True:
-			time.sleep(2)
-			startDriver()
+	while True:
+		time.sleep(2)
+		startDriver()
 		
 
 
