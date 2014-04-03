@@ -1,0 +1,18 @@
+#!/usr/bin/env python2.7
+
+import json
+import subprocess
+import os.path
+
+CONFIG_PATH = os.path.expanduser('~/smarthome-hub-sync/config.py')
+config = json.loads(subprocess.check_output(CONFIG_PATH))
+
+with open(os.path.expanduser('~/.hub-id')) as f:
+    UUID = f.read().strip()
+
+ssh_host = "%s@%s" % (config['ssh_bridge_user'], config['ssh_bridge_host'])
+
+p = subprocess.Popen(['ssh', ssh_host], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+port = p.communicate(input=UUID)[0].strip()
+
+subprocess.check_call(['ssh', '-N', '-R', port+":127.0.0.1:22", ssh_host])
