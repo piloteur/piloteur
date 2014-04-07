@@ -36,6 +36,7 @@ class Syncer():
         self.config = config
 
         logging.basicConfig(format=self.config['log_format'])
+        logging.Formatter.converter = time.gmtime
         self.log = logging.getLogger('HUB')
         if os.environ.get('DEBUG'):
             self.log.setLevel(logging.DEBUG)
