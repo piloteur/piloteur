@@ -1,6 +1,7 @@
-diff -r -u open-zwave-read-only-old/cpp/examples/MinOZW/Main.cpp open-zwave-read-only/cpp/examples/MinOZW/Main.cpp
---- open-zwave-read-only-old/cpp/examples/MinOZW/Main.cpp	2014-04-05 03:23:00.000000000 +0200
-+++ open-zwave-read-only/cpp/examples/MinOZW/Main.cpp	2014-04-05 03:25:09.000000000 +0200
+Index: cpp/examples/MinOZW/Main.cpp
+===================================================================
+--- cpp/examples/MinOZW/Main.cpp	(revision 779)
++++ cpp/examples/MinOZW/Main.cpp	(working copy)
 @@ -155,6 +155,7 @@
  			nodeInfo->m_nodeId = _notification->GetNodeId();
  			nodeInfo->m_polled = false;		
@@ -32,9 +33,39 @@ diff -r -u open-zwave-read-only-old/cpp/examples/MinOZW/Main.cpp open-zwave-read
  
  		// The section below demonstrates setting up polling for a variable.  In this simple
  		// example, it has been hardwired to poll COMMAND_CLASS_BASIC on the each node that 
-diff -r -u open-zwave-read-only-old/cpp/examples/MinOZW/Makefile open-zwave-read-only/cpp/examples/MinOZW/Makefile
---- open-zwave-read-only-old/cpp/examples/MinOZW/Makefile	2014-04-05 03:23:00.000000000 +0200
-+++ open-zwave-read-only/cpp/examples/MinOZW/Makefile	2014-04-05 15:59:59.000000000 +0200
+@@ -332,13 +333,19 @@
+ 				ValueID v = *it2;
+ 				if( v.GetCommandClassId() == 0x20 )
+ 				{
+-					Manager::Get()->EnablePoll( v, 2 );		// enables polling with "intensity" of 2, though this is irrelevant with only one value polled
++					Manager::Get()->EnablePoll( v, 1 );		// enables polling
+ 					break;
+ 				}
+ 			}
+ 		}
+ 		pthread_mutex_unlock( &g_criticalSection );
+ 
++		while(1)
++		{
++			sleep(1);
++		}
++
++/*
+ 		// If we want to access our NodeInfo list, that has been built from all the
+ 		// notification callbacks we received from the library, we have to do so
+ 		// from inside a Critical Section.  This is because the callbacks occur on other 
+@@ -354,6 +361,7 @@
+ 			pthread_mutex_unlock( &g_criticalSection );
+ 			sleep(1);
+ 		}
++*/
+ 
+ 		Driver::DriverData data;
+ 		Manager::Get()->GetDriverStatistics( g_homeId, &data );
+Index: cpp/examples/MinOZW/Makefile
+===================================================================
+--- cpp/examples/MinOZW/Makefile	(revision 779)
++++ cpp/examples/MinOZW/Makefile	(working copy)
 @@ -20,7 +20,7 @@
  
  INCLUDES	:= -I $(top_srcdir)/cpp/src -I $(top_srcdir)/cpp/src/command_classes/ -I $(top_srcdir)/cpp/src/value_classes/ \
@@ -53,10 +84,10 @@ diff -r -u open-zwave-read-only-old/cpp/examples/MinOZW/Makefile open-zwave-read
  
  $(top_builddir)/MinOZW: $(top_srcdir)/cpp/examples/MinOZW/MinOZW.in $(OBJDIR)/MinOZW
  	@echo "Creating Temporary Shell Launch Script"
-Only in open-zwave-read-only-old/cpp/examples/MinOZW: ___Main___cpp___krS3zy
-diff -r -u open-zwave-read-only-old/cpp/src/platform/unix/LogImpl.cpp open-zwave-read-only/cpp/src/platform/unix/LogImpl.cpp
---- open-zwave-read-only-old/cpp/src/platform/unix/LogImpl.cpp	2014-04-05 03:23:01.000000000 +0200
-+++ open-zwave-read-only/cpp/src/platform/unix/LogImpl.cpp	2014-04-05 15:50:12.000000000 +0200
+Index: cpp/src/platform/unix/LogImpl.cpp
+===================================================================
+--- cpp/src/platform/unix/LogImpl.cpp	(revision 779)
++++ cpp/src/platform/unix/LogImpl.cpp	(working copy)
 @@ -53,14 +53,14 @@
  	m_queueLevel( _queueLevel ),				// level of messages to log to queue
  	m_dumpTrigger( _dumpTrigger )				// dump queued messages when this level is seen
