@@ -70,6 +70,8 @@ class Syncer():
         self.log.info('---')
         self.start_time = time.time()
 
+        self.versions()
+
         try:
             # Maybe running rsync two times might have to be reconsidered
             success = self.sync(self.DATA_PATH, self.REMOTE_DATA_PATH)
@@ -175,6 +177,29 @@ class Syncer():
         with open(TIMESYNC_PATH, 'a') as f:
             f.write('%s,%s,%f\n' %(local.isoformat(), remote.isoformat(),
                 (remote - local).total_seconds()))
+
+    def versions(self):
+        now = datetime.datetime.utcnow()
+        if not now.minute % 10 == 0: return
+        if not now.second < 10: return
+
+        VERSIONS_PATH = os.path.join(self.LOGS_PATH, "versions/versions-log.%s.csv" % self.LOG_HOUR)
+
+        versions = []
+        for repo in (
+            "smart-home-config",
+            "smarthome-deployment-blobs",
+            "smarthome-drivers",
+            "smarthome-hub-sync",
+            "smarthome-reverse-tunneler",
+        ):
+            versions.append(subprocess.check_output(["git", "rev-parse", "HEAD"],
+                cwd=os.path.expanduser("~/" + repo)).strip())
+
+        ansible = subprocess.check_output(["ansible", "--version"]).strip()
+
+        with open(VERSIONS_PATH, 'a') as f:
+            f.write('%s,%s,%s\n' %(now.isoformat(), ansible, ','.join(versions)))
 
 
 
