@@ -22,9 +22,16 @@ DATA_PATH = os.path.expanduser(config['data_path'])
 
 payload['last_writes'] = {}
 for driver_name in config['loaded_drivers']:
-    hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
     filename = os.path.join(DATA_PATH, '%(name)s-%(hour)s.data')
+    hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
     filename = filename % {'name': driver_name, 'hour': hour}
+    if not os.path.isfile(filename):
+        ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        hour = ago.strftime('%Y-%m-%d-%H')
+        filename = filename % {'name': driver_name, 'hour': hour}
+    if not os.path.isfile(filename):
+        payload['last_writes'][driver_name] = 0
+        continue
     t = os.path.getmtime(filename)
     payload['last_writes'][driver_name] = t
 
