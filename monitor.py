@@ -109,6 +109,9 @@ class Monitor():
             versions=versions,
         )
 
+    def serve_index(self):
+        return render_template('status_index.html')
+
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.abspath(__file__))
@@ -123,5 +126,6 @@ if __name__ == '__main__':
     if arguments['serve']:
         app = Flask(__name__)
         app.route("/status/<hub_id>")(M.serve_status)
+        app.route("/status/")(M.serve_index)
         host, port = arguments['--listen'].split(':')
         app.run(host, int(port))

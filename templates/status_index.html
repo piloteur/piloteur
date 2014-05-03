@@ -79,77 +79,23 @@
           }
         }
 
-        .jumbotron h1 {
-            padding-bottom: 20px;
-        }
-        .jumbotron h1 code {
-            color: inherit;
-            background-color: inherit;
-            font-size: 70%;
-        }
-
-        .header form {
-          float: right;
-          margin-top: 5px;
-        }
-
-        .jumbotron {
-          padding-top: 20px;
-          padding-bottom: 30px;
+        .jumbotron input {
+          margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
       <div class="header">
-        <form class="form-inline" role="form">
-          <input type="text" class="form-control" id="hub_id_input" placeholder="{{ hub_id }}">
-          <button type="submit" class="btn btn-primary">Go</button>
-        </form>
-
         <h3 class="text-muted">Smarthome Hub health check</h3>
       </div>
 
       <div class="jumbotron">
-        <h1><code>{{ hub_id }}</code></h1>
-        {% if hub_healthy %}
-            <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
-        {% else %}
-            <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
-        {% endif %}
+        <form role="form">
+          <input type="text" class="form-control input-lg" id="hub_id_input">
+          <button type="submit" class="btn btn-primary btn-lg">Go</button>
+        </form>
       </div>
-
-      {% if tunnel_up %}
-        <h2>Drivers</h2>
-        <table class="table table-bordered">
-          {% for driver in drivers %}
-              <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
-                  <td>{{ driver[0] }}</td>
-                  <td>{{ driver[1] }}</td>
-                  <td>{{ driver[2] }}</td>
-              </tr>
-          {% endfor %}
-        </table>
-
-        <h2>Versions</h2>
-        <table class="table table-bordered">
-          {% for version in versions %}
-              <tr class="{% if version[3] %}success{% else %}danger{% endif %}">
-                  <td>{{ version[0] }}</td>
-                  <td>{{ version[1] }}</td>
-                  <td>{{ version[2] }}</td>
-              </tr>
-          {% endfor %}
-        </table>
-
-        <p>
-          Hub timestamp: {{ timestamp }}
-        </p>
-      {% else %}
-        <table class="table table-bordered">
-          <tr class="danger"><td>No SSH tunnel port found for this Hub ID</td></tr>
-        </table>
-      {% endif %}
     </div>
 
     <script src="//cdn.jsdelivr.net/jquery/2.1.0/jquery.min.js"></script>
@@ -161,7 +107,7 @@
           };
         }
 
-        $('.header form').submit(function(event) {
+        $('.jumbotron form').submit(function(event) {
           var pathArray = window.location.pathname.split('/');
           var newPathname = "";
           for ( i = 0; i < pathArray.length - 1; i++ ) {
@@ -170,7 +116,7 @@
           }
           newPathname = newPathname.replace(/^\/+|\/+$/g, '');
           window.location = (window.location.protocol + "//" + window.location.host +
-            "/" + newPathname + "/" + $('.header form input').val());
+            "/" + newPathname + "/" + $('.jumbotron form input').val());
           event.preventDefault();
         });
     </script>
