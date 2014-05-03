@@ -38,21 +38,24 @@ for driver_name in config['loaded_drivers']:
 
 hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
 versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
-if not os.path.isfile(filename):
+if not os.path.isfile(versions_file):
     ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
     hour = ago.strftime('%Y-%m-%d-%H')
     versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
-with open(versions_file) as f:
-    versions = f.read().strip().split('\n')[-1].split(',')
-payload['versions'] = dict(zip((
-    "timestamp",
-    "ansible",
-    "smart-home-config",
-    "smarthome-deployment-blobs",
-    "smarthome-drivers",
-    "smarthome-hub-sync",
-    "smarthome-reverse-tunneler",
-), versions))
+if not os.path.isfile(versions_file):
+    payload['versions'] = None
+else:
+    with open(versions_file) as f:
+        versions = f.read().strip().split('\n')[-1].split(',')
+    payload['versions'] = dict(zip((
+        "timestamp",
+        "ansible",
+        "smart-home-config",
+        "smarthome-deployment-blobs",
+        "smarthome-drivers",
+        "smarthome-hub-sync",
+        "smarthome-reverse-tunneler",
+    ), versions))
 
 payload['timestamp'] = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
 

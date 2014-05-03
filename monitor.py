@@ -82,22 +82,26 @@ class Monitor():
                                 last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
                                 healthy))
 
-            versions_timestamp = arrow.get(data['payload']['versions']['timestamp'])
-            del data['payload']['versions']['timestamp']
-            healthy = (now - versions_timestamp) < datetime.timedelta(minutes=15)
-            if not healthy: hub_healthy = False
-            versions.append(('timestamp',
-                             versions_timestamp.humanize(now),
-                             versions_timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                             healthy))
-            ansible = data['payload']['versions']['ansible']
-            del data['payload']['versions']['ansible']
-            if ansible != 'ansible 1.5.3':  # TODO unhardcode?
-                hub_healthy = healthy = False
-            versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
-            for repo, commit in data['payload']['versions'].items():
-                # TODO get repo last commit and check how old is this
-                versions.append((repo, commit[:7], '', True))
+            if data['payload']['versions'] is None:
+                versions.append(('versions.log', 'Not found', '', False))
+                hub_healthy = False
+            else:
+                versions_timestamp = arrow.get(data['payload']['versions']['timestamp'])
+                del data['payload']['versions']['timestamp']
+                healthy = (now - versions_timestamp) < datetime.timedelta(minutes=15)
+                if not healthy: hub_healthy = False
+                versions.append(('timestamp',
+                                 versions_timestamp.humanize(now),
+                                 versions_timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
+                                 healthy))
+                ansible = data['payload']['versions']['ansible']
+                del data['payload']['versions']['ansible']
+                if ansible != 'ansible 1.5.3':  # TODO unhardcode?
+                    hub_healthy = healthy = False
+                versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
+                for repo, commit in data['payload']['versions'].items():
+                    # TODO get repo last commit and check how old is this
+                    versions.append((repo, commit[:7], '', True))
 
 
         return render_template('status.html',
