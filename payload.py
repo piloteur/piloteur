@@ -9,54 +9,74 @@ import os
 import datetime
 import calendar
 
-payload = {}
+class MetricsCollector():
+    def __init__(self):
+        with open(os.path.expanduser('~/.hub-id')) as f:
+            self.hub_id = f.read().strip()
 
-with open(os.path.expanduser('~/.hub-id')) as f:
-    payload['hub-id'] = f.read().strip()
+        self.config = json.loads(subprocess.check_output(os.path.expanduser(
+            '~/smarthome-hub-sync/config.py')))
 
-config = json.loads(subprocess.check_output(os.path.expanduser(
-    '~/smarthome-hub-sync/config.py')))
-# payload['config'] = config
+        self.DATA_PATH = os.path.expanduser(self.config['data_path'])
+        self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
 
-DATA_PATH = os.path.expanduser(config['data_path'])
-LOGS_PATH = os.path.expanduser(config['logs_path'])
+    def run(self):
+        payload = {
+            'hub-id': self.hub_id,
+            # 'config': self.config,
+            'timestamp': calendar.timegm(datetime.datetime.utcnow().utctimetuple()),
+            'last_writes': self._last_writes(),
+            'versions': self._versions(),
+        }
 
-payload['last_writes'] = {}
-for driver_name in config['loaded_drivers']:
-    filename = os.path.join(DATA_PATH, '%(name)s-%(hour)s.data')
-    hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
-    filename = filename % {'name': driver_name, 'hour': hour}
-    if not os.path.isfile(filename):
-        ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-        hour = ago.strftime('%Y-%m-%d-%H')
-        filename = filename % {'name': driver_name, 'hour': hour}
-    if not os.path.isfile(filename):
-        payload['last_writes'][driver_name] = 0
-        continue
-    t = os.path.getmtime(filename)
-    payload['last_writes'][driver_name] = t
+        return payload
 
-hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
-versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
-if not os.path.isfile(versions_file):
-    ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    hour = ago.strftime('%Y-%m-%d-%H')
-    versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
-if not os.path.isfile(versions_file):
-    payload['versions'] = None
-else:
-    with open(versions_file) as f:
-        versions = f.read().strip().split('\n')[-1].split(',')
-    payload['versions'] = dict(zip((
-        "timestamp",
-        "ansible",
-        "smart-home-config",
-        "smarthome-deployment-blobs",
-        "smarthome-drivers",
-        "smarthome-hub-sync",
-        "smarthome-reverse-tunneler",
-    ), versions))
+    def _get_file(self, base, name):
+        hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
+        filename = os.path.join(base, name % {'hour': hour})
 
-payload['timestamp'] = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+        if not os.path.isfile(filename):
+            ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+            hour = ago.strftime('%Y-%m-%d-%H')
+            filename = os.path.join(base, name % {'hour': hour})
 
-json.dump(payload, sys.stdout)
+        if not os.path.isfile(filename):
+            raise IOError
+
+        return filename
+
+    def _last_writes(self):
+        last_writes = {}
+        for driver_name in self.config['loaded_drivers']:
+            try:
+                filename = self._get_file(self.DATA_PATH, driver_name + '-%(hour)s.data')
+            except IOError:
+                last_writes[driver_name] = 0
+                continue
+            t = os.path.getmtime(filename)
+            last_writes[driver_name] = t
+        return last_writes
+
+
+    def _versions(self):
+        try:
+            filename = self._get_file(self.LOGS_PATH, 'versions/versions-log.%(hour)s.csv')
+        except IOError:
+            return None
+
+        with open(filename) as f:
+            versions = f.read().strip().split('\n')[-1].split(',')
+        return dict(zip((
+            "timestamp",
+            "ansible",
+            "smart-home-config",
+            "smarthome-deployment-blobs",
+            "smarthome-drivers",
+            "smarthome-hub-sync",
+            "smarthome-reverse-tunneler",
+        ), versions))
+
+
+if __name__ == '__main__':
+    m = MetricsCollector()
+    json.dump(m.run(), sys.stdout)
