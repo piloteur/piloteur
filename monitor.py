@@ -52,20 +52,27 @@ class Monitor():
             try:
                 res = subprocess.check_output(ssh_cmd, stdin=f)
             except subprocess.CalledProcessError:
-                ssh_cmd[3] = "admin@localhost:%s" % ports[hub_id]
+                for n, arg in enumerate(ssh_cmd):
+                    if not arg == "pi@localhost:%s" % ports[hub_id]: continue
+                    ssh_cmd[n] = "admin@localhost:%s" % ports[hub_id]
                 res = subprocess.check_output(ssh_cmd, stdin=f)
 
         return {'tunnel_up': True, 'payload': json.loads(res)}
 
     def serve_status(self, hub_id):
         data = self.check(hub_id)
+
         drivers = []
+        versions = []
         timestamp = None
         hub_healthy = False
+
         if data['payload']:
-            hub_healthy = True
             now = arrow.get(data['payload']['timestamp'])
             timestamp = now.format('YYYY-MM-DD HH:mm:ss ZZ')
+
+            hub_healthy = True
+
             for driver_name, last_write in sorted(data['payload']['last_writes'].items()):
                 last_write = arrow.get(last_write)
                 healthy = (now - last_write) < HEALTHY_LIMIT
@@ -74,12 +81,33 @@ class Monitor():
                                 last_write.humanize(now),
                                 last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
                                 healthy))
+
+            versions_timestamp = arrow.get(data['payload']['versions']['timestamp'])
+            del data['payload']['versions']['timestamp']
+            healthy = (now - versions_timestamp) < datetime.timedelta(minutes=15)
+            if not healthy: hub_healthy = False
+            versions.append(('timestamp',
+                             versions_timestamp.humanize(now),
+                             versions_timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
+                             healthy))
+            ansible = data['payload']['versions']['ansible']
+            del data['payload']['versions']['ansible']
+            if ansible != 'ansible 1.5.3':  # TODO unhardcode?
+                hub_healthy = healthy = False
+            versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
+            for repo, commit in data['payload']['versions'].items():
+                # TODO get repo last commit and check how old is this
+                versions.append((repo, commit[:7], '', True))
+
+
         return render_template('status.html',
             tunnel_up=data['tunnel_up'],
             drivers=drivers,
             timestamp=timestamp,
             hub_id=hub_id,
-            hub_healthy=hub_healthy)
+            hub_healthy=hub_healthy,
+            versions=versions,
+        )
 
 
 if __name__ == '__main__':

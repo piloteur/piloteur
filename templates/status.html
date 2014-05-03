@@ -104,24 +104,36 @@
         {% endif %}
       </div>
 
-      <table class="table table-bordered">
-        {% if tunnel_up %}
-            {% for driver in drivers %}
-                <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
-                    <td>{{ driver[0] }}</td>
-                    <td>{{ driver[1] }}</td>
-                    <td>{{ driver[2] }}</td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <tr class="danger"><td>No SSH tunnel port found for this Hub ID</td></tr>
-        {% endif %}
-      </table>
-
       {% if tunnel_up %}
-          <p>
-            Hub timestamp: {{ timestamp }}
-          </p>
+        <h2>Drivers</h2>
+        <table class="table table-bordered">
+          {% for driver in drivers %}
+              <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
+                  <td>{{ driver[0] }}</td>
+                  <td>{{ driver[1] }}</td>
+                  <td>{{ driver[2] }}</td>
+              </tr>
+          {% endfor %}
+        </table>
+
+        <h2>Versions</h2>
+        <table class="table table-bordered">
+          {% for version in versions %}
+              <tr class="{% if version[3] %}success{% else %}danger{% endif %}">
+                  <td>{{ version[0] }}</td>
+                  <td>{{ version[1] }}</td>
+                  <td>{{ version[2] }}</td>
+              </tr>
+          {% endfor %}
+        </table>
+
+        <p>
+          Hub timestamp: {{ timestamp }}
+        </p>
+      {% else %}
+        <table class="table table-bordered">
+          <tr class="danger"><td>No SSH tunnel port found for this Hub ID</td></tr>
+        </table>
       {% endif %}
     </div>
 

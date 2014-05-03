@@ -19,6 +19,7 @@ config = json.loads(subprocess.check_output(os.path.expanduser(
 # payload['config'] = config
 
 DATA_PATH = os.path.expanduser(config['data_path'])
+LOGS_PATH = os.path.expanduser(config['logs_path'])
 
 payload['last_writes'] = {}
 for driver_name in config['loaded_drivers']:
@@ -34,6 +35,24 @@ for driver_name in config['loaded_drivers']:
         continue
     t = os.path.getmtime(filename)
     payload['last_writes'][driver_name] = t
+
+hour = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
+versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
+if not os.path.isfile(filename):
+    ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    hour = ago.strftime('%Y-%m-%d-%H')
+    versions_file = os.path.join(LOGS_PATH, "versions/versions-log.%s.csv" % hour)
+with open(versions_file) as f:
+    versions = f.read().strip().split('\n')[-1].split(',')
+payload['versions'] = dict(zip((
+    "timestamp",
+    "ansible",
+    "smart-home-config",
+    "smarthome-deployment-blobs",
+    "smarthome-drivers",
+    "smarthome-hub-sync",
+    "smarthome-reverse-tunneler",
+), versions))
 
 payload['timestamp'] = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
 
