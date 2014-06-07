@@ -78,3 +78,26 @@ def logs_timestamp(driver_name, hub_id=None):
     if not files: return
 
     return latest_timestamp(files)
+
+
+### Private API
+
+def get_system_logs_files(hub_id, log_name):
+    LOGS_PATH = os.path.join(main.config["data_path"], "logs", hub_id)
+    LOGS_PATH = os.path.join(LOGS_PATH, log_name)
+    try: listdir = main.sftp.listdir(LOGS_PATH)
+    except IOError: return
+
+    regex = re.compile(r'%s-log\.[\d\-]+\.\w+' % re.escape(log_name))
+    log_files = sorted(os.path.join(LOGS_PATH, f)
+                       for f in listdir
+                       if regex.match(f))
+
+    return log_files
+
+@main.API_call
+def fetch_system_logs(log_name, n=1, hub_id=None):
+    files = get_system_logs_files(hub_id, log_name)
+    if not files: return
+
+    return fetch_lines(files, n)

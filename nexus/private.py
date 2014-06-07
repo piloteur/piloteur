@@ -1,2 +1,2 @@
 # Private API
-from .versions import get_versions
+from .fetcher import fetch_system_logs
