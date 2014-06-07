@@ -12,6 +12,7 @@ import traceback
 import email.utils
 import urllib2
 import itertools
+import collections
 
 import socket
 socket.setdefaulttimeout(60)
@@ -57,6 +58,8 @@ class Syncer():
         self.LOG_HOUR = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
 
         self.KEYFILE_PATH = os.path.expanduser(self.config['keyfile_path'])
+
+        self.last_runs = collections.defaultdict(int)
 
     # def run_remote_command(self, command):
     #     ssh_cmd = ["ssh", "-i", self.KEYFILE_PATH]
@@ -180,9 +183,10 @@ class Syncer():
                 (remote - local).total_seconds()))
 
     def versions(self):
+        if time.time() - self.last_runs["versions"] < 10 * 60: return
+        self.last_runs["versions"] = time.time()
+
         now = datetime.datetime.utcnow()
-        if not now.minute % 10 == 0: return
-        if not now.second < 10: return
 
         VERSIONS_PATH = os.path.join(self.LOGS_PATH, "versions/versions-log.%s.csv" % self.LOG_HOUR)
 
@@ -203,9 +207,8 @@ class Syncer():
             f.write('%s,%s,%s\n' %(now.isoformat(), ansible, ','.join(versions)))
 
     def classes(self):
-        now = datetime.datetime.utcnow()
-        if not now.minute % 10 == 0: return
-        if not now.second < 10: return
+        if time.time() - self.last_runs["classes"] < 10 * 60: return
+        self.last_runs["classes"] = time.time()
 
         CLASSES_PATH = os.path.join(self.LOGS_PATH, "classes/classes-log.%s.csv" % self.LOG_HOUR)
 
