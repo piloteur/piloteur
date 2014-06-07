@@ -2,10 +2,6 @@ Flask==0.10.1
 Jinja2==2.7.2
 MarkupSafe==0.21
 Werkzeug==0.9.4
-arrow==0.4.2
-docopt==0.6.1
 itsdangerous==0.24
-python-dateutil==2.2
-six==1.6.1
 
 -r requirements.txt
