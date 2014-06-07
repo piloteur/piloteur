@@ -3,8 +3,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os.path
 import logging
 import re
-import arrow
-import paramiko
 import tailer
 
 from . import main
