@@ -71,6 +71,7 @@ class Syncer():
         self.start_time = time.time()
 
         self.versions()
+        self.classes()
 
         try:
             # Maybe running rsync two times might have to be reconsidered
@@ -200,6 +201,16 @@ class Syncer():
 
         with open(VERSIONS_PATH, 'a') as f:
             f.write('%s,%s,%s\n' %(now.isoformat(), ansible, ','.join(versions)))
+
+    def classes(self):
+        now = datetime.datetime.utcnow()
+        if not now.minute % 10 == 0: return
+        if not now.second < 10: return
+
+        CLASSES_PATH = os.path.join(self.LOGS_PATH, "classes/classes-log.%s.csv" % self.LOG_HOUR)
+
+        with open(CLASSES_PATH, 'a') as f:
+            f.write(','.join([self.config["hub-id"]] + self.config["hub-classes"]) + '\n')
 
 
 

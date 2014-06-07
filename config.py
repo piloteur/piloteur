@@ -31,24 +31,31 @@ def gen_paths(CONFIG_DIR):
             paths[foldername] = os.path.join(root, "config.%s.json" % foldername)
     return paths
 
+# Get UUID and classes from home or sys.argv
+if len(sys.argv) > 1:
+    UUID = sys.argv[1]
+    classes = sys.argv[2:]
+else:
+    with open(os.path.expanduser('~/.hub-id')) as f:
+        UUID = f.read().strip()
+    with open(os.path.expanduser('~/.hub-classes')) as f:
+        classes = re.split(r'[^a-z0-9-]+', f.read().strip())
+
 # TODO: un-hardcode this?
 CONFIG_DIR = os.path.expanduser('~/smart-home-config/config')
-
-config_paths = gen_paths(CONFIG_DIR)
 
 with open(os.path.join(CONFIG_DIR, "config.json")) as f:
     config = json.load(f)
 
-with open(os.path.expanduser('~/.hub-id')) as f:
-    UUID = f.read().strip()
-with open(os.path.expanduser('~/.hub-classes')) as f:
-    classes = re.split(r'[^a-z0-9-]+', f.read().strip())
-
+config_paths = gen_paths(CONFIG_DIR)
 for name in classes + [UUID]:
     if not config_paths.get(name): continue
     new_config_path = config_paths[name]
     with open(new_config_path) as f:
         new_config = json.load(f)
     config = dmerge(config, new_config)
+
+config["hub-id"] = UUID
+config["hub-classes"] = classes
 
 json.dump(config, sys.stdout, indent=4)
