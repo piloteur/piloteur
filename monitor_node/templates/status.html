@@ -119,7 +119,7 @@
         {% endif %}
       </div>
 
-      {% if tunnel_up %}
+      {% if hub_id_found %}
         <h2>Drivers</h2>
         <table class="table table-bordered">
           {% for driver in drivers %}
@@ -147,7 +147,7 @@
         </p>
       {% else %}
         <table class="table table-bordered">
-          <tr class="danger"><td>No SSH tunnel port found for this Hub ID</td></tr>
+          <tr class="danger"><td>Hub ID not found</td></tr>
         </table>
       {% endif %}
     </div>

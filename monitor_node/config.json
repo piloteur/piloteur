@@ -1,4 +1,5 @@
 {
-    "ssh_bridge": "admin@54.208.95.123",
-    "ssh_bridge_folder": "/home/smarthome/ssh_ports/"
+    "data_location": "sensordata@power1.cs.virginia.edu:smarthome/",
+    "loglevel": "DEBUG",
+    "ssh_key": "~/.ssh/id_rsa"
 }

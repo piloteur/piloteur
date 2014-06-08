@@ -3,9 +3,7 @@
 
 """Smarthome monitor.
 
-Usage:
-  monitor.py check <hub-id>
-  monitor.py serve [--listen=<addr>]
+Usage: monitor.py serve [--listen=<addr>]
 
 Options:
   --listen ADDR  IP and port to bind to [default: 0.0.0.0:8080]
@@ -17,95 +15,111 @@ Options:
 import subprocess
 import os.path
 import json
-import pipes
-import sys
+import re
 import arrow
 import datetime
+import collections
 from docopt import docopt
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
+
+import nexus
+import nexus.private
 
 HEALTHY_LIMIT = datetime.timedelta(minutes=5)
+
+NodeData = collections.namedtuple('NodeData',
+    ['hub_id', 'classes', 'config', 'timestamp',
+     'last_writes', 'versions'])
 
 
 class Monitor():
     def __init__(self, config):
         self.config = config
 
-    def check(self, hub_id):
-        ports = subprocess.check_output(["ssh", self.config['ssh_bridge'],
-            "grep -R . '%s'" % pipes.quote(self.config['ssh_bridge_folder'])])
-        ports = dict((l.split(':')[1].strip(), os.path.basename(l.split(':')[0]))
-                     for l in ports.split('\n') if ':' in l.strip())
+    def fetch_data(self, hub_id):
+        # TODO: make this persistent
+        nexus.init(self.config)
+        nexus.private.set_hub_id(hub_id)
 
-        if not hub_id in ports:
-            return {'tunnel_up': False, 'payload': None}
-            return 2
+        classes_log = nexus.private.fetch_system_logs("classes")
+        if not classes_log: return
+        remote_hub_id = classes_log.split(',')[0]
+        if not remote_hub_id == hub_id: return
+        classes = classes_log.split(',')[1:]
 
-        ssh_cmd = ["ssh"]
-        ssh_cmd += ["-o", "ProxyCommand ssh -e none -W %h " + pipes.quote(self.config['ssh_bridge'])]
-        ssh_cmd += ["-o", "BatchMode yes"]
-        ssh_cmd += ["-o", "StrictHostKeyChecking no"]
-        ssh_cmd += ["pi@localhost:%s" % ports[hub_id]]
-        ssh_cmd += ["sudo -u smarthome python"]
+        config_cmd = [os.path.expanduser("~/smarthome-hub-sync/config.py")]
+        config_cmd.append(hub_id)
+        config_cmd.extend(classes)
+        node_config = json.loads(subprocess.check_output(config_cmd))
 
-        with open(os.path.join(DIR, 'payload.py')) as f:
-            try:
-                res = subprocess.check_output(ssh_cmd, stdin=f)
-            except subprocess.CalledProcessError:
-                for n, arg in enumerate(ssh_cmd):
-                    if not arg == "pi@localhost:%s" % ports[hub_id]: continue
-                    ssh_cmd[n] = "admin@localhost:%s" % ports[hub_id]
-                res = subprocess.check_output(ssh_cmd, stdin=f)
+        timesync_log = nexus.private.fetch_system_logs("timesync")
+        if not timesync_log: return  # TODO
+        timestamp = arrow.get(timesync_log.split(',')[0])
 
-        return {'tunnel_up': True, 'payload': json.loads(res)}
+        versions_log = nexus.private.fetch_system_logs("versions")
+        if not versions_log: return  # TODO
+        versions = versions_log.split(',')
+        versions = dict(zip((
+            "timestamp",
+            "ansible",
+            "smart-home-config",
+            "smarthome-deployment-blobs",
+            "smarthome-drivers",
+            "smarthome-hub-sync",
+            "smarthome-reverse-tunneler",
+        ), versions))
+
+        last_writes = {}
+        for driver_name in node_config['loaded_drivers']:
+            t = nexus.data_timestamp(driver_name)
+            if not t:
+                last_writes[driver_name] = arrow.get(0)
+            else:
+                last_writes[driver_name] = arrow.get(t)
+
+        return NodeData(hub_id=hub_id,
+                        classes=classes,
+                        config=node_config,
+                        timestamp=timestamp,
+                        versions=versions,
+                        last_writes=last_writes)
 
     def serve_status(self, hub_id):
-        data = self.check(hub_id)
+        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
+
+        data = self.fetch_data(hub_id)
 
         drivers = []
         versions = []
         timestamp = None
         hub_healthy = False
 
-        if data['payload']:
-            now = arrow.get(data['payload']['timestamp'])
-            timestamp = now.format('YYYY-MM-DD HH:mm:ss ZZ')
+        if data:
+            timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
 
             hub_healthy = True
 
-            for driver_name, last_write in sorted(data['payload']['last_writes'].items()):
-                last_write = arrow.get(last_write)
-                healthy = (now - last_write) < HEALTHY_LIMIT
+            for driver_name, last_write in sorted(data.last_writes.items()):
+                healthy = (data.timestamp - last_write) < HEALTHY_LIMIT
                 if not healthy: hub_healthy = False
                 drivers.append((driver_name,
-                                last_write.humanize(now),
+                                last_write.humanize(data.timestamp),
                                 last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
                                 healthy))
 
-            if data['payload']['versions'] is None:
-                versions.append(('versions.log', 'Not found', '', False))
-                hub_healthy = False
-            else:
-                versions_timestamp = arrow.get(data['payload']['versions']['timestamp'])
-                del data['payload']['versions']['timestamp']
-                healthy = (now - versions_timestamp) < datetime.timedelta(minutes=15)
-                if not healthy: hub_healthy = False
-                versions.append(('timestamp',
-                                 versions_timestamp.humanize(now),
-                                 versions_timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                                 healthy))
-                ansible = data['payload']['versions']['ansible']
-                del data['payload']['versions']['ansible']
-                if ansible != 'ansible 1.5.3':  # TODO unhardcode?
-                    hub_healthy = healthy = False
-                versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
-                for repo, commit in data['payload']['versions'].items():
-                    # TODO get repo last commit and check how old is this
-                    versions.append((repo, commit[:7], '', True))
+            ansible = data.versions['ansible']
+            if ansible != 'ansible 1.5.3':  # TODO unhardcode?
+                hub_healthy = healthy = False
+            del data.versions['timestamp']
+            del data.versions['ansible']
+            versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
+            for repo, commit in data.versions.items():
+                # TODO get repo last commit and check how old is this
+                versions.append((repo, commit[:7], '', True))
 
 
         return render_template('status.html',
-            tunnel_up=data['tunnel_up'],
+            hub_id_found=(data is not None),
             drivers=drivers,
             timestamp=timestamp,
             hub_id=hub_id,
@@ -124,12 +138,11 @@ if __name__ == '__main__':
 
     M = Monitor(config)
 
-    arguments = docopt(__doc__, version='Smarthome monitor 0.1')
-    if arguments['check']:
-        json.dump(M.check(arguments['<hub-id>']), sys.stdout, indent=4)
-    if arguments['serve']:
-        app = Flask(__name__)
-        app.route("/status/<hub_id>")(M.serve_status)
-        app.route("/status/")(M.serve_index)
-        host, port = arguments['--listen'].split(':')
-        app.run(host, int(port))
+    arguments = docopt(__doc__, version='Smarthome monitor 0.2')
+
+    app = Flask(__name__)
+    app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
+    app.add_url_rule("/status/", 'serve_index', M.serve_index)
+    host, port = arguments['--listen'].split(':')
+    app.debug = True
+    app.run(host, int(port))
