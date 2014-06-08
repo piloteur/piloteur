@@ -19,6 +19,7 @@ import re
 import arrow
 import datetime
 import collections
+import fnmatch
 from docopt import docopt
 from flask import Flask, render_template, abort
 
@@ -28,8 +29,9 @@ import nexus.private
 HEALTHY_LIMIT = datetime.timedelta(minutes=5)
 
 NodeData = collections.namedtuple('NodeData',
-    ['hub_id', 'classes', 'config', 'timestamp',
-     'last_writes', 'versions'])
+    ['hub_id', 'classes', 'config', 'timestamp', 'last_writes', 'versions'])
+NodeResult = collections.namedtuple('NodeResult',
+    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_healthy', 'versions', 'classes'])
 
 
 class Monitor():
@@ -37,8 +39,6 @@ class Monitor():
         self.config = config
 
     def fetch_data(self, hub_id):
-        # TODO: make this persistent
-        nexus.init(self.config)
         nexus.private.set_hub_id(hub_id)
 
         classes_log = nexus.private.fetch_system_logs("classes")
@@ -84,52 +84,58 @@ class Monitor():
                         versions=versions,
                         last_writes=last_writes)
 
-    def serve_status(self, hub_id):
-        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
+    def serve_status(self, hub_id_pattern):
+        if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
 
-        data = self.fetch_data(hub_id)
+        # TODO: make this persistent
+        nexus.init(self.config)
 
-        drivers = []
-        versions = []
-        timestamp = None
-        classes = None
-        hub_healthy = False
+        results = []
+        hubs = sorted(fnmatch.filter(nexus.list_hub_ids(), hub_id_pattern))
 
-        if data:
-            classes = data.classes
+        for hub_id in hubs:
+            data = self.fetch_data(hub_id)
 
-            timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
+            if data:
+                drivers = []
+                versions = []
 
-            hub_healthy = True
+                classes = data.classes
 
-            for driver_name, last_write in sorted(data.last_writes.items()):
-                healthy = (data.timestamp - last_write) < HEALTHY_LIMIT
-                if not healthy: hub_healthy = False
-                drivers.append((driver_name,
-                                last_write.humanize(data.timestamp),
-                                last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                                healthy))
+                timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
 
-            ansible = data.versions['ansible']
-            if ansible != 'ansible 1.5.3':  # TODO unhardcode?
-                hub_healthy = healthy = False
-            del data.versions['timestamp']
-            del data.versions['ansible']
-            versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
-            for repo, commit in data.versions.items():
-                # TODO get repo last commit and check how old is this
-                versions.append((repo, commit[:7], '', True))
+                hub_healthy = True
 
+                for driver_name, last_write in sorted(data.last_writes.items()):
+                    healthy = (data.timestamp - last_write) < HEALTHY_LIMIT
+                    if not healthy: hub_healthy = False
+                    drivers.append((driver_name,
+                                    last_write.humanize(data.timestamp),
+                                    last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
+                                    healthy))
 
-        return render_template('status.html',
-            hub_id_found=(data is not None),
-            drivers=drivers,
-            timestamp=timestamp,
-            hub_id=hub_id,
-            hub_healthy=hub_healthy,
-            versions=versions,
-            classes=classes,
-        )
+                healthy = True
+                ansible = data.versions['ansible']
+                if ansible != 'ansible 1.5.3':  # TODO unhardcode?
+                    hub_healthy = healthy = False
+                del data.versions['timestamp']
+                del data.versions['ansible']
+                versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
+                for repo, commit in data.versions.items():
+                    # TODO get repo last commit and check how old is this
+                    versions.append((repo, commit[:7], '', True))
+
+                results.append(NodeResult(
+                    hub_id_found=(data is not None),
+                    drivers=drivers,
+                    timestamp=timestamp,
+                    hub_id=hub_id,
+                    hub_healthy=hub_healthy,
+                    versions=versions,
+                    classes=classes,
+                ))
+
+        return render_template('status.html', results=results)
 
     def serve_index(self):
         return render_template('status_index.html')
@@ -145,7 +151,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__, version='Smarthome monitor 0.2')
 
     app = Flask(__name__)
-    app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
+    app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
     app.add_url_rule("/status/", 'serve_index', M.serve_index)
     host, port = arguments['--listen'].split(':')
     app.debug = True

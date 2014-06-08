@@ -55,6 +55,7 @@
         .jumbotron {
           text-align: center;
           border-bottom: 1px solid #e5e5e5;
+          padding-top: 10px !important;
         }
         .jumbotron .btn {
           padding: 14px 24px;
@@ -85,7 +86,7 @@
         .jumbotron h1 code {
             color: inherit;
             background-color: inherit;
-            font-size: 70%;
+            font-size: 50%;
         }
 
         .header form {
@@ -97,32 +98,36 @@
           padding-top: 20px;
           padding-bottom: 30px;
         }
+
+        .hub-footer {
+          margin-bottom: 50px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
       <div class="header">
         <form class="form-inline" role="form">
-          <input type="text" class="form-control" id="hub_id_input" placeholder="{{ hub_id }}">
+          <input type="text" class="form-control" id="hub_id_input" placeholder="Wildcards supported!">
           <button type="submit" class="btn btn-primary">Go</button>
         </form>
 
         <h3 class="text-muted">Smarthome Hub health check</h3>
       </div>
 
-      <div class="jumbotron">
-        <h1><code>{{ hub_id }}</code></h1>
-        {% if hub_healthy %}
-            <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
-        {% else %}
-            <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
-        {% endif %}
-      </div>
+      {% for h in results %}
+        <div class="jumbotron">
+          <h1><code>{{ h.hub_id }}</code></h1>
+          {% if h.hub_healthy %}
+              <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
+          {% else %}
+              <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
+          {% endif %}
+        </div>
 
-      {% if hub_id_found %}
         <h2>Classes</h2>
         <table class="table table-bordered">
-          {% for class in classes %}
+          {% for class in h.classes %}
               <tr class="">
                   <td>{{ class }}</td>
               </tr>
@@ -131,7 +136,7 @@
 
         <h2>Drivers</h2>
         <table class="table table-bordered">
-          {% for driver in drivers %}
+          {% for driver in h.drivers %}
               <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
                   <td>{{ driver[0] }}</td>
                   <td>{{ driver[1] }}</td>
@@ -142,7 +147,7 @@
 
         <h2>Versions</h2>
         <table class="table table-bordered">
-          {% for version in versions %}
+          {% for version in h.versions %}
               <tr class="{% if version[3] %}success{% else %}danger{% endif %}">
                   <td>{{ version[0] }}</td>
                   <td>{{ version[1] }}</td>
@@ -151,14 +156,14 @@
           {% endfor %}
         </table>
 
-        <p>
-          Hub timestamp: {{ timestamp }}
+        <p class="hub-footer">
+          Hub timestamp: {{ h.timestamp }}
         </p>
       {% else %}
         <table class="table table-bordered">
-          <tr class="danger"><td>Hub ID not found</td></tr>
+          <tr class="danger"><td>No Hub ID found</td></tr>
         </table>
-      {% endif %}
+      {% endfor %}
     </div>
 
     <script src="//cdn.jsdelivr.net/jquery/2.1.0/jquery.min.js"></script>
