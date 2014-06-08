@@ -154,5 +154,5 @@ if __name__ == '__main__':
     app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
     app.add_url_rule("/status/", 'serve_index', M.serve_index)
     host, port = arguments['--listen'].split(':')
-    app.debug = True
+    # app.debug = True
     app.run(host, int(port))
