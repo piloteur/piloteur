@@ -92,9 +92,12 @@ class Monitor():
         drivers = []
         versions = []
         timestamp = None
+        classes = None
         hub_healthy = False
 
         if data:
+            classes = data.classes
+
             timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
 
             hub_healthy = True
@@ -125,6 +128,7 @@ class Monitor():
             hub_id=hub_id,
             hub_healthy=hub_healthy,
             versions=versions,
+            classes=classes,
         )
 
     def serve_index(self):

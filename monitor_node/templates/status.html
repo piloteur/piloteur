@@ -120,6 +120,15 @@
       </div>
 
       {% if hub_id_found %}
+        <h2>Classes</h2>
+        <table class="table table-bordered">
+          {% for class in classes %}
+              <tr class="">
+                  <td>{{ class }}</td>
+              </tr>
+          {% endfor %}
+        </table>
+
         <h2>Drivers</h2>
         <table class="table table-bordered">
           {% for driver in drivers %}
