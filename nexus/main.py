@@ -19,9 +19,9 @@ sftp = None
 
 ### Constants
 
-GREEN = 1
+GREEN = 0
+YELLOW = 1
 RED = 2
-YELLOW = 3
 
 ### Helpers
 

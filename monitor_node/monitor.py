@@ -26,12 +26,13 @@ from flask import Flask, Response, render_template, abort
 import nexus
 import nexus.private
 
-HEALTHY_LIMIT = datetime.timedelta(minutes=5)
+YELLOW_LIMIT = datetime.timedelta(minutes=15)
+RED_LIMIT = datetime.timedelta(minutes=30)
 
 NodeData = collections.namedtuple('NodeData',
     ['hub_id', 'classes', 'config', 'timestamp', 'last_writes', 'versions'])
 NodeResult = collections.namedtuple('NodeResult',
-    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_healthy', 'versions', 'classes'])
+    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_health', 'versions', 'classes'])
 
 
 class Monitor():
@@ -104,38 +105,45 @@ class Monitor():
 
                 timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
 
-                hub_healthy = True
+                hub_health = nexus.GREEN
 
                 for driver_name, last_write in sorted(data.last_writes.items()):
-                    healthy = (data.timestamp - last_write) < HEALTHY_LIMIT
-                    if not healthy: hub_healthy = False
+                    health = nexus.GREEN
+                    if (data.timestamp - last_write) > YELLOW_LIMIT:
+                        health = nexus.YELLOW
+                    if (data.timestamp - last_write) > RED_LIMIT:
+                        health = nexus.RED
+                    hub_health = max(hub_health, health)
                     drivers.append((driver_name,
                                     last_write.humanize(data.timestamp),
                                     last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                                    healthy))
+                                    health))
 
-                healthy = True
+                health = nexus.GREEN
                 ansible = data.versions['ansible']
                 if ansible != 'ansible 1.5.3':  # TODO unhardcode?
-                    hub_healthy = healthy = False
+                    health = nexus.RED
+                hub_health = max(hub_health, health)
+                versions.append(('ansible', ansible, 'ansible 1.5.3', health))
+
                 del data.versions['timestamp']
                 del data.versions['ansible']
-                versions.append(('ansible', ansible, 'ansible 1.5.3', healthy))
+
                 for repo, commit in data.versions.items():
                     # TODO get repo last commit and check how old is this
-                    versions.append((repo, commit[:7], '', True))
+                    versions.append((repo, commit[:7], '', nexus.GREEN))
 
                 results.append(NodeResult(
                     hub_id_found=(data is not None),
                     drivers=drivers,
                     timestamp=timestamp,
                     hub_id=hub_id,
-                    hub_healthy=hub_healthy,
+                    hub_health=hub_health,
                     versions=versions,
                     classes=classes,
                 ))
 
-        return render_template('status.html', results=results)
+        return render_template('status.html', results=results, nexus=nexus)
 
     def serve_index(self):
         return render_template('status_index.html')

@@ -123,9 +123,11 @@
       {% for h in results %}
         <div class="jumbotron">
           <h1><code>{{ h.hub_id }}</code></h1>
-          {% if h.hub_healthy %}
+          {% if h.hub_health == nexus.GREEN %}
               <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
-          {% else %}
+          {% elif h.hub_health == nexus.YELLOW %}
+              <p><a class="btn btn-lg btn-warning" role="button">Yellow</a></p>
+          {% elif h.hub_health == nexus.RED %}
               <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
           {% endif %}
         </div>
@@ -142,7 +144,13 @@
         <h2>Drivers</h2>
         <table class="table table-bordered">
           {% for driver in h.drivers %}
-              <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
+              <tr{% if driver[3] == nexus.GREEN %}
+              class="success"
+              {% elif driver[3] == nexus.YELLOW %}
+              class="warning"
+              {% elif driver[3] == nexus.RED %}
+              class="danger"
+              {% endif %}>
                   <td>
                     {{ driver[0] }}
                     <a class="driver_show_link" href="{{ url_for('show_data', hub_id=h.hub_id, driver_name=driver[0]) }}">[data]</a>
@@ -157,7 +165,13 @@
         <h2>Versions</h2>
         <table class="table table-bordered">
           {% for version in h.versions %}
-              <tr class="{% if version[3] %}success{% else %}danger{% endif %}">
+              <tr{% if version[3] == nexus.GREEN %}
+              class="success"
+              {% elif version[3] == nexus.YELLOW %}
+              class="warning"
+              {% elif version[3] == nexus.RED %}
+              class="danger"
+              {% endif %}>
                   <td>{{ version[0] }}</td>
                   <td>{{ version[1] }}</td>
                   <td>{{ version[2] }}</td>
