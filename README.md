@@ -74,7 +74,7 @@ Usage: module.py [--config=<path>] <hub-id>
 
 Options:
 	--config=<path>  The path to Smarthome-NeXus JSON config
-	                 [default: ~/.smarthome-nexus.json]
+	                 [default: ~/.smarthome.json]
 ```
 
 So here is a recommended skeleton of a monitor module:
