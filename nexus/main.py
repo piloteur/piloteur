@@ -48,6 +48,10 @@ def API_call(f):
 
 ### API functions
 
+def set_hub_id(new_hub_id):
+    global hub_id
+    hub_id = new_hub_id
+
 def init(new_config):
     global config
     config = new_config
