@@ -153,3 +153,7 @@ Returns `None` if not found.
 `logs_timestamp` will return the modified timestamp of the most recent log file with the passed *driver_name* (following the common naming convention).
 
 Returns `None` if not found.
+
+### list_hub_ids()
+
+`list_hub_ids` will return a list of all the Hub IDs that ever logged.

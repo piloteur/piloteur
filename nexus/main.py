@@ -46,6 +46,15 @@ def API_call(f):
         return f(**all_args)
     return wrapper
 
+def global_API_call(f):
+    # TODO: merge with the above API_call
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if config is None or sftp is None:
+            raise RuntimeError("Library not initialized with init()")
+        return f(*args, **kwargs)
+    return wrapper
+
 ### API functions
 
 def set_hub_id(new_hub_id):
