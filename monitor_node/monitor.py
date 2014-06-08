@@ -21,7 +21,7 @@ import datetime
 import collections
 import fnmatch
 from docopt import docopt
-from flask import Flask, render_template, abort
+from flask import Flask, Response, render_template, abort
 
 import nexus
 import nexus.private
@@ -140,6 +140,20 @@ class Monitor():
     def serve_index(self):
         return render_template('status_index.html')
 
+    def show_data(self, hub_id, driver_name):
+        # TODO: make this persistent
+        nexus.init(self.config)
+        data = nexus.fetch_data(driver_name, hub_id=hub_id)
+        if not data: abort(404)
+        return Response(data, mimetype='text/plain')
+
+    def show_logs(self, hub_id, driver_name):
+        # TODO: make this persistent
+        nexus.init(self.config)
+        logs = nexus.fetch_logs(driver_name, hub_id=hub_id)
+        if not logs: abort(404)
+        return Response(logs, mimetype='text/plain')
+
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.abspath(__file__))
@@ -153,6 +167,8 @@ if __name__ == '__main__':
     app = Flask(__name__)
     app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
     app.add_url_rule("/status/", 'serve_index', M.serve_index)
+    app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
+    app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
     host, port = arguments['--listen'].split(':')
     # app.debug = True
     app.run(host, int(port))

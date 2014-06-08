@@ -102,6 +102,11 @@
         .hub-footer {
           margin-bottom: 50px;
         }
+
+        .driver_show_link {
+          font-size: 70%;
+          color: grey;
+        }
     </style>
 </head>
 <body>
@@ -138,7 +143,11 @@
         <table class="table table-bordered">
           {% for driver in h.drivers %}
               <tr class="{% if driver[3] %}success{% else %}danger{% endif %}">
-                  <td>{{ driver[0] }}</td>
+                  <td>
+                    {{ driver[0] }}
+                    <a class="driver_show_link" href="{{ url_for('show_data', hub_id=h.hub_id, driver_name=driver[0]) }}">[data]</a>
+                    <a class="driver_show_link" href="{{ url_for('show_logs', hub_id=h.hub_id, driver_name=driver[0]) }}">[logs]</a>
+                  </td>
                   <td>{{ driver[1] }}</td>
                   <td>{{ driver[2] }}</td>
               </tr>
