@@ -30,9 +30,9 @@ YELLOW_LIMIT = datetime.timedelta(minutes=15)
 RED_LIMIT = datetime.timedelta(minutes=30)
 
 NodeData = collections.namedtuple('NodeData',
-    ['hub_id', 'classes', 'config', 'timestamp', 'last_writes', 'versions'])
+    ['hub_id', 'classes', 'config', 'timestamp', 'last_writes', 'versions', 'wifi_quality'])
 NodeResult = collections.namedtuple('NodeResult',
-    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_health', 'versions', 'classes'])
+    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_health', 'versions', 'classes', 'wifi_quality'])
 
 
 class Monitor():
@@ -56,6 +56,12 @@ class Monitor():
         timesync_log = nexus.private.fetch_system_logs("timesync")
         if not timesync_log: return  # TODO
         timestamp = arrow.get(timesync_log.split(',')[0])
+
+        iwconfig_log = nexus.private.fetch_system_logs("iwconfig")
+        if not iwconfig_log: return  # TODO
+        wifi_quality = iwconfig_log.split(',')[1]
+        if wifi_quality == 'N/A': wifi_quality = None
+        else: wifi_quality = int(wifi_quality)
 
         versions_log = nexus.private.fetch_system_logs("versions")
         if not versions_log: return  # TODO
@@ -83,7 +89,8 @@ class Monitor():
                         config=node_config,
                         timestamp=timestamp,
                         versions=versions,
-                        last_writes=last_writes)
+                        last_writes=last_writes,
+                        wifi_quality=wifi_quality)
 
     def serve_status(self, hub_id_pattern):
         if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
@@ -100,10 +107,6 @@ class Monitor():
             if data:
                 drivers = []
                 versions = []
-
-                classes = data.classes
-
-                timestamp = data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ')
 
                 hub_health = nexus.GREEN
 
@@ -133,14 +136,18 @@ class Monitor():
                     # TODO get repo last commit and check how old is this
                     versions.append((repo, commit[:7], '', nexus.GREEN))
 
+                if data.wifi_quality and data.wifi_quality < 30:
+                    max(hub_health, nexus.YELLOW)
+
                 results.append(NodeResult(
                     hub_id_found=(data is not None),
                     drivers=drivers,
-                    timestamp=timestamp,
+                    timestamp=data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
                     hub_id=hub_id,
                     hub_health=hub_health,
                     versions=versions,
-                    classes=classes,
+                    classes=data.classes,
+                    wifi_quality=data.wifi_quality,
                 ))
 
         return render_template('status.html', results=results, nexus=nexus)
@@ -148,6 +155,7 @@ class Monitor():
     def serve_index(self):
         # TODO: make this persistent
         nexus.init(self.config)
+        # TODO: use the list of hubs registered to the tunneler instead
         return render_template('status_index.html', hubs=sorted(nexus.list_hub_ids()))
 
     def show_data(self, hub_id, driver_name):
