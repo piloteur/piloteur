@@ -96,6 +96,14 @@
           <button type="submit" class="btn btn-primary btn-lg">Go</button>
         </form>
       </div>
+
+      <table class="table table-bordered">
+        {% for hub in hubs %}
+            <tr class="">
+                <td><a href="{{ hub }}">{{ hub }}</a></td>
+            </tr>
+        {% endfor %}
+      </table>
     </div>
 
     <script src="//cdn.jsdelivr.net/jquery/2.1.0/jquery.min.js"></script>

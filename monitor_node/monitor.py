@@ -146,7 +146,9 @@ class Monitor():
         return render_template('status.html', results=results, nexus=nexus)
 
     def serve_index(self):
-        return render_template('status_index.html')
+        # TODO: make this persistent
+        nexus.init(self.config)
+        return render_template('status_index.html', hubs=sorted(nexus.list_hub_ids()))
 
     def show_data(self, hub_id, driver_name):
         # TODO: make this persistent
