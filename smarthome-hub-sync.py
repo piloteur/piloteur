@@ -12,6 +12,7 @@ import traceback
 import email.utils
 import urllib2
 import itertools
+import re
 
 import socket
 socket.setdefaulttimeout(60)
@@ -84,6 +85,8 @@ class Syncer():
 
         self.monitor()
         self.timesync()
+
+        self.iwconfig()
 
     def sync(self, local_path, remote_path):
         rsync_cmd = ["rsync", "-avz", "--append"]
@@ -205,6 +208,17 @@ class Syncer():
 
         with open(CLASSES_PATH, 'a') as f:
             f.write(','.join([self.config["hub-id"]] + self.config["hub-classes"]) + '\n')
+
+    def iwconfig(self):
+        IWCONFIG_PATH = os.path.join(self.LOGS_PATH, "iwconfig/iwconfig-log.%s.csv" % self.LOG_HOUR)
+
+        iwconfig = subprocess.check_output('iwconfig')
+        match = re.search(r'Link Quality=(\d+)/100', iwconfig)
+        quality = None
+        if match: quality = match.group(1)
+
+        with open(IWCONFIG_PATH, 'a') as f:
+            f.write('%s,%s\n' %(datetime.datetime.utcnow().isoformat(), quality or 'N/A'))
 
 
 
