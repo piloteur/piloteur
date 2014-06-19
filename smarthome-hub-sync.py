@@ -212,7 +212,7 @@ class Syncer():
     def iwconfig(self):
         IWCONFIG_PATH = os.path.join(self.LOGS_PATH, "iwconfig/iwconfig-log.%s.csv" % self.LOG_HOUR)
 
-        iwconfig = subprocess.check_output('iwconfig')
+        iwconfig = subprocess.check_output('iwconfig', stderr=open(os.devnull, 'w'))
         match = re.search(r'Link Quality=(\d+)/100', iwconfig)
         quality = None
         if match: quality = match.group(1)
