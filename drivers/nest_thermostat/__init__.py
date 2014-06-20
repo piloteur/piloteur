@@ -54,7 +54,7 @@ class NestThermostat():
         blob["timestamp"] = datetime.datetime.utcnow().isoformat()
         blob["accounts"] = {}
 
-        p = multiprocessing.dummy.Pool(len(self.devices))
+        p = multiprocessing.dummy.Pool(10)
         stderr_lock = multiprocessing.dummy.Lock()
 
         def f(account):
