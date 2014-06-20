@@ -21,7 +21,7 @@ class NestThermostat():
             wait = self.interval - (time.time() - start) % self.interval
             time.sleep(wait)
 
-    def login(self, account):
+    def login(self, account, stderr_lock):
         try:
             r = requests.post("https://home.nest.com/user/login",
                               data = {"username": account['username'],
@@ -36,14 +36,16 @@ class NestThermostat():
             account['access_token'] = data["access_token"]
             account['userid'] = data["userid"]
 
-            print >> sys.stderr, "%s logged in" % account['username']
+            with stderr_lock:
+                print >> sys.stderr, "%s logged in" % account['username']
 
             return True
 
         except Exception as e:
             error = traceback.format_exception_only(type(e), e)[-1].strip()
-            print >> sys.stderr, "%s login failed: %s" % (
-                account['username'], error)
+            with stderr_lock:
+                print >> sys.stderr, "%s login failed: %s" % (
+                    account['username'], error)
 
             return False
 
@@ -57,50 +59,45 @@ class NestThermostat():
 
         def f(account):
             if not 'access_token' in account:
-                if not self.login(account):
+                if not self.login(account, stderr_lock):
                     return
 
             try: r = self.query(account)
             except requests.exceptions.Timeout:
-                stderr_lock.acquire()
-                print >> sys.stderr, 'WARNING: timeout waiting for Nest API'
-                stderr_lock.release()
+                with stderr_lock:
+                    print >> sys.stderr, 'WARNING: timeout waiting for Nest API'
                 return
 
             if not r.status_code == requests.codes.ok:
-                self.login(account)
+                self.login(account, stderr_lock)
                 r = self.query(account)
             if not r.status_code == requests.codes.ok:
-                stderr_lock.acquire()
-                print >> sys.stderr, "%s query failed: %s" % (
+                with stderr_lock:
+                    print >> sys.stderr, "%s query failed: %s" % (
                     account['username'], r.status_code)
-                stderr_lock.release()
                 return
 
             data = r.json()
 
             if not 'device' in data:
-                stderr_lock.acquire()
-                print >> sys.stderr, 'ERROR: %s: malformed response from Nest: missing "device" key' % account['username']
-                stderr_lock.release()
+                with stderr_lock:
+                    print >> sys.stderr, 'ERROR: %s: malformed response from Nest: missing "device" key' % account['username']
                 return
 
             for serial in account['serials']:
                 if not serial in data['device']:
-                    stderr_lock.acquire()
-                    print >> sys.stderr, 'ERROR: device %s not found in account %s' % (
+                    with stderr_lock:
+                        print >> sys.stderr, 'ERROR: device %s not found in account %s' % (
                         serial, account['username'])
-                    stderr_lock.release()
 
             blob["accounts"][account['username']] = data
 
         def f_wrapper(account):
             try: f(account)
             except:
-                stderr_lock.acquire()
-                print >> sys.stderr, 'ERROR: exception while processing account %s' % account['username']
-                traceback.print_exc()
-                stderr_lock.release()
+                with stderr_lock:
+                    print >> sys.stderr, 'ERROR: exception while processing account %s' % account['username']
+                    traceback.print_exc()
 
         p.map(f, self.devices, 1)
         p.close()
