@@ -38,10 +38,14 @@ class NestThermostat():
 
             print >> sys.stderr, "%s logged in" % account['username']
 
+            return True
+
         except Exception as e:
             error = traceback.format_exception_only(type(e), e)[-1].strip()
             print >> sys.stderr, "%s login failed: %s" % (
                 account['username'], error)
+
+            return False
 
     def get(self):
         blob = {}
@@ -53,7 +57,8 @@ class NestThermostat():
 
         def f(account):
             if not 'access_token' in account:
-                self.login(account)
+                if not self.login(account):
+                    return
 
             try: r = self.query(account)
             except requests.exceptions.Timeout:
@@ -76,7 +81,7 @@ class NestThermostat():
 
             if not 'device' in data:
                 stderr_lock.acquire()
-                print >> sys.stderr, 'ERROR: malformed response from Nest: missing "device" key'
+                print >> sys.stderr, 'ERROR: %s: malformed response from Nest: missing "device" key' % account['username']
                 stderr_lock.release()
                 return
 
@@ -88,6 +93,14 @@ class NestThermostat():
                     stderr_lock.release()
 
             blob["accounts"][account['username']] = data
+
+        def f_wrapper(account):
+            try: f(account)
+            except:
+                stderr_lock.acquire()
+                print >> sys.stderr, 'ERROR: exception while processing account %s' % account['username']
+                traceback.print_exc()
+                stderr_lock.release()
 
         p.map(f, self.devices, 1)
         p.close()
