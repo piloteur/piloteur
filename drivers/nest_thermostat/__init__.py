@@ -92,14 +92,15 @@ class NestThermostat():
 
             blob["accounts"][account['username']] = data
 
-        def f_wrapper(account):
+        def f_wrapper(i):
+            account = self.devices[i]
             try: f(account)
             except:
                 with stderr_lock:
                     print >> sys.stderr, 'ERROR: exception while processing account %s' % account['username']
                     traceback.print_exc()
 
-        p.map(f, self.devices, 1)
+        p.map(f_wrapper, tuple(range(len(self.devices))), 1)
         p.close()
 
         json.dump(blob, sys.stdout)
