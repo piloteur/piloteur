@@ -13,6 +13,7 @@ import email.utils
 import urllib2
 import itertools
 import re
+import errno
 
 import socket
 socket.setdefaulttimeout(60)
@@ -212,10 +213,17 @@ class Syncer():
     def iwconfig(self):
         IWCONFIG_PATH = os.path.join(self.LOGS_PATH, "iwconfig/iwconfig-log.%s.csv" % self.LOG_HOUR)
 
-        iwconfig = subprocess.check_output('iwconfig', stderr=open(os.devnull, 'w'))
-        match = re.search(r'Link Quality=(\d+)/100', iwconfig)
         quality = None
-        if match: quality = match.group(1)
+
+        try:
+            iwconfig = subprocess.check_output('iwconfig', stderr=open(os.devnull, 'w'))
+        except OSError as e:
+            # Skip if iwconfig does not exist, for example on EC2
+            if e.errno != errno.ENOENT:
+                raise
+        else:
+            match = re.search(r'Link Quality=(\d+)/100', iwconfig)
+            if match: quality = match.group(1)
 
         with open(IWCONFIG_PATH, 'a') as f:
             f.write('%s,%s\n' %(datetime.datetime.utcnow().isoformat(), quality or 'N/A'))
