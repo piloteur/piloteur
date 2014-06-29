@@ -107,6 +107,10 @@ class Monitor():
 
     def serve_status(self, hub_id_pattern):
         if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
+        return render_template('status.html', hub_id_pattern=hub_id_pattern)
+
+    def serve_ajax(self, hub_id_pattern):
+        if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
 
         self.nexus_init()
 
@@ -162,7 +166,7 @@ class Monitor():
                     wifi_quality=data.wifi_quality,
                 ))
 
-        return render_template('status.html', results=results, nexus=nexus)
+        return render_template('ajax.html', results=results, nexus=nexus)
 
     def serve_index(self):
         self.nexus_init()
@@ -196,6 +200,7 @@ if __name__ == '__main__':
 
     app = Flask(__name__)
     app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
+    app.add_url_rule("/ajax/<hub_id_pattern>", 'serve_ajax', M.serve_ajax)
     app.add_url_rule("/", 'serve_index', M.serve_index)
     app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
     app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
