@@ -156,7 +156,7 @@ class Monitor():
         # TODO: make this persistent
         nexus.init(self.config)
         # TODO: use the list of hubs registered to the tunneler instead
-        return render_template('status_index.html', hubs=sorted(nexus.list_hub_ids()))
+        return render_template('index.html', hubs=sorted(nexus.list_hub_ids()))
 
     def show_data(self, hub_id, driver_name):
         # TODO: make this persistent
@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
     app = Flask(__name__)
     app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
-    app.add_url_rule("/status/", 'serve_index', M.serve_index)
+    app.add_url_rule("/", 'serve_index', M.serve_index)
     app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
     app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
     host, port = arguments['--listen'].split(':')
