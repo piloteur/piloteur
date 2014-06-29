@@ -20,6 +20,7 @@ import arrow
 import datetime
 import collections
 import fnmatch
+import paramiko
 from docopt import docopt
 from flask import Flask, Response, render_template, abort
 
@@ -38,6 +39,18 @@ NodeResult = collections.namedtuple('NodeResult',
 class Monitor():
     def __init__(self, config):
         self.config = config
+
+    def nexus_init(self):
+        # TODO: make this persistent
+
+        for _ in range(5):
+            try:
+                nexus.init(self.config)
+            except paramiko.SSHException:
+                continue
+            return
+
+        abort(500)
 
     def fetch_data(self, hub_id):
         nexus.private.set_hub_id(hub_id)
@@ -95,8 +108,7 @@ class Monitor():
     def serve_status(self, hub_id_pattern):
         if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
 
-        # TODO: make this persistent
-        nexus.init(self.config)
+        self.nexus_init()
 
         results = []
         hubs = sorted(fnmatch.filter(nexus.list_hub_ids(), hub_id_pattern))
@@ -153,21 +165,21 @@ class Monitor():
         return render_template('status.html', results=results, nexus=nexus)
 
     def serve_index(self):
-        # TODO: make this persistent
-        nexus.init(self.config)
+        self.nexus_init()
+
         # TODO: use the list of hubs registered to the tunneler instead
         return render_template('index.html', hubs=sorted(nexus.list_hub_ids()))
 
     def show_data(self, hub_id, driver_name):
-        # TODO: make this persistent
-        nexus.init(self.config)
+        self.nexus_init()
+
         data = nexus.fetch_data(driver_name, hub_id=hub_id)
         if not data: abort(404)
         return Response(data, mimetype='text/plain')
 
     def show_logs(self, hub_id, driver_name):
-        # TODO: make this persistent
-        nexus.init(self.config)
+        self.nexus_init()
+
         logs = nexus.fetch_logs(driver_name, hub_id=hub_id)
         if not logs: abort(404)
         return Response(logs, mimetype='text/plain')
