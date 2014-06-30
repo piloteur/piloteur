@@ -97,10 +97,14 @@
         </form>
       </div>
 
+      <h1>
+        Online hubs
+      </h1>
+
       <table class="table table-bordered">
         {% for hub in hubs %}
             <tr class="">
-                <td><a href="{{ hub }}">{{ hub }}</a></td>
+                <td><a href="{{ url_for('serve_status', hub_id_pattern=hub) }}">{{ hub }}</a></td>
             </tr>
         {% endfor %}
       </table>

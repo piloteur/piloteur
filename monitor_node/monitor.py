@@ -37,6 +37,18 @@ NodeResult = collections.namedtuple('NodeResult',
     ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_health', 'versions', 'classes', 'wifi_quality'])
 
 
+def get_tunnel_connections(tunnel_info):
+    username, hostname, port, folder = tunnel_info
+
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname, port, username)
+
+    cmd = "grep -h . {}*".format(folder)
+    stdin, stdout, stderr = client.exec_command(cmd)
+    return [n.strip() for n in stdout.readlines()]
+
 class Monitor():
     def __init__(self, config):
         self.config = config
@@ -176,8 +188,8 @@ class Monitor():
     def serve_index(self):
         self.nexus_init()
 
-        # TODO: use the list of hubs registered to the tunneler instead
-        return render_template('index.html', hubs=sorted(nexus.list_hub_ids()))
+        hubs_list = get_tunnel_connections(self.config['tunnel_info'])
+        return render_template('index.html', hubs=sorted(hubs_list))
 
     def show_data(self, hub_id, driver_name):
         self.nexus_init()

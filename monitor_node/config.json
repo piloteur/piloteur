@@ -1,5 +1,10 @@
 {
     "data_location": "sensordata@power1.cs.virginia.edu:smarthome/",
     "loglevel": "INFO",
-    "ssh_key": "~/.ssh/id_rsa"
+    "ssh_key": "~/.ssh/id_rsa",
+    "tunnel_info": [
+        "admin",
+        "ec2-54-208-95-123.compute-1.amazonaws.com", 22,
+        "~smarthome/ssh_ports/"
+    ]
 }

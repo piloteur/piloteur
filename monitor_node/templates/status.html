@@ -154,9 +154,8 @@
         });
 
         var hub_id = encodeURIComponent("{{ hub_id_pattern }}");
-        $("#results").load("/ajax/" + hub_id, function() {
-          $(".loading").hide();
-        });
+        $("#results").load("{{ url_for('serve_ajax', hub_id_pattern=hub_id_pattern) }}",
+                           function() { $(".loading").hide(); });
     </script>
 </body>
 </html>
