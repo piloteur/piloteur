@@ -23,7 +23,8 @@ import paramiko
 import time
 import fnmatch
 from docopt import docopt
-from flask import Flask, Response, render_template, abort
+from flask import Flask, Response
+from flask import render_template, abort, redirect, url_for
 
 import nexus
 import nexus.private
@@ -204,6 +205,11 @@ class Monitor():
         for keyword in query.split(' '):
             keyword = '*' + keyword.strip('*') + '*'
             hubs.update(fnmatch.filter(all_hubs, keyword))
+
+        if len(hubs) == 1:
+            return """
+            <script>window.location.href = "{}";</script>
+            """.format(url_for('serve_status', hub_id=list(hubs)[0]))
 
         results = []
         for hub_id in hubs:
