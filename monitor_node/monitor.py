@@ -21,6 +21,7 @@ import datetime
 import collections
 import fnmatch
 import paramiko
+import time
 from docopt import docopt
 from flask import Flask, Response, render_template, abort
 
@@ -39,15 +40,19 @@ NodeResult = collections.namedtuple('NodeResult',
 class Monitor():
     def __init__(self, config):
         self.config = config
+        self.last_connection = 0
 
     def nexus_init(self):
-        # TODO: make this persistent
+        # TODO: make this smarter
+        if self.last_connection > time.time() - 60:
+            return
 
         for _ in range(5):
             try:
                 nexus.init(self.config)
             except paramiko.SSHException:
                 continue
+            self.last_connection = time.time()
             return
 
         abort(500)
