@@ -19,7 +19,6 @@ import re
 import arrow
 import datetime
 import collections
-import fnmatch
 import paramiko
 import time
 from docopt import docopt
@@ -48,6 +47,7 @@ def get_tunnel_connections(tunnel_info):
     cmd = "grep -h . {}*".format(folder)
     stdin, stdout, stderr = client.exec_command(cmd)
     return [n.strip() for n in stdout.readlines()]
+
 
 class Monitor():
     def __init__(self, config):
@@ -122,74 +122,84 @@ class Monitor():
                         last_writes=last_writes,
                         wifi_quality=wifi_quality)
 
-    def serve_status(self, hub_id_pattern):
-        if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
-        return render_template('status.html', hub_id_pattern=hub_id_pattern)
 
-    def serve_ajax(self, hub_id_pattern):
-        if not re.match(r'^[a-z0-9-\?\*]+$', hub_id_pattern): abort(403)
+    ### STATUS
+
+    def serve_status(self, hub_id):
+        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
+        return render_template('status.html', hub_id=hub_id)
+
+    def ajax_status(self, hub_id):
+        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
 
         self.nexus_init()
 
-        results = []
-        hubs = sorted(fnmatch.filter(nexus.list_hub_ids(), hub_id_pattern))
+        data = self.fetch_data(hub_id)
 
-        for hub_id in hubs:
-            data = self.fetch_data(hub_id)
+        if not data:
+            return render_template('ajax_status.html', h=None, nexus=nexus)
 
-            if data:
-                drivers = []
-                versions = []
+        drivers = []
+        versions = []
 
-                hub_health = nexus.GREEN
+        hub_health = nexus.GREEN
 
-                for driver_name, last_write in sorted(data.last_writes.items()):
-                    health = nexus.GREEN
-                    if (data.timestamp - last_write) > YELLOW_LIMIT:
-                        health = nexus.YELLOW
-                    if (data.timestamp - last_write) > RED_LIMIT:
-                        health = nexus.RED
-                    hub_health = max(hub_health, health)
-                    drivers.append((driver_name,
-                                    last_write.humanize(data.timestamp),
-                                    last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                                    health))
+        for driver_name, last_write in sorted(data.last_writes.items()):
+            health = nexus.GREEN
+            if (data.timestamp - last_write) > YELLOW_LIMIT:
+                health = nexus.YELLOW
+            if (data.timestamp - last_write) > RED_LIMIT:
+                health = nexus.RED
+            hub_health = max(hub_health, health)
+            drivers.append((driver_name,
+                            last_write.humanize(data.timestamp),
+                            last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
+                            health))
 
-                health = nexus.GREEN
-                ansible = data.versions['ansible']
-                if ansible != 'ansible 1.5.3':  # TODO unhardcode?
-                    health = nexus.RED
-                hub_health = max(hub_health, health)
-                versions.append(('ansible', ansible, 'ansible 1.5.3', health))
+        health = nexus.GREEN
+        ansible = data.versions['ansible']
+        if ansible != 'ansible 1.5.3':  # TODO unhardcode?
+            health = nexus.RED
+        hub_health = max(hub_health, health)
+        versions.append(('ansible', ansible, 'ansible 1.5.3', health))
 
-                del data.versions['timestamp']
-                del data.versions['ansible']
+        del data.versions['timestamp']
+        del data.versions['ansible']
 
-                for repo, commit in data.versions.items():
-                    # TODO get repo last commit and check how old is this
-                    versions.append((repo, commit[:7], '', nexus.GREEN))
+        for repo, commit in data.versions.items():
+            # TODO get repo last commit and check how old is this
+            versions.append((repo, commit[:7], '', nexus.GREEN))
 
-                if data.wifi_quality and data.wifi_quality < 30:
-                    max(hub_health, nexus.YELLOW)
+        if data.wifi_quality and data.wifi_quality < 30:
+            max(hub_health, nexus.YELLOW)
 
-                results.append(NodeResult(
-                    hub_id_found=(data is not None),
-                    drivers=drivers,
-                    timestamp=data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                    hub_id=hub_id,
-                    hub_health=hub_health,
-                    versions=versions,
-                    classes=data.classes,
-                    wifi_quality=data.wifi_quality,
-                ))
+        h = NodeResult(
+            hub_id_found=(data is not None),
+            drivers=drivers,
+            timestamp=data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
+            hub_id=hub_id,
+            hub_health=hub_health,
+            versions=versions,
+            classes=data.classes,
+            wifi_quality=data.wifi_quality,
+        )
 
-        return render_template('ajax.html', results=results, nexus=nexus)
+        return render_template('ajax_status.html', h=h, nexus=nexus)
+
+
+    ### INDEX
 
     def serve_index(self):
+        return render_template('index.html')
+
+    def ajax_index(self):
         self.nexus_init()
 
         hubs_list = get_tunnel_connections(self.config['tunnel_info'])
-        return render_template('index.html', hubs=sorted(hubs_list))
+        return render_template('ajax_index.html', hubs=sorted(hubs_list))
+
+
+    ### SHOW
 
     def show_data(self, hub_id, driver_name):
         self.nexus_init()
@@ -216,11 +226,16 @@ if __name__ == '__main__':
     arguments = docopt(__doc__, version='Smarthome monitor 0.2')
 
     app = Flask(__name__)
-    app.add_url_rule("/status/<hub_id_pattern>", 'serve_status', M.serve_status)
-    app.add_url_rule("/ajax/<hub_id_pattern>", 'serve_ajax', M.serve_ajax)
+
     app.add_url_rule("/", 'serve_index', M.serve_index)
+    app.add_url_rule("/ajax/index/", 'ajax_index', M.ajax_index)
+
+    app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
+    app.add_url_rule("/ajax/status/<hub_id>", 'ajax_status', M.ajax_status)
+
     app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
     app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
+
     host, port = arguments['--listen'].split(':')
     # app.debug = True
     app.run(host, int(port))

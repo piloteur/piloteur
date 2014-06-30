@@ -1,4 +1,4 @@
-{% for h in results %}
+{% if h %}
   <div class="jumbotron">
     <h1><code>{{ h.hub_id }}</code></h1>
     {% if h.hub_health == nexus.GREEN %}
@@ -83,6 +83,6 @@
   </p>
 {% else %}
   <table class="table table-bordered">
-    <tr class="danger"><td>No Hub ID found</td></tr>
+    <tr class="danger"><td>Hub ID not found</td></tr>
   </table>
-{% endfor %}
+{% endif %}
