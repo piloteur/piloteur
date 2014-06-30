@@ -21,6 +21,7 @@ import datetime
 import collections
 import paramiko
 import time
+import fnmatch
 from docopt import docopt
 from flask import Flask, Response, render_template, abort
 
@@ -171,7 +172,7 @@ class Monitor():
             versions.append((repo, commit[:7], '', nexus.GREEN))
 
         if data.wifi_quality and data.wifi_quality < 30:
-            max(hub_health, nexus.YELLOW)
+            hub_health = max(hub_health, nexus.YELLOW)
 
         h = NodeResult(
             hub_id_found=(data is not None),
@@ -185,6 +186,59 @@ class Monitor():
         )
 
         return render_template('ajax_status.html', h=h, nexus=nexus)
+
+
+    ### SEARCH
+
+    def serve_search(self, query):
+        if not re.match(r'^[a-z0-9-\*\? ]+$', query): abort(403)
+        return render_template('search.html', query=query)
+
+    def ajax_search(self, query):
+        if not re.match(r'^[a-z0-9-\*\? ]+$', query): abort(403)
+
+        self.nexus_init()
+
+        all_hubs = nexus.list_hub_ids()
+        hubs = set()
+        for keyword in query.split(' '):
+            keyword = '*' + keyword.strip('*') + '*'
+            hubs.update(fnmatch.filter(all_hubs, keyword))
+
+        results = []
+        for hub_id in hubs:
+            data = self.fetch_data(hub_id)
+
+            if not data:
+                results.append((hub_id, nexus.RED, 'Failed to load data.'))
+                continue
+
+            hub_health = nexus.GREEN
+            error_message = ''
+
+            for driver_name, last_write in sorted(data.last_writes.items()):
+                health = nexus.GREEN
+                if (data.timestamp - last_write) > YELLOW_LIMIT:
+                    health = nexus.YELLOW
+                if (data.timestamp - last_write) > RED_LIMIT:
+                    health = nexus.RED
+
+                if health != nexus.GREEN:
+                    error_message += '"{}" last logged data {}. '.format(
+                        driver_name, last_write.humanize(data.timestamp))
+                hub_health = max(hub_health, health)
+
+            if data.versions['ansible'] != 'ansible 1.5.3':
+                hub_health = nexus.RED
+                error_message += 'Old Ansible version. '
+
+            if data.wifi_quality and data.wifi_quality < 30:
+                hub_health = max(hub_health, nexus.YELLOW)
+                error_message += 'Weak Wi-Fi signal. '
+
+            results.append((hub_id, hub_health, error_message))
+
+        return render_template('ajax_search.html', results=results, nexus=nexus)
 
 
     ### INDEX
@@ -223,7 +277,7 @@ if __name__ == '__main__':
 
     M = Monitor(config)
 
-    arguments = docopt(__doc__, version='Smarthome monitor 0.2')
+    arguments = docopt(__doc__, version='Smarthome monitor 0.3')
 
     app = Flask(__name__)
 
@@ -232,6 +286,9 @@ if __name__ == '__main__':
 
     app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
     app.add_url_rule("/ajax/status/<hub_id>", 'ajax_status', M.ajax_status)
+
+    app.add_url_rule("/search/<query>", 'serve_search', M.serve_search)
+    app.add_url_rule("/ajax/search/<query>", 'ajax_search', M.ajax_search)
 
     app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
     app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)

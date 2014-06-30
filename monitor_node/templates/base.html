@@ -23,7 +23,7 @@
     <div class="container">
       <div class="header">
         <form class="form-inline search_form" role="form">
-          <input type="text" class="form-control" id="hub_id_input" placeholder="Wildcards supported!">
+          <input type="text" class="form-control" id="hub_id_input" placeholder="Multiple terms supported!">
           <button type="submit" class="btn btn-primary">Go</button>
         </form>
 
@@ -53,7 +53,7 @@
 
         $('.search_form').submit(function(event) {
           var search_string = $(this).find('input').val();
-          var search_url = "{{ url_for('serve_status', hub_id='PLACEHOLDER') }}";
+          var search_url = "{{ url_for('serve_search', query='PLACEHOLDER') }}";
           search_url = search_url.replace('PLACEHOLDER', encodeURIComponent(search_string));
 
           window.location.href = search_url;

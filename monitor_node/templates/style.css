@@ -100,3 +100,7 @@ body {
 .header a:hover {
   text-decoration: none;
 }
+
+.header input {
+  width: 200px !important;
+}

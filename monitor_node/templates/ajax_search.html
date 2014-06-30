@@ -1,0 +1,25 @@
+<table class="table table-bordered">
+  {% for result in results %}
+      <tr{% if result[1] == nexus.GREEN %}
+       class="success"
+       {% elif result[1] == nexus.YELLOW %}
+       class="warning"
+       {% elif result[1] == nexus.RED %}
+       class="danger"
+       {% endif %}>
+          <td><a href="{{ url_for('serve_status', hub_id=result[0]) }}">{{ result[0] }}</a></td>
+          <td>{% if result[1] == nexus.GREEN %}
+          GREEN
+          {% elif result[1] == nexus.YELLOW %}
+          YELLOW
+          {% elif result[1] == nexus.RED %}
+          RED
+          {% endif %}</td>
+          <td>{{ result[2] }}</td>
+      </tr>
+  {% else %}
+      <table class="table table-bordered">
+        <tr class="danger"><td>No Hub ID found</td></tr>
+      </table>
+  {% endfor %}
+</table>
