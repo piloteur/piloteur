@@ -91,7 +91,7 @@ PERIOD = 60
 
 def check(hub_id):
 	return [{
-		'name': 'helloworld/xxx'
+		'name': 'helloworld/xxx',
 		'status': nx.GREEN,
 		'note': '',
 		'timestamp': time.time()
