@@ -98,7 +98,7 @@ def check(hub_id):
 	}]
 	
 if __name__ == '__main__':
-	smx.command_line()
+	nx.command_line()
 ```
 
 Invoking it will work like this:
@@ -114,7 +114,7 @@ $ helloworld.py demo-hub
 
 The library needs to be configured to fetch the data for the tests. You don't need to worry about this when running inside the monitor infrastructure, but you'll need to this yourself to run the dev command-line tool.
 
-A JSON configuration file looks like this:
+A JSON configuration file looks like this (without comments):
 
 ```json
 {
