@@ -253,7 +253,6 @@ class Monitor():
         results = []
         for hub_id in hubs:
             data = self.fetch_data(hub_id)
-
             res = self.assess_data(data)
 
             results.append((
@@ -275,6 +274,35 @@ class Monitor():
 
         hubs_list = get_tunnel_connections(self.config['tunnel_info'])
         return render_template('ajax_index.html', hubs=sorted(hubs_list))
+
+
+    ### ALL
+
+    def serve_all(self):
+        return render_template('all.html')
+
+    def ajax_all(self):
+        self.nexus_init()
+
+        hubs_list = get_tunnel_connections(self.config['tunnel_info'])
+
+        results = []
+        for hub_id in hubs_list:
+            app.logger.info(hub_id)
+
+            data = self.fetch_data(hub_id)
+            res = self.assess_data(data)
+
+            if res.error:
+                color = nexus.RED
+            elif res.hub_health != nexus.GREEN:
+                color = nexus.YELLOW
+            else:
+                color = nexus.GREEN
+
+            results.append((res.hub_id, color, res.error or res.summary))
+
+        return render_template('ajax_search.html', results=results, nexus=nexus)
 
 
     ### SHOW
@@ -307,6 +335,9 @@ if __name__ == '__main__':
 
     app.add_url_rule("/", 'serve_index', M.serve_index)
     app.add_url_rule("/ajax/index/", 'ajax_index', M.ajax_index)
+
+    app.add_url_rule("/all", 'serve_all', M.serve_all)
+    app.add_url_rule("/ajax/all/", 'ajax_all', M.ajax_all)
 
     app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
     app.add_url_rule("/ajax/status/<hub_id>", 'ajax_status', M.ajax_status)
