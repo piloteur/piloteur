@@ -1,3 +1,8 @@
+{% if results %}
+    <p class="text-center lead">
+      Found {{ results|count }} hubs
+    </p>
+{% endif %}
 <table class="table table-bordered">
   {% for result in results %}
       <tr{% if result[1] == nexus.GREEN %}
@@ -18,8 +23,6 @@
           <td>{{ result[2] }}</td>
       </tr>
   {% else %}
-      <table class="table table-bordered">
-        <tr class="danger"><td>No Hub ID found</td></tr>
-      </table>
+      <tr class="danger"><td>No Hub ID found</td></tr>
   {% endfor %}
 </table>
