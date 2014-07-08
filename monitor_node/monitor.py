@@ -24,7 +24,7 @@ import time
 import fnmatch
 from docopt import docopt
 from flask import Flask, Response
-from flask import render_template, abort, redirect, url_for
+from flask import render_template, abort, url_for
 
 import nexus
 import nexus.private
@@ -32,10 +32,16 @@ import nexus.private
 YELLOW_LIMIT = datetime.timedelta(minutes=15)
 RED_LIMIT = datetime.timedelta(minutes=30)
 
-NodeData = collections.namedtuple('NodeData',
-    ['hub_id', 'classes', 'config', 'timestamp', 'last_writes', 'versions', 'wifi_quality'])
-NodeResult = collections.namedtuple('NodeResult',
-    ['hub_id_found', 'drivers', 'timestamp', 'hub_id', 'hub_health', 'versions', 'classes', 'wifi_quality'])
+def void_namedtuple(ntuple):
+    void = ntuple._make([None] * len(ntuple._fields))
+    def new(**kwargs):
+        return void._replace(**kwargs)
+    return new
+
+NodeData = void_namedtuple(collections.namedtuple('NodeData',
+    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'last_writes', 'config']))
+NodeResult = void_namedtuple(collections.namedtuple('NodeResult',
+    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'hub_health', 'drivers']))
 
 
 def get_tunnel_connections(tunnel_info):
@@ -74,10 +80,15 @@ class Monitor():
     def fetch_data(self, hub_id):
         nexus.private.set_hub_id(hub_id)
 
+        if hub_id not in nexus.list_hub_ids():
+            return NodeData(error="Hub ID not found.")
+
         classes_log = nexus.private.fetch_system_logs("classes")
-        if not classes_log: return
+        if not classes_log:
+            return NodeData(error="Missing classes data.")
         remote_hub_id = classes_log.split(',')[0]
-        if not remote_hub_id == hub_id: return
+        if not remote_hub_id == hub_id:
+            return NodeData(error="Mismatching hub_id?!")
         classes = classes_log.split(',')[1:]
 
         config_cmd = [os.path.expanduser("~/smarthome-hub-sync/config.py")]
@@ -86,17 +97,20 @@ class Monitor():
         node_config = json.loads(subprocess.check_output(config_cmd))
 
         timesync_log = nexus.private.fetch_system_logs("timesync")
-        if not timesync_log: return  # TODO
+        if not timesync_log:
+            return NodeData(error="Missing timesync data.")
         timestamp = arrow.get(timesync_log.split(',')[0])
 
         iwconfig_log = nexus.private.fetch_system_logs("iwconfig")
-        if not iwconfig_log: return  # TODO
+        if not iwconfig_log:
+            return NodeData(error="Missing iwconfig data.")
         wifi_quality = iwconfig_log.split(',')[1]
         if wifi_quality == 'N/A': wifi_quality = None
         else: wifi_quality = int(wifi_quality)
 
         versions_log = nexus.private.fetch_system_logs("versions")
-        if not versions_log: return  # TODO
+        if not versions_log:
+            return NodeData(error="Missing versions data.")
         versions = versions_log.split(',')
         versions = dict(zip((
             "timestamp",
@@ -138,8 +152,13 @@ class Monitor():
 
         data = self.fetch_data(hub_id)
 
-        if not data:
-            return render_template('ajax_status.html', h=None, nexus=nexus)
+        if data.error:
+            h = NodeResult(
+                hub_id=hub_id,
+                hub_health=nexus.RED,
+                error=data.error,
+            )
+            return render_template('ajax_status.html', h=h, nexus=nexus)
 
         drivers = []
         versions = []
@@ -176,7 +195,6 @@ class Monitor():
             hub_health = max(hub_health, nexus.YELLOW)
 
         h = NodeResult(
-            hub_id_found=(data is not None),
             drivers=drivers,
             timestamp=data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
             hub_id=hub_id,
@@ -215,8 +233,8 @@ class Monitor():
         for hub_id in hubs:
             data = self.fetch_data(hub_id)
 
-            if not data:
-                results.append((hub_id, nexus.RED, 'Failed to load data.'))
+            if data.error:
+                results.append((hub_id, nexus.RED, data.error))
                 continue
 
             hub_health = nexus.GREEN
