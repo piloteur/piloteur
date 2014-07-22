@@ -1,0 +1,22 @@
+#! /bin/bash
+
+git_pull() {
+    local folder="$1"
+
+    cd "$folder"
+    git pull
+}
+
+main() {
+    local folders=('/home/ubuntu/smarthome-hub-sync' '/home/ubuntu/smart-home-config' '/home/ubuntu/smarthome-deployment-blobs' '/home/ubuntu/smarthome-drivers' '/home/ubuntu/smarthome-reverse-tunneler' '/home/ubuntu/smarthome-monitor')
+    local f
+
+    for f in "${folders[@]}"
+    do
+        git_pull "$f"
+    done
+
+    pkill --full "monitor.py"
+}
+
+main
