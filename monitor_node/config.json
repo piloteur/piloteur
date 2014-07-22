@@ -1,5 +1,5 @@
 {
-    "data_location": "sensordata@power1.cs.virginia.edu:smarthome/",
+    "data_location": "sensordata@power4.cs.virginia.edu:smarthome/",
     "loglevel": "INFO",
     "ssh_key": "~/.ssh/id_rsa",
     "tunnel_info": [
