@@ -1,0 +1,3 @@
+#! /bin/bash
+
+exec python alerting.py >> alerting.log 2>&1
