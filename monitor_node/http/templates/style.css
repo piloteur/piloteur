@@ -104,3 +104,7 @@ body {
 .header input {
   width: 200px !important;
 }
+
+.index_view td > small {
+  color: #999;
+}

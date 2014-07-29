@@ -144,10 +144,27 @@ class Monitor():
         return render_template('index.html')
 
     def ajax_index(self):
-        self.nexus_init()
+        c = sqlite3.connect(self.db_path).cursor()
 
         hubs_list = get_tunnel_connections(self.config['tunnel_info'])
-        return render_template('ajax_index.html', hubs=sorted(hubs_list))
+        oldest_cache = arrow.utcnow()
+
+        hubs = []
+        for hub_id in sorted(hubs_list):
+            c.execute('SELECT * FROM Cache WHERE hub_id=?', [hub_id])
+            for hub_id, hub_health, summary, cache_time in c.fetchall():
+                cache_time = arrow.get(cache_time, 'YYYY-MM-DD HH:mm:ss')
+                oldest_cache = min(cache_time, oldest_cache)
+
+                hub_health = {
+                    'RED': nexus.RED, 'YELLOW': nexus.YELLOW,
+                    'GREEN': nexus.GREEN, 'FAIL': nexus.RED
+                }[hub_health]
+
+                hubs.append((hub_id, hub_health, summary))
+
+        return render_template('ajax_index.html', hubs=hubs,
+            oldest_cache=oldest_cache, nexus=nexus)
 
 
     ### ALL
