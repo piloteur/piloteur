@@ -52,7 +52,7 @@ def fetch_data(hub_id):
         return NodeData(hub_id=hub_id, error="Mismatching hub_id?!")
     classes = classes_log.split(',')[1:]
 
-    config_cmd = [os.path.expanduser("~/smarthome-hub-sync/config.py")]
+    config_cmd = [os.path.expanduser("~/smarthome-hub-sync/config.py")]  # TODO
     config_cmd.append(hub_id)
     config_cmd.extend(classes)
     node_config = json.loads(subprocess.check_output(config_cmd))
