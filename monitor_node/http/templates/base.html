@@ -63,6 +63,12 @@
 
         $("#result").load("{% block ajax_url %}{% endblock %}",
                           function() { $(".loading").hide(); });
+
+        function reload_ajax(url) {
+          $("#result").html('').load(url,
+            function() { $(".loading").hide(); });
+          $(".loading").show();
+        }
     </script>
 </body>
 </html>

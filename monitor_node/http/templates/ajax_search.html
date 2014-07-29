@@ -3,6 +3,14 @@
       Found {{ results|count }} hubs
     </p>
 {% endif %}
+{% if oldest_cache %}
+    <p class="text-center">
+      <button type="button" class="btn btn-info" onclick="
+        reload_ajax('{{ url_for('ajax_search_refresh', query=query) }}')">
+        Last updated {{ oldest_cache }}. Click here to refresh (slow!)
+      </button>
+    </p>
+{% endif %}
 <table class="table table-bordered">
   {% for result in results %}
       <tr{% if result[1] == nexus.GREEN %}

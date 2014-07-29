@@ -18,6 +18,9 @@ import re
 import paramiko
 import time
 import fnmatch
+import datetime
+import arrow
+import sqlite3
 from docopt import docopt
 from flask import Flask, Response
 from flask import render_template, abort, url_for
@@ -29,8 +32,9 @@ from nexus.monitor import get_tunnel_connections, fetch_data, assess_data
 
 
 class Monitor():
-    def __init__(self, config):
+    def __init__(self, config, db_path):
         self.config = config
+        self.db_path = db_path
         self.last_connection = 0
 
     def nexus_init(self):
@@ -72,12 +76,20 @@ class Monitor():
         if not re.match(r'^[a-z0-9-\*\? ]+$', query): abort(403)
         return render_template('search.html', query=query)
 
-    def ajax_search(self, query):
+    def ajax_search_refresh(self, query):
+        return self.ajax_search(query, refresh=True)
+
+    def ajax_search(self, query, refresh=False):
         if not re.match(r'^[a-z0-9-\*\? ]+$', query): abort(403)
 
-        self.nexus_init()
+        if refresh:
+            self.nexus_init()
+            all_hubs = nexus.list_hub_ids()
+        else:
+            c = sqlite3.connect(self.db_path).cursor()
+            c.execute('SELECT hub_id FROM Cache')
+            all_hubs = [row[0] for row in c.fetchall()]
 
-        all_hubs = nexus.list_hub_ids()
         hubs = set()
         for keyword in query.split(' '):
             keyword = '*' + keyword.strip('*') + '*'
@@ -89,17 +101,41 @@ class Monitor():
             """.format(url_for('serve_status', hub_id=list(hubs)[0]))
 
         results = []
+        oldest_cache = arrow.utcnow()
         for hub_id in hubs:
-            data = fetch_data(hub_id)
-            res = assess_data(data)
+            if refresh:
+                data = fetch_data(hub_id)
+                res = assess_data(data)
 
-            results.append((
-                res.hub_id,
-                res.hub_health,
-                res.error or res.summary
-            ))
+                results.append((
+                    res.hub_id,
+                    res.hub_health,
+                    res.error or res.summary
+                ))
 
-        return render_template('ajax_search.html', results=results, nexus=nexus)
+                continue
+
+            c.execute('SELECT * FROM Cache WHERE hub_id=?', [hub_id])
+            for hub_id, hub_health, summary, cache_time in c.fetchall():
+                cache_time = arrow.get(cache_time, 'YYYY-MM-DD HH:mm:ss')
+                oldest_cache = min(cache_time, oldest_cache)
+
+                hub_health = {
+                    'RED': nexus.RED, 'YELLOW': nexus.YELLOW,
+                    'GREEN': nexus.GREEN, 'FAIL': nexus.RED
+                }[hub_health]
+
+                results.append((hub_id, hub_health, summary))
+
+        if refresh or not results: oldest_cache = None
+        else: oldest_cache = oldest_cache.humanize()
+        # else: oldest_cache = '{} ({})'.format(
+        #     oldest_cache.humanize(),
+        #     oldest_cache.format('YYYY-MM-DD HH:mm:ss ZZ')
+        # )
+
+        return render_template('ajax_search.html', results=results,
+            nexus=nexus, oldest_cache=oldest_cache, query=query)
 
 
     ### INDEX
@@ -165,9 +201,9 @@ if __name__ == '__main__':
     with open(os.path.join(DIR, '..', 'config.json')) as f:
         config = json.load(f)
 
-    M = Monitor(config)
+    M = Monitor(config, os.path.join(DIR, '..', 'cache.db'))
 
-    arguments = docopt(__doc__, version='Smarthome monitor 0.3')
+    arguments = docopt(__doc__, version='Smarthome monitor 0.4')
 
     app = Flask(__name__)
 
@@ -182,6 +218,8 @@ if __name__ == '__main__':
 
     app.add_url_rule("/search/<query>", 'serve_search', M.serve_search)
     app.add_url_rule("/ajax/search/<query>", 'ajax_search', M.ajax_search)
+    app.add_url_rule("/ajax/search/<query>/refresh",
+        'ajax_search_refresh', M.ajax_search_refresh)
 
     app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
     app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
