@@ -210,8 +210,8 @@ if __name__ == '__main__':
     app.add_url_rule("/", 'serve_index', M.serve_index)
     app.add_url_rule("/ajax/index/", 'ajax_index', M.ajax_index)
 
-    app.add_url_rule("/all", 'serve_all', M.serve_all)
-    app.add_url_rule("/ajax/all/", 'ajax_all', M.ajax_all)
+    # app.add_url_rule("/all", 'serve_all', M.serve_all)
+    # app.add_url_rule("/ajax/all/", 'ajax_all', M.ajax_all)
 
     app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
     app.add_url_rule("/ajax/status/<hub_id>", 'ajax_status', M.ajax_status)
