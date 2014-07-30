@@ -17,6 +17,7 @@ main() {
     done
 
     pkill --full "monitor.py"
+    pkill --full "alerting.py"
 }
 
 main
