@@ -31,8 +31,10 @@ class Alerting():
         subject = self.tmpl_env.get_template('subject.jinja2').render(**data).strip()
         body = self.tmpl_env.get_template('body.jinja2').render(**data)
 
-        to = data['config']['alert_recipients']
-        if data['hub_health'] == 'FAIL': to += data['config']['system_alert_recipients']
+        if data['hub_health'] == 'FAIL' or data['old_health'] == 'FAIL':
+            to = data['config']['system_alert_recipients']
+        else:
+            to = data['config']['alert_recipients']
 
         self.log.debug("Sending a mail to {}".format(to))
 
