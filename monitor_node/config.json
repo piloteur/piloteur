@@ -10,5 +10,6 @@
     "mailgun_domain": "mg.smarthome.qf.io",
     "mailgun_api_key": "key-2d67d4422436ea9080c9f17bcd1f811a",
     "alert_mail_from": "Smarthome Alert Bot <alert@mg.smarthome.qf.io>",
-    "hub_config_path": "~/smarthome-hub-sync/config.py"
+    "hub_config_path": "~/smarthome-hub-sync/config.py",
+    "checks_path": "~/smarthome-checks"
 }

@@ -4,15 +4,14 @@ import subprocess
 import os.path
 import json
 import arrow
-import datetime
 import collections
 import paramiko
+import sys
+import importlib
+import traceback
 
-from nexus import RED, YELLOW, GREEN, list_hub_ids, data_timestamp
+from nexus import RED, YELLOW, GREEN, list_hub_ids
 import nexus.private
-
-YELLOW_LIMIT = datetime.timedelta(minutes=15)
-RED_LIMIT = datetime.timedelta(minutes=30)
 
 def void_namedtuple(ntuple):
     void = ntuple._make([None] * len(ntuple._fields))
@@ -21,7 +20,7 @@ def void_namedtuple(ntuple):
     return new
 
 NodeData = void_namedtuple(collections.namedtuple('NodeData',
-    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'last_writes', 'config']))
+    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'config']))
 NodeResult = void_namedtuple(collections.namedtuple('NodeResult',
     ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'summary', 'hub_health', 'drivers']))
 
@@ -83,20 +82,11 @@ def fetch_data(hub_id, config):
         "smarthome-reverse-tunneler",
     ), versions))
 
-    last_writes = {}
-    for driver_name in node_config['loaded_drivers']:
-        t = data_timestamp(driver_name)
-        if not t:
-            last_writes[driver_name] = arrow.get(0)
-        else:
-            last_writes[driver_name] = arrow.get(t)
-
     return NodeData(hub_id=hub_id,
                     classes=classes,
                     config=node_config,
                     timestamp=timestamp,
                     versions=versions,
-                    last_writes=last_writes,
                     wifi_quality=wifi_quality)
 
 def assess_data(data, config):
@@ -107,8 +97,8 @@ def assess_data(data, config):
             error=data.error,
         )
 
-    drivers = []
-    versions = []
+    checks_path = os.path.expanduser(config['checks_path'])
+    if not checks_path in sys.path: sys.path.append(checks_path)
 
     hub_health = GREEN
     error_message = ''
@@ -117,26 +107,34 @@ def assess_data(data, config):
     ########################################################################
     # DRIVERS                                                              #
     ########################################################################
-    for driver_name, last_write in sorted(data.last_writes.items()):
-        health = GREEN
-        if (data.timestamp - last_write) > YELLOW_LIMIT:
-            health = YELLOW
-        if (data.timestamp - last_write) > RED_LIMIT:
-            health = RED
+    drivers = []
+    for driver_name in sorted(data.config['loaded_drivers']):
+        try:
+            module = importlib.import_module('driver_checks.' + driver_name)
+        except ImportError:
+            # This driver has no checks, TODO: what to do?
+            continue
+
+        try:
+            nexus.private.set_hub_id(data.hub_id)  # TODO but better safe than sorry
+            res = module.check(data.hub_id)
+        except:
+            # TODO is it ok to cause red?
+            exc_msg = traceback.format_exception_only(*sys.exc_info()[:2])[-1]
+            health, message = RED, exc_msg
+        else:
+            # TODO handle multiple values in the res list
+            health, message = res[0]['status'], res[0]['note']
 
         if health != GREEN:
-            error_message += '"{}" last logged data {}. '.format(
-                driver_name, last_write.humanize(data.timestamp))
-
+            error_message += '"{}": {}. '.format(driver_name, message)
         hub_health = max(hub_health, health)
-        drivers.append((driver_name,
-                        last_write.humanize(data.timestamp),
-                        last_write.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                        health))
+        drivers.append((driver_name, message, health))
 
     ########################################################################
     # VERSIONS                                                             #
     ########################################################################
+    versions = []
     health = GREEN
     ansible = data.versions['ansible']
     if ansible != 'ansible 1.5.3':  # TODO unhardcode?

@@ -43,11 +43,11 @@
   <h2>Drivers</h2>
   <table class="table table-bordered">
     {% for driver in h.drivers %}
-        <tr{% if driver[3] == nexus.GREEN %}
+        <tr{% if driver[2] == nexus.GREEN %}
         class="success"
-        {% elif driver[3] == nexus.YELLOW %}
+        {% elif driver[2] == nexus.YELLOW %}
         class="warning"
-        {% elif driver[3] == nexus.RED %}
+        {% elif driver[2] == nexus.RED %}
         class="danger"
         {% endif %}>
             <td>
@@ -56,7 +56,6 @@
               <a class="driver_show_link" href="{{ url_for('show_logs', hub_id=h.hub_id, driver_name=driver[0]) }}">[logs]</a>
             </td>
             <td>{{ driver[1] }}</td>
-            <td>{{ driver[2] }}</td>
         </tr>
     {% endfor %}
   </table>
