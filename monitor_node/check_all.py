@@ -3,7 +3,7 @@ import paramiko
 import os.path
 
 from nexus import GREEN, init
-from nexus.monitor import get_tunnel_connections, fetch_data, assess_data
+from monitor import get_tunnel_connections, fetch_data, assess_data
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -23,8 +23,8 @@ hubs_list = get_tunnel_connections(config['tunnel_info'])
 
 results = []
 for hub_id in hubs_list:
-    data = fetch_data(hub_id)
-    res = assess_data(data)
+    data = fetch_data(hub_id, config)
+    res = assess_data(data, config)
 
     if res.error:
         color = 'RED'

@@ -8,8 +8,8 @@ import datetime
 import collections
 import paramiko
 
-from . import RED, YELLOW, GREEN, list_hub_ids, data_timestamp
-from . import private
+from nexus import RED, YELLOW, GREEN, list_hub_ids, data_timestamp
+import nexus.private
 
 YELLOW_LIMIT = datetime.timedelta(minutes=15)
 RED_LIMIT = datetime.timedelta(minutes=30)
@@ -38,13 +38,13 @@ def get_tunnel_connections(tunnel_info):
     stdin, stdout, stderr = client.exec_command(cmd)
     return [n.strip() for n in stdout.readlines()]
 
-def fetch_data(hub_id):
-    private.set_hub_id(hub_id)
+def fetch_data(hub_id, config):
+    nexus.private.set_hub_id(hub_id)
 
     if hub_id not in list_hub_ids():
         return NodeData(hub_id=hub_id, error="Hub ID not found.")
 
-    classes_log = private.fetch_system_logs("classes")
+    classes_log = nexus.private.fetch_system_logs("classes")
     if not classes_log:
         return NodeData(hub_id=hub_id, error="Missing classes data.")
     remote_hub_id = classes_log.split(',')[0]
@@ -52,24 +52,24 @@ def fetch_data(hub_id):
         return NodeData(hub_id=hub_id, error="Mismatching hub_id?!")
     classes = classes_log.split(',')[1:]
 
-    config_cmd = [os.path.expanduser("~/smarthome-hub-sync/config.py")]  # TODO
+    config_cmd = [os.path.expanduser(config["hub_config_path"])]
     config_cmd.append(hub_id)
     config_cmd.extend(classes)
     node_config = json.loads(subprocess.check_output(config_cmd))
 
-    timesync_log = private.fetch_system_logs("timesync")
+    timesync_log = nexus.private.fetch_system_logs("timesync")
     if not timesync_log:
         return NodeData(hub_id=hub_id, error="Missing timesync data.")
     timestamp = arrow.get(timesync_log.split(',')[0])
 
-    iwconfig_log = private.fetch_system_logs("iwconfig")
+    iwconfig_log = nexus.private.fetch_system_logs("iwconfig")
     if not iwconfig_log:
         return NodeData(hub_id=hub_id, error="Missing iwconfig data.")
     wifi_quality = iwconfig_log.split(',')[1]
     if wifi_quality == 'N/A': wifi_quality = None
     else: wifi_quality = int(wifi_quality)
 
-    versions_log = private.fetch_system_logs("versions")
+    versions_log = nexus.private.fetch_system_logs("versions")
     if not versions_log:
         return NodeData(hub_id=hub_id, error="Missing versions data.")
     versions = versions_log.split(',')
@@ -99,7 +99,7 @@ def fetch_data(hub_id):
                     last_writes=last_writes,
                     wifi_quality=wifi_quality)
 
-def assess_data(data):
+def assess_data(data, config):
     if data.error:
         return NodeResult(
             hub_id=data.hub_id,

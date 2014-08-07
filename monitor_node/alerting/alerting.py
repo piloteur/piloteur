@@ -10,10 +10,14 @@ import paramiko
 import arrow
 import requests
 import jinja2
+import sys
 
 import nexus
 import nexus.private
-import nexus.monitor
+
+PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PARENT)
+from monitor import fetch_data, assess_data
 
 
 PERIOD = 10
@@ -77,8 +81,8 @@ class Alerting():
 
         all_hubs = nexus.list_hub_ids()
         for hub_id in all_hubs:
-            data = nexus.monitor.fetch_data(hub_id)
-            res = nexus.monitor.assess_data(data)
+            data = fetch_data(hub_id, self.config)
+            res = assess_data(data, self.config)
 
             hub_health = {
                 nexus.RED: 'RED', nexus.YELLOW: 'YELLOW', nexus.GREEN: 'GREEN'

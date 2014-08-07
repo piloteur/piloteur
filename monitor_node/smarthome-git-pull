@@ -16,7 +16,7 @@ main() {
         git_pull "$f"
     done
 
-    pkill --full "monitor.py"
+    pkill --full "http.py"
     pkill --full "alerting.py"
 }
 

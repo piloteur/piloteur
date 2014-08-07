@@ -18,9 +18,9 @@ import re
 import paramiko
 import time
 import fnmatch
-import datetime
 import arrow
 import sqlite3
+import sys
 from docopt import docopt
 from flask import Flask, Response
 from flask import render_template, abort, url_for
@@ -28,7 +28,9 @@ from flask import render_template, abort, url_for
 import nexus
 import nexus.private
 
-from nexus.monitor import get_tunnel_connections, fetch_data, assess_data
+PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PARENT)
+from monitor import get_tunnel_connections, fetch_data, assess_data
 
 
 class Monitor():
@@ -64,8 +66,8 @@ class Monitor():
 
         self.nexus_init()
 
-        data = fetch_data(hub_id)
-        result = assess_data(data)
+        data = fetch_data(hub_id, self.config)
+        result = assess_data(data, self.config)
 
         return render_template('ajax_status.html', h=result, nexus=nexus)
 
@@ -104,8 +106,8 @@ class Monitor():
         oldest_cache = arrow.utcnow()
         for hub_id in hubs:
             if refresh:
-                data = fetch_data(hub_id)
-                res = assess_data(data)
+                data = fetch_data(hub_id, self.config)
+                res = assess_data(data, self.config)
 
                 results.append((
                     res.hub_id,
@@ -181,8 +183,8 @@ class Monitor():
         for hub_id in hubs_list:
             app.logger.info(hub_id)
 
-            data = fetch_data(hub_id)
-            res = assess_data(data)
+            data = fetch_data(hub_id, self.config)
+            res = assess_data(data, self.config)
 
             if res.error:
                 color = nexus.RED
