@@ -56,10 +56,10 @@ def fetch_data(hub_id, config):
     config_cmd.extend(classes)
     node_config = json.loads(subprocess.check_output(config_cmd))
 
-    timesync_log = nexus.private.fetch_system_logs("timesync")
-    if not timesync_log:
+    timestamp = nexus.get_timestamp()
+    if timestamp is None:
         return NodeData(hub_id=hub_id, error="Missing timesync data.")
-    timestamp = arrow.get(timesync_log.split(',')[0])
+    timestamp = arrow.get(timestamp)
 
     iwconfig_log = nexus.private.fetch_system_logs("iwconfig")
     if not iwconfig_log:
