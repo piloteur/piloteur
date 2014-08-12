@@ -123,9 +123,12 @@ def assess_data(data, config):
             nexus.private.set_hub_id(data.hub_id)  # TODO but better safe than sorry
             res = check(data.hub_id)
         except:
-            # TODO is it ok to cause red?
             exc_msg = traceback.format_exception_only(*sys.exc_info()[:2])[-1]
-            health, message = RED, exc_msg
+            return NodeResult(
+                hub_id=data.hub_id,
+                hub_health=RED,
+                error=exc_msg,
+            )
         else:
             # TODO handle multiple values in the res list
             health, message = res[0]['status'], res[0]['note']
