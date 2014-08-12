@@ -11,7 +11,6 @@ import importlib
 import traceback
 import datetime
 
-from driver_checks.common import data_freshness_check
 from nexus import RED, YELLOW, GREEN, list_hub_ids
 import nexus.private
 
@@ -101,6 +100,7 @@ def assess_data(data, config):
 
     checks_path = os.path.expanduser(config['checks_path'])
     if not checks_path in sys.path: sys.path.append(checks_path)
+    from driver_checks.common import data_freshness_check
 
     hub_health = GREEN
     error_message = ''
