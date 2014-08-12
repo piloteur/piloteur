@@ -9,7 +9,9 @@ import paramiko
 import sys
 import importlib
 import traceback
+import datetime
 
+from driver_checks.common import data_freshness_check
 from nexus import RED, YELLOW, GREEN, list_hub_ids
 import nexus.private
 
@@ -111,13 +113,15 @@ def assess_data(data, config):
     for driver_name in sorted(data.config['loaded_drivers']):
         try:
             module = importlib.import_module('driver_checks.' + driver_name)
+            check = module.check
         except ImportError:
-            # This driver has no checks, TODO: what to do?
+            red_limit = datetime.timedelta(hours=1)
+            check = data_freshness_check(driver_name, red_limit)
             continue
 
         try:
             nexus.private.set_hub_id(data.hub_id)  # TODO but better safe than sorry
-            res = module.check(data.hub_id)
+            res = check(data.hub_id)
         except:
             # TODO is it ok to cause red?
             exc_msg = traceback.format_exception_only(*sys.exc_info()[:2])[-1]
