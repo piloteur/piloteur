@@ -115,9 +115,9 @@ def assess_data(data, config):
             module = importlib.import_module('driver_checks.' + driver_name)
             check = module.check
         except ImportError:
+            # TODO: communicate somehow that we are fallbacking
             red_limit = datetime.timedelta(hours=1)
             check = data_freshness_check(driver_name, red_limit)
-            continue
 
         try:
             nexus.private.set_hub_id(data.hub_id)  # TODO but better safe than sorry
@@ -129,9 +129,9 @@ def assess_data(data, config):
                 hub_health=RED,
                 error=exc_msg,
             )
-        else:
-            # TODO handle multiple values in the res list
-            health, message = res[0]['status'], res[0]['note']
+
+        # TODO handle multiple values in the res list
+        health, message = res[0]['status'], res[0]['note']
 
         if health != GREEN:
             error_message += '"{}": {}. '.format(driver_name, message)
