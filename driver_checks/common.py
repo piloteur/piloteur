@@ -22,9 +22,7 @@ def data_freshness_check(driver_name, red_limit, yellow_limit=None):
         if (sys_timestamp - last_write) > red_limit:
             health = RED
 
-        message = ''
-        if health != GREEN:
-            message = 'last logged data {}'.format(last_write.humanize(sys_timestamp))
+        message = 'last logged data {}'.format(last_write.humanize(sys_timestamp))
 
         return [{
             'name': 'driver/data_freshness/{}'.format(driver_name),
