@@ -1,0 +1,4 @@
+{
+    "ports_folder": "~/ssh_ports/",
+    "base_port": 40000
+}
