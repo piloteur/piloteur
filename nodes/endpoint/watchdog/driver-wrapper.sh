@@ -3,7 +3,7 @@
 NAME=$1
 CWD="$2"
 
-REDIRECTOR=smarthome-hub-watchdog/output-redirector.py
+REDIRECTOR=watchdog/output-redirector.py
 
 PYTHON=~/drivers_ENVs/$NAME/bin/python
 export PYTHONPATH=~/smarthome-drivers/drivers

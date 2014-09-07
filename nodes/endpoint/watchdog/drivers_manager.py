@@ -30,7 +30,7 @@ class DriversManager():
         # TODO: un-hardcode this repo path
         self.DRIVERS_PATH = os.path.expanduser('~/smarthome-drivers/drivers')
 
-        self.DRIVER_WRAPPER = os.path.abspath('smarthome-hub-watchdog/driver-wrapper.sh')
+        self.DRIVER_WRAPPER = os.path.abspath('watchdog/driver-wrapper.sh')
 
         self.GEN_FINGER_PATH = os.path.expanduser('~/.general_fingerprints')
         self.DRV_FINGER_PATH = os.path.expanduser('~/.drivers_fingerprints')
