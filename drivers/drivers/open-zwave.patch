@@ -1,0 +1,158 @@
+Index: cpp/src/platform/unix/LogImpl.cpp
+===================================================================
+--- cpp/src/platform/unix/LogImpl.cpp	(revision 741)
++++ cpp/src/platform/unix/LogImpl.cpp	(working copy)
+@@ -52,14 +52,14 @@
+ 	m_queueLevel( _queueLevel ),				// level of messages to log to queue
+ 	m_dumpTrigger( _dumpTrigger )				// dump queued messages when this level is seen
+ {
+-	if ( !m_bAppendLog )
+-	{
+-		FILE* pFile = fopen( m_filename.c_str(), "w" );
+-		if( pFile != NULL )
+-		{
+-			fclose( pFile );
+-		}
+-	}
++	// if ( !m_bAppendLog )
++	// {
++	// 	FILE* pFile = fopen( m_filename.c_str(), "w" );
++	// 	if( pFile != NULL )
++	// 	{
++	// 		fclose( pFile );
++	// 	}
++	// }
+ 	setlinebuf(stdout);	// To prevent buffering and lock contention issues
+ }
+ 
+@@ -108,16 +108,16 @@
+ 			char outBuf[1124];
+ 			char *outBufPtr = outBuf;
+ 			// save to file
+-			FILE* pFile = fopen( m_filename.c_str(), "a" );
+-			if ( pFile != NULL || m_bConsoleOutput )
+-			{
+-				if( _logLevel != LogLevel_Internal )						// don't add a second timestamp to display of queued messages
+-				{
+-					strcpy( outBufPtr, timeStr.c_str() );
+-					outBufPtr += timeStr.length();
+-					strcpy( outBufPtr, nodeStr.c_str() );
+-					outBufPtr += nodeStr.length();
+-				}
++			// FILE* pFile = fopen( m_filename.c_str(), "a" );
++			// if ( pFile != NULL || m_bConsoleOutput )
++			// {
++				// if( _logLevel != LogLevel_Internal )						// don't add a second timestamp to display of queued messages
++				// {
++				// 	strcpy( outBufPtr, timeStr.c_str() );
++				// 	outBufPtr += timeStr.length();
++				// 	strcpy( outBufPtr, nodeStr.c_str() );
++				// 	outBufPtr += nodeStr.length();
++				// }
+ 
+ 				if( lineLen > 0 )
+ 				{
+@@ -134,16 +134,16 @@
+ 				*outBufPtr = '\0';
+ 
+ 				// print message to file (and possibly screen)
+-				if( pFile != NULL )
+-				{
+-					fputs( outBuf, pFile );
+-					fclose( pFile );
+-				}
+-				if( m_bConsoleOutput )
+-				{
++				// if( pFile != NULL )
++				// {
++				// 	fputs( outBuf, pFile );
++				// 	fclose( pFile );
++				// }
++				// if( m_bConsoleOutput )
++				// {
+ 					fputs( outBuf, stdout );
+-				}
+-			}
++				// }
++			// }
+ 		}
+ 
+ 		if( _logLevel != LogLevel_Internal )
+Index: cpp/examples/linux/MinOZW/Makefile
+===================================================================
+--- cpp/examples/linux/MinOZW/Makefile	(revision 741)
++++ cpp/examples/linux/MinOZW/Makefile	(working copy)
+@@ -36,7 +36,7 @@
+ 	$(MAKE) -C ../../../build/linux
+ 
+ test:	Main.o lib
+-	$(LD) -o $@ $(LDFLAGS) $< $(LIBS) -pthread -ludev
++	$(LD) -static -o $@ $(LDFLAGS) $< $(LIBS) -pthread -ludev -lrt
+ 
+ clean:
+ 	rm -f test Main.o
+Index: cpp/examples/linux/MinOZW/Main.cpp
+===================================================================
+--- cpp/examples/linux/MinOZW/Main.cpp	(revision 741)
++++ cpp/examples/linux/MinOZW/Main.cpp	(working copy)
+@@ -155,6 +155,7 @@
+ 			nodeInfo->m_nodeId = _notification->GetNodeId();
+ 			nodeInfo->m_polled = false;		
+ 			g_nodes.push_back( nodeInfo );
++			Manager::Get()->AddAssociation(nodeInfo->m_homeId,nodeInfo->m_nodeId,1,1);
+ 			break;
+ 		}
+ 
+@@ -258,11 +259,11 @@
+ 	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
+ 	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
+ 	// the log file will appear in the program's working directory.
+-	Options::Create( "../../../../config/", "", "" );
++	Options::Create( "/etc/zwave/", "/var/zwave/", "" );
+ 	Options::Get()->AddOptionInt( "SaveLogLevel", LogLevel_Detail );
+ 	Options::Get()->AddOptionInt( "QueueLogLevel", LogLevel_Debug );
+ 	Options::Get()->AddOptionInt( "DumpTrigger", LogLevel_Error );
+-	Options::Get()->AddOptionInt( "PollInterval", 500 );
++	Options::Get()->AddOptionInt( "PollInterval", 100 );
+ 	Options::Get()->AddOptionBool( "IntervalBetweenPolls", true );
+ 	Options::Get()->AddOptionBool("ValidateValueChanges", true);
+ 	Options::Get()->Lock();
+@@ -305,7 +306,7 @@
+ 	if( !g_initFailed )
+ 	{
+ 
+-		Manager::Get()->WriteConfig( g_homeId );
++//		Manager::Get()->WriteConfig( g_homeId );
+ 
+ 		// The section below demonstrates setting up polling for a variable.  In this simple
+ 		// example, it has been hardwired to poll COMMAND_CLASS_BASIC on the each node that 
+@@ -323,7 +324,7 @@
+ 				ValueID v = *it2;
+ 				if( v.GetCommandClassId() == 0x20 )
+ 				{
+-					Manager::Get()->EnablePoll( v, 2 );		// enables polling with "intensity" of 2, though this is irrelevant with only one value polled
++					Manager::Get()->EnablePoll( v, 1 );		// enables polling with "intensity" of 2, though this is irrelevant with only one value polled
+ 					break;
+ 				}
+ 			}
+@@ -338,6 +339,7 @@
+ 		// stalling the OpenZWave drivers.
+ 		// At this point, the program just waits for 3 minutes (to demonstrate polling),
+ 		// then exits
++/*
+ 		for( int i = 0; i < 60*3; i++ )
+ 		{
+ 			pthread_mutex_lock( &g_criticalSection );
+@@ -345,7 +347,11 @@
+ 			pthread_mutex_unlock( &g_criticalSection );
+ 			sleep(1);
+ 		}
+-
++*/
++		while(1)
++		{
++				sleep(1);
++		}
+ 		Driver::DriverData data;
+ 		Manager::Get()->GetDriverStatistics( g_homeId, &data );
+ 		printf("SOF: %d ACK Waiting: %d Read Aborts: %d Bad Checksums: %d\n", data.m_SOFCnt, data.m_ACKWaiting, data.m_readAborts, data.m_badChecksum);
