@@ -1,0 +1,110 @@
+/* Space out content a bit */
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.results {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/* Custom page header */
+.header {
+  border-bottom: 1px solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+  padding-bottom: 19px;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 40px;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+.container-narrow > hr {
+  margin: 30px 0;
+}
+
+/* Main marketing message and sign up button */
+.jumbotron {
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+}
+.jumbotron .btn {
+  padding: 14px 24px;
+  font-size: 21px;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  /* Remove the padding we set earlier */
+  .header,
+  .results {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  /* Space out the masthead */
+  .header {
+    margin-bottom: 30px;
+  }
+  /* Remove the bottom border on the jumbotron for visual effect */
+  .jumbotron {
+    border-bottom: 0;
+  }
+}
+
+.jumbotron input {
+  margin-bottom: 20px;
+}
+
+.status_view .jumbotron h1 {
+    padding-bottom: 20px;
+}
+.status_view .jumbotron h1 code {
+    color: inherit;
+    background-color: inherit;
+    font-size: 50%;
+}
+
+.header form {
+  float: right;
+  margin-top: 5px;
+}
+
+.status_view .jumbotron {
+  padding-top: 10px;
+  padding-bottom: 30px;
+}
+
+.hub-footer {
+  margin-bottom: 50px;
+}
+
+.driver_show_link {
+  font-size: 70%;
+  color: grey;
+}
+
+.loading {
+  text-align: center;
+}
+
+.header a:hover {
+  text-decoration: none;
+}
+
+.header input {
+  width: 200px !important;
+}
+
+.index_view td > small {
+  color: #999;
+}

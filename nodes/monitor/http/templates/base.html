@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smarthome health check{% endblock %}</title>
+
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.1.1/css/bootstrap.min.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        {% include 'style.css' %}
+    </style>
+</head>
+<body class="{% block view_name %}{% endblock %}">
+    <div class="container">
+      <div class="header">
+        <form class="form-inline search_form" role="form">
+          <input type="text" class="form-control" id="hub_id_input" placeholder="Multiple terms supported!">
+          <button type="submit" class="btn btn-primary">Go</button>
+        </form>
+
+        <a href="{{ url_for('serve_index') }}">
+          <h3 class="text-muted">Smarthome Hub health check</h3>
+        </a>
+      </div>
+
+      {% block content %}
+      {% endblock %}
+
+      <div class="loading">
+        <i class="fa fa-5x fa-spinner fa-spin"></i>
+      </div>
+
+      <div id="result"></div>
+    </div>
+
+    <script src="//cdn.jsdelivr.net/jquery/2.1.0/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script>
+        if (!String.prototype.trim) {
+          String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/g, '');
+          };
+        }
+
+        $('.search_form').submit(function(event) {
+          var search_string = $(this).find('input').val();
+          var search_url = "{{ url_for('serve_search', query='PLACEHOLDER') }}";
+          search_url = search_url.replace('PLACEHOLDER', encodeURIComponent(search_string));
+
+          window.location.href = search_url;
+
+          event.preventDefault();
+        });
+
+        $("#result").load("{% block ajax_url %}{% endblock %}",
+                          function() { $(".loading").hide(); });
+
+        function reload_ajax(url) {
+          $("#result").html('').load(url,
+            function() { $(".loading").hide(); });
+          $(".loading").show();
+        }
+    </script>
+</body>
+</html>

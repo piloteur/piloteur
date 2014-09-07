@@ -1,0 +1,87 @@
+{% if not h.error %}
+  <div class="jumbotron">
+    <h1><code>{{ h.hub_id }}</code></h1>
+    {% if h.hub_health == nexus.GREEN %}
+        <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
+    {% elif h.hub_health == nexus.YELLOW %}
+        <p><a class="btn btn-lg btn-warning" role="button">Yellow</a></p>
+    {% elif h.hub_health == nexus.RED %}
+        <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
+    {% endif %}
+  </div>
+
+  <h2>Wi-Fi</h2>
+  {% if h.wifi_quality %}
+    <div class="progress progress-striped">
+      {% if h.wifi_quality > 30 %}
+      <div class="progress-bar progress-bar-success" role="progressbar"
+      {% else %}
+      <div class="progress-bar progress-bar-danger" role="progressbar"
+      {% endif %}
+      aria-valuenow="{{ h.wifi_quality }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ h.wifi_quality }}%">
+        {{ h.wifi_quality }}%
+      </div>
+    </div>
+  {% else %}
+    <div class="progress progress-striped">
+      <div class="progress-bar progress-bar-info" role="progressbar"
+      aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+        No Wi-Fi connection available
+      </div>
+    </div>
+  {% endif %}
+
+  <h2>Classes</h2>
+  <table class="table table-bordered">
+    {% for class in h.classes %}
+        <tr class="">
+            <td>{{ class }}</td>
+        </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Drivers</h2>
+  <table class="table table-bordered">
+    {% for driver in h.drivers %}
+        <tr{% if driver[2] == nexus.GREEN %}
+        class="success"
+        {% elif driver[2] == nexus.YELLOW %}
+        class="warning"
+        {% elif driver[2] == nexus.RED %}
+        class="danger"
+        {% endif %}>
+            <td>
+              {{ driver[0] }}
+              <a class="driver_show_link" href="{{ url_for('show_data', hub_id=h.hub_id, driver_name=driver[0]) }}">[data]</a>
+              <a class="driver_show_link" href="{{ url_for('show_logs', hub_id=h.hub_id, driver_name=driver[0]) }}">[logs]</a>
+            </td>
+            <td>{{ driver[1] }}</td>
+        </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Versions</h2>
+  <table class="table table-bordered">
+    {% for version in h.versions %}
+        <tr{% if version[3] == nexus.GREEN %}
+        class="success"
+        {% elif version[3] == nexus.YELLOW %}
+        class="warning"
+        {% elif version[3] == nexus.RED %}
+        class="danger"
+        {% endif %}>
+            <td>{{ version[0] }}</td>
+            <td>{{ version[1] }}</td>
+            <td>{{ version[2] }}</td>
+        </tr>
+    {% endfor %}
+  </table>
+
+  <p class="hub-footer">
+    Hub timestamp: {{ h.timestamp }}
+  </p>
+{% else %}
+  <table class="table table-bordered">
+    <tr class="danger"><td>{{ h.error }}</td></tr>
+  </table>
+{% endif %}

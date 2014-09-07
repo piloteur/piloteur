@@ -1,0 +1,17 @@
+<h1>
+  Online hubs
+  <small>Last updated: {{ oldest_cache.humanize() }}</small>
+</h1>
+
+<table class="table table-bordered">
+  {% for h in hubs %}
+      <tr{% if h[1] == nexus.YELLOW %}
+       class="warning"
+       {% elif h[1] == nexus.RED %}
+       class="danger"
+       {% endif %}><td>
+          <a href="{{ url_for('serve_status', hub_id=h[0]) }}">{{ h[0] }}</a>
+          <small>{{ h[2] }}</small>
+      </td></tr>
+  {% endfor %}
+</table>

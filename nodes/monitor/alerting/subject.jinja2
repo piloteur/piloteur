@@ -1,0 +1,5 @@
+{%- if hub_health == 'FAIL' -%}
+    {{ hub_id }} is failing
+{%- else -%}
+    {{ hub_id }} is now {{ hub_health }} [was: {{ old_health|lower }}]
+{%- endif -%}

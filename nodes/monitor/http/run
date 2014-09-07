@@ -1,0 +1,3 @@
+#! /bin/bash
+
+exec python http.py serve >> http.log 2>&1
