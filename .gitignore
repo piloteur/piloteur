@@ -51,3 +51,10 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+/deployment/ec2.py
+/deployment/ec2.ini
+/deployment/inventory.ini
+/deployment/repo_overrides.yml
+
+
