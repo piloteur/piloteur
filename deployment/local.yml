@@ -13,7 +13,7 @@
   vars:
     pulling: True
   roles:
-    - hub-pull
+    - endpoint-pull
 
 - hosts: localhost
   gather_facts: True
@@ -23,4 +23,4 @@
     # Workaround ansible bug #6651
     - ["NOT_EXISTING_HACK", "../repo_overrides.yml"]
   roles:
-    - hub
+    - endpoint

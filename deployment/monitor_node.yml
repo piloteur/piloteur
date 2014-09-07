@@ -11,7 +11,7 @@
   tasks:
     - name: add smarthome-services to authorized_key
       authorized_key: user=ubuntu
-        key="{{ lookup('file', 'keys/smarthome-services.pub') }}"
+        key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
     - user: name=ubuntu password=!
 
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530

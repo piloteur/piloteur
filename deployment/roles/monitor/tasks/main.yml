@@ -17,7 +17,7 @@
 - name: mkdir ~/.ssh
   file: path={{ home }}/.ssh state=directory
 - name: upload the smarthome-services id_rsa
-  copy: src=keys/smarthome-services dest={{ home }}/.ssh/id_rsa mode=600
+  copy: src=smarthome-services dest={{ home }}/.ssh/id_rsa mode=600
 
 - name: cache the github.com host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-github.com"
@@ -60,10 +60,10 @@
 ########################################################################
 
 - name: install the git pull script
-  template: src=smarthome-git-pull dest=/usr/local/bin/smarthome-git-pull mode=0755
+  template: src=piloteur-git-pull dest=/usr/local/bin/piloteur-git-pull mode=0755
   sudo: yes
 - name: create git pull cron entry
-  cron: name="git pull" minute="*/15" job="/usr/local/bin/smarthome-git-pull"
+  cron: name="git pull" minute="*/15" job="/usr/local/bin/piloteur-git-pull"
 
 # TODO: virtualenv'ize this and wheels
 - name: install requirements.txt

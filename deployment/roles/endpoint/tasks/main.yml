@@ -128,10 +128,10 @@
 
 
 ########################################################################
-#                               TUNNELER                               #
+#                                BRIDGE                                #
 ########################################################################
 
-- name: extract tunneler host
+- name: extract bridge host
   shell: "{{ app }}/config.py | jq --raw-output .ssh_bridge_host"
   register: ssh_bridge_host
 - name: cache the remote host key
@@ -139,12 +139,12 @@
       ssh-keyscan -t ecdsa,rsa,dsa {{ ssh_bridge_host.stdout.strip() }} >> ~/.ssh/known_hosts;
       touch {{ home }}/.ssh/.cached-host-key-{{ ssh_bridge_host.stdout.strip() }}
 
-- name: install the tunneler init script
-  template: src=tunneler dest=/etc/init.d/tunneler
+- name: install the bridge init script
+  template: src=bridge dest=/etc/init.d/bridge
       owner=root group=root mode=0755
   sudo_user: root
-- name: enable tunneler
-  service: name=tunneler enabled=yes state=started
+- name: enable bridge
+  service: name=bridge enabled=yes state=started
   sudo_user: root
 
 - name: install the ssh config

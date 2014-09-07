@@ -1,9 +1,9 @@
 ##########################
 # Usage:
 #
-# ansible-playbook -i inventory.ini tunneler.yml --extra-vars "keypair_name=... security_group=... operation=new"
+# ansible-playbook -i inventory.ini bridge_node.yml --extra-vars "keypair_name=... security_group=... operation=new"
 # ---
-# ansible-playbook -i ec2.py tunneler.yml --extra-vars "operation=update"
+# ansible-playbook -i ec2.py bridge_node.yml --extra-vars "operation=update"
 ##########################
 
 - hosts: localhost
@@ -13,13 +13,13 @@
     instance_type: "t1.micro"
     image: "ami-d3675dba" # Debian Wheezy 7.4 PVM x86_64
     region: "us-east-1"
-    tag: "tunneler"
+    tag: "bridge"
   tasks:
     - name: check for the operation
       fail: msg="please specify a operation value of either `new` or `update`"
       when: operation is not defined or (operation != 'new' and operation != 'update')
 
-    - include: new_ec2_instance.yml
+    - include: snippet_new_instance.inc.yml
       when: operation == 'new'
 
     # BUG: FAILING ON GROUP EMPTY - groups["tag_smarthome_{{ tag }}"] does not exist
@@ -35,7 +35,7 @@
     - user: name=smarthome
     - name: add smarthome-services to authorized_key
       authorized_key: user=admin
-        key="{{ lookup('file', 'keys/smarthome-services.pub') }}"
+        key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
     - user: name=admin password=!
 
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
@@ -47,4 +47,4 @@
   sudo_user: smarthome
   sudo: yes
   roles:
-    - tunneler
+    - bridge
