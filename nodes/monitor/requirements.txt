@@ -5,4 +5,4 @@ Werkzeug==0.9.4
 itsdangerous==0.24
 requests==2.3.0
 
--r requirements.txt
+piloteur-nexus

@@ -109,7 +109,7 @@ Usage: %s [--config=<path>] <hub-id>
 
 Options:
     --config=<path> The path to Smarthome-NeXus JSON config
-                    [default: ~/.smarthome.json]
+                    [default: ~/.piloteur.json]
     """ % sys.argv[0]
 
     arguments = docopt.docopt(DOC)
