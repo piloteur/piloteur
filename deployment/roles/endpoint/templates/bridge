@@ -11,7 +11,7 @@
 
 case $1 in
     start)
-        sudo -u smarthome supervise {{ tunneler }}/client &
+        sudo -u piloteur supervise {{ endpoint }}/bridge &
         ;;
     *)
         echo "Usage: $0 start"

@@ -12,7 +12,7 @@
 case $1 in
     start)
     {% for dir in folders.stdout_lines %}
-        sudo -u smarthome mkdir -p "{{ dir| replace("~", home) }}"
+        sudo -u piloteur mkdir -p "{{ dir| replace("~", home) }}"
     {% endfor %}
         ;;
     *)

@@ -27,16 +27,12 @@
       ssh-keyscan -t ecdsa,rsa,dsa github.com >> ~/.ssh/known_hosts;
       touch {{ home }}/.ssh/.cached-host-key-github.com
 
-- name: checkout the hub repo
-  git: dest={{ app }} repo={{ hub_repo }} depth=1 version={{ hub_rev }}
+- name: checkout the code repo
+  git: dest={{ code }} repo={{ code_repo }} depth=1 version={{ code_rev }}
 - name: checkout the config repo
   git: dest={{ config }} repo={{ config_repo }} depth=1 version={{ config_rev }}
 - name: checkout the blobs repo
   git: dest={{ blobs }} repo={{ blobs_repo }} depth=1 version={{ blobs_rev }}
-- name: checkout the drivers repo
-  git: dest={{ drivers }} repo={{ drivers_repo }} depth=1 version={{ drivers_rev }}
-- name: checkout the tunneler repo
-  git: dest={{ tunneler }} repo={{ tunneler_repo }} depth=1 version={{ tunneler_rev }}
 
 
 ########################################################################
@@ -73,43 +69,43 @@
   sudo_user: root
 
 - name: create the virtualenv and install requirements.txt
-  pip: virtualenv={{ home }}/ENV/ requirements={{ app }}/requirements.txt
+  pip: virtualenv={{ home }}/ENV/ requirements={{ endpoint }}/requirements.txt
       extra_args="--no-index --use-wheel --find-links={{ blobs }}/wheelhouse"
 
 
 ########################################################################
-#            GENERATE/GET/INSTALL THE HUB-ID AND THE CLASSES           #
+#           GENERATE/GET/INSTALL THE NODE-ID AND THE CLASSES           #
 ########################################################################
 
-- name: generate hub unique UUID if not existing
-  shell: creates={{ home }}/.hub-id
-      uuidgen > {{ home }}/.hub-id
-  when: user_hub_id is not defined
+- name: generate node unique UUID if not existing
+  shell: creates={{ home }}/.node-id
+      uuidgen > {{ home }}/.node-id
+  when: user_node_id is not defined
 
-- name: check the user_hub_id/1
-  shell: executable=/bin/bash [[ {{ user_hub_id }} =~ ^[a-z0-9-]+$ ]]
-  when: user_hub_id is defined
+- name: check the user_node_id/1
+  shell: executable=/bin/bash [[ {{ user_node_id }} =~ ^[a-z0-9-]+$ ]]
+  when: user_node_id is defined
   register: result
   ignore_errors: True
-- name: check the user_hub_id/2
-  fail: msg="invalid characters in the user_hub_id"
+- name: check the user_node_id/2
+  fail: msg="invalid characters in the user_node_id"
   when: result|failed
 
-- name: install the user_hub_id
-  copy: content={{ user_hub_id }} dest={{ home }}/.hub-id
-  when: user_hub_id is defined
+- name: install the user_node_id
+  copy: content={{ user_node_id }} dest={{ home }}/.node-id
+  when: user_node_id is defined
 
-# - name: get the hub unique UUID
-#   command: "cat {{ home }}/.hub-id"
-#   register: hub_id
+# - name: get the node unique UUID
+#   command: "cat {{ home }}/.node-id"
+#   register: node_id
 # - debug: >
-#     msg="hub-id: {{ hub_id.stdout }}"
+#     msg="node-id: {{ node_id.stdout }}"
 
-- name: ensure .hub-classes exists
-  file: path={{ home }}/.hub-classes state=touch
-- name: install the hub classes
-  copy: content={{ hub_classes }} dest={{ home }}/.hub-classes
-  when: hub_classes is defined
+- name: ensure .node-classes exists
+  file: path={{ home }}/.node-classes state=touch
+- name: install the node classes
+  copy: content={{ node_classes }} dest={{ home }}/.node-classes
+  when: node_classes is defined
 
 
 ########################################################################
@@ -132,7 +128,7 @@
 ########################################################################
 
 - name: extract bridge host
-  shell: "{{ app }}/config.py | jq --raw-output .ssh_bridge_host"
+  shell: "{{ endpoint }}/config.py | jq --raw-output .ssh_bridge_host"
   register: ssh_bridge_host
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ ssh_bridge_host.stdout.strip() }}"
@@ -168,7 +164,7 @@
 
 # Cache the remotehost SSH host key
 - name: extract remote host
-  shell: "{{ app }}/config.py | jq --raw-output .remotehost"
+  shell: "{{ endpoint }}/config.py | jq --raw-output .remotehost"
   register: remotehost
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ remotehost.stdout.strip() }}"
@@ -178,7 +174,7 @@
 # Create folders
 - name: extract the folders that have to be created
   shell: >
-      {{ app }}/config.py | jq --raw-output '[.logs_path+(.logging_modules|.[]), .logs_path+(.loaded_drivers|.[])+"-driver", .logs_path, .data_path]|.[]'
+      {{ endpoint }}/config.py | jq --raw-output '[.logs_path+(.logging_modules|.[]), .logs_path+(.loaded_drivers|.[])+"-driver", .logs_path, .data_path]|.[]'
   register: folders
 - name: mkdir
   file: path={{ item }} state=directory
@@ -195,14 +191,14 @@
 
 # Setup sudoers file
 - name: setup sudo
-  template: src=sudoers dest=/etc/sudoers.d/smarthome validate='visudo -cf %s'
+  template: src=sudoers dest=/etc/sudoers.d/piloteur validate='visudo -cf %s'
       owner=root group=root
   sudo_user: root
 
 # Setup cronjobs
 - name: create cron entries
   cron: name="run '{{ item }}'"
-      job=". /etc/profile; . $HOME/.profile; cd '{{ app }}'; '{{ app }}/{{ item }}'"
+      job=". /etc/profile; . $HOME/.profile; cd '{{ endpoint }}'; '{{ endpoint }}/{{ item }}'"
   with_items:
-    - smarthome-hub-runner.sh
-    - smarthome-hub-watchdog.sh
+    - runner.sh
+    - watchdog.sh

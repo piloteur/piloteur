@@ -8,7 +8,7 @@ HOME = sys.argv[1]
 CONFIG_DIR = sys.argv[2]
 
 PATH = "/etc/wpa_supplicant/wpa_supplicant.conf"
-TOKEN = "###SMARTHOME-MAGIC-TOKEN###"
+TOKEN = "###PILOTEUR-MAGIC-TOKEN###"
 
 with open(PATH) as f:
     sys_cfg = f.read()
@@ -18,9 +18,9 @@ with open(PATH) as f:
 with open(os.path.join(CONFIG_DIR, "wlan.cfg")) as f:
     cfg = f.read()
 
-with open(os.path.expanduser('~smarthome/.hub-id')) as f:
+with open(os.path.expanduser('~piloteur/.node-id')) as f:
     UUID = f.read().strip()
-with open(os.path.expanduser('~smarthome/.hub-classes')) as f:
+with open(os.path.expanduser('~piloteur/.node-classes')) as f:
     classes = re.split(r'[^a-z0-9-]+', f.read().strip())
 
 config_paths = {}

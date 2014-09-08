@@ -8,7 +8,7 @@
     LOGS_PATH=$(./config.py | jq --raw-output .logs_path)
     eval LOGS_PATH="$LOGS_PATH" # Expand that ~
 
-    # UUID=$(cat ~/.hub-id)
+    # UUID=$(cat ~/.node-id)
     # LOGS_PATH="$LOGS_PATH$UUID/"
 
     LOG_HOUR=$(date --utc +%Y-%m-%d-%H)

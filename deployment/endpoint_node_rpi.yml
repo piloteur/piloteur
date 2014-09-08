@@ -3,7 +3,7 @@
   remote_user: pi
   sudo: yes
   tasks:
-    - user: name=smarthome
+    - user: name=piloteur
     - name: add smarthome-services to authorized_key
       authorized_key: user=pi
         key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
@@ -15,7 +15,7 @@
 - hosts: raspberrypi
   gather_facts: True
   remote_user: pi
-  sudo_user: smarthome
+  sudo_user: piloteur
   sudo: yes
   vars_files:
     - "{{ repo_overrides }}"

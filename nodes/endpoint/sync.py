@@ -39,7 +39,7 @@ class Syncer():
 
         logging.basicConfig(format=self.config['log_format'])
         logging.Formatter.converter = time.gmtime
-        self.log = logging.getLogger('HUB')
+        self.log = logging.getLogger('ENDPOINT')
         if os.environ.get('DEBUG'):
             self.log.setLevel(logging.DEBUG)
         else:
@@ -47,14 +47,14 @@ class Syncer():
 
         self.log.debug('Loaded config: %s', self.config)
 
-        with open(os.path.expanduser('~/.hub-id')) as f:
-            self.HUB_ID = f.read().strip()
+        with open(os.path.expanduser('~/.node-id')) as f:
+            self.NODE_ID = f.read().strip()
 
         self.DATA_PATH = os.path.expanduser(self.config['data_path'])
         self.LOGS_PATH = os.path.expanduser(self.config['logs_path'])
 
-        self.REMOTE_DATA_PATH = os.path.join('data', self.HUB_ID)
-        self.REMOTE_LOGS_PATH = os.path.join('logs', self.HUB_ID)
+        self.REMOTE_DATA_PATH = os.path.join('data', self.NODE_ID)
+        self.REMOTE_LOGS_PATH = os.path.join('logs', self.NODE_ID)
 
         self.LOG_HOUR = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H')
 
@@ -189,13 +189,7 @@ class Syncer():
         VERSIONS_PATH = os.path.join(self.LOGS_PATH, "versions/versions-log.%s.csv" % self.LOG_HOUR)
 
         versions = []
-        for repo in (
-            "smart-home-config",
-            "smarthome-deployment-blobs",
-            "smarthome-drivers",
-            "smarthome-hub-sync",
-            "smarthome-reverse-tunneler",
-        ):
+        for repo in ("piloteur-code", "piloteur-config", "piloteur-blobs"):
             versions.append(subprocess.check_output(["git", "rev-parse", "HEAD"],
                 cwd=os.path.expanduser("~/" + repo)).strip())
 
@@ -208,7 +202,7 @@ class Syncer():
         CLASSES_PATH = os.path.join(self.LOGS_PATH, "classes/classes-log.%s.csv" % self.LOG_HOUR)
 
         with open(CLASSES_PATH, 'a') as f:
-            f.write(','.join([self.config["hub-id"]] + self.config["hub-classes"]) + '\n')
+            f.write(','.join([self.config["node-id"]] + self.config["node-classes"]) + '\n')
 
     def iwconfig(self):
         IWCONFIG_PATH = os.path.join(self.LOGS_PATH, "iwconfig/iwconfig-log.%s.csv" % self.LOG_HOUR)

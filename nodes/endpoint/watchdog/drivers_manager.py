@@ -28,12 +28,12 @@ class DriversManager():
         self.stopped_drivers = []
 
         # TODO: un-hardcode this repo path
-        self.DRIVERS_PATH = os.path.expanduser('~/smarthome-drivers/drivers')
+        self.DRIVERS_PATH = os.path.expanduser('~/piloteur-code/drivers/drivers')
 
         self.DRIVER_WRAPPER = os.path.abspath('watchdog/driver-wrapper.sh')
 
         self.GEN_FINGER_PATH = os.path.expanduser('~/.general_fingerprints')
-        self.DRV_FINGER_PATH = os.path.expanduser('~/.drivers_fingerprints')
+        # self.DRV_FINGER_PATH = os.path.expanduser('~/.drivers_fingerprints')
 
     def run(self):
         self.check_changes()
@@ -41,13 +41,13 @@ class DriversManager():
 
     def check_changes(self):
         self.check_global_changes()
-        self.check_drivers_changes()
+        # self.check_drivers_changes()
 
     def check_global_changes(self):
         hub_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
-            cwd=os.path.expanduser('~/smarthome-hub-sync'))
+            cwd=os.path.expanduser('~/piloteur-code'))
         config = hashlib.md5(subprocess.check_output(["./config.py"],
-            cwd=os.path.expanduser('~/smarthome-hub-sync'))).hexdigest()
+            cwd=os.path.expanduser('~/piloteur-code/nodes/endpoint'))).hexdigest()
 
         fingerprint = hub_head + '\n' + config
 

@@ -22,9 +22,9 @@
     - include: snippet_new_instance.inc.yml
       when: operation == 'new'
 
-    # BUG: FAILING ON GROUP EMPTY - groups["tag_smarthome_{{ tag }}"] does not exist
+    # BUG: FAILING ON GROUP EMPTY - groups["tag_piloteur_{{ tag }}"] does not exist
     - add_host: name="{{ item }}" groups=machines
-      with_items: groups["tag_smarthome_{{ tag }}"]
+      with_items: groups["tag_piloteur_{{ tag }}"]
       when: operation == 'update'
 
 - hosts: machines
@@ -32,7 +32,7 @@
   remote_user: admin
   sudo: yes
   tasks:
-    - user: name=smarthome
+    - user: name=piloteur
     - name: add smarthome-services to authorized_key
       authorized_key: user=admin
         key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
@@ -44,7 +44,7 @@
 - hosts: machines
   gather_facts: True
   remote_user: admin
-  sudo_user: smarthome
+  sudo_user: piloteur
   sudo: yes
   vars_files:
     - "{{ repo_overrides }}"

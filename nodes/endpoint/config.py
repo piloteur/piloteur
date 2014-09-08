@@ -36,13 +36,13 @@ if len(sys.argv) > 1:
     UUID = sys.argv[1]
     classes = sys.argv[2:]
 else:
-    with open(os.path.expanduser('~/.hub-id')) as f:
+    with open(os.path.expanduser('~/.node-id')) as f:
         UUID = f.read().strip()
-    with open(os.path.expanduser('~/.hub-classes')) as f:
+    with open(os.path.expanduser('~/.node-classes')) as f:
         classes = re.split(r'[^a-z0-9-]+', f.read().strip())
 
 # TODO: un-hardcode this?
-CONFIG_DIR = os.path.expanduser('~/smart-home-config/config')
+CONFIG_DIR = os.path.expanduser('~/piloteur-config/config')
 
 with open(os.path.join(CONFIG_DIR, "config.json")) as f:
     config = json.load(f)
@@ -55,7 +55,7 @@ for name in classes + [UUID]:
         new_config = json.load(f)
     config = dmerge(config, new_config)
 
-config["hub-id"] = UUID
-config["hub-classes"] = classes
+config["node-id"] = UUID
+config["node-classes"] = classes
 
 json.dump(config, sys.stdout, indent=4)

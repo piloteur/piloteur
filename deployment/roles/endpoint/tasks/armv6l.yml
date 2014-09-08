@@ -44,7 +44,7 @@
 
 ################################# MISC ##################################
 - name: armv6l | setup and mount tmpfs
-  mount: name={{ home }}/smarthome src=tmpfs fstype=tmpfs
+  mount: name={{ home }}/piloteur src=tmpfs fstype=tmpfs
       state=mounted
   sudo_user: root
 
