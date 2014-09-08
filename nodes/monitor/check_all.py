@@ -3,7 +3,7 @@ import paramiko
 import os.path
 
 from nexus import GREEN, init
-from monitor import get_tunnel_connections, fetch_data, assess_data
+from monitor import get_bridge_connections, fetch_data, assess_data
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -19,18 +19,18 @@ for _ in range(5):
 else:
     exit(1)
 
-hubs_list = get_tunnel_connections(config['tunnel_info'])
+nodes_list = get_bridge_connections(config['bridge_info'])
 
 results = []
-for hub_id in hubs_list:
-    data = fetch_data(hub_id, config)
+for node_id in nodes_list:
+    data = fetch_data(node_id, config)
     res = assess_data(data, config)
 
     if res.error:
         color = 'RED'
-    elif res.hub_health != GREEN:
+    elif res.node_health != GREEN:
         color = 'YELLOW'
     else:
         color = 'GREEN'
 
-    print('[{}] {}... {}'.format(color, res.hub_id, res.error or res.summary))
+    print('[{}] {}... {}'.format(color, res.node_id, res.error or res.summary))

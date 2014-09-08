@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
-"""Smarthome monitor.
+"""Piloteur monitor.
 
 Usage: monitor.py serve [--listen=<addr>]
 
@@ -30,7 +30,7 @@ import nexus.private
 
 PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PARENT)
-from monitor import get_tunnel_connections, fetch_data, assess_data
+from monitor import get_bridge_connections, fetch_data, assess_data
 
 
 class Monitor():
@@ -57,16 +57,16 @@ class Monitor():
 
     ### STATUS
 
-    def serve_status(self, hub_id):
-        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
-        return render_template('status.html', hub_id=hub_id)
+    def serve_status(self, node_id):
+        if not re.match(r'^[a-z0-9-]+$', node_id): abort(403)
+        return render_template('status.html', node_id=node_id)
 
-    def ajax_status(self, hub_id):
-        if not re.match(r'^[a-z0-9-]+$', hub_id): abort(403)
+    def ajax_status(self, node_id):
+        if not re.match(r'^[a-z0-9-]+$', node_id): abort(403)
 
         self.nexus_init()
 
-        data = fetch_data(hub_id, self.config)
+        data = fetch_data(node_id, self.config)
         result = assess_data(data, self.config)
 
         return render_template('ajax_status.html', h=result, nexus=nexus)
@@ -86,48 +86,48 @@ class Monitor():
 
         if refresh:
             self.nexus_init()
-            all_hubs = nexus.list_hub_ids()
+            all_nodes = nexus.list_node_ids()
         else:
             c = sqlite3.connect(self.db_path).cursor()
-            c.execute('SELECT hub_id FROM Cache')
-            all_hubs = [row[0] for row in c.fetchall()]
+            c.execute('SELECT node_id FROM Cache')
+            all_nodes = [row[0] for row in c.fetchall()]
 
-        hubs = set()
+        nodes = set()
         for keyword in query.split(' '):
             keyword = '*' + keyword.strip('*') + '*'
-            hubs.update(fnmatch.filter(all_hubs, keyword))
+            nodes.update(fnmatch.filter(all_nodes, keyword))
 
-        if len(hubs) == 1:
+        if len(nodes) == 1:
             return """
             <script>window.location.href = "{}";</script>
-            """.format(url_for('serve_status', hub_id=list(hubs)[0]))
+            """.format(url_for('serve_status', node_id=list(nodes)[0]))
 
         results = []
         oldest_cache = arrow.utcnow()
-        for hub_id in hubs:
+        for node_id in nodes:
             if refresh:
-                data = fetch_data(hub_id, self.config)
+                data = fetch_data(node_id, self.config)
                 res = assess_data(data, self.config)
 
                 results.append((
-                    res.hub_id,
-                    res.hub_health,
+                    res.node_id,
+                    res.node_health,
                     res.error or res.summary
                 ))
 
                 continue
 
-            c.execute('SELECT * FROM Cache WHERE hub_id=?', [hub_id])
-            for hub_id, hub_health, summary, cache_time in c.fetchall():
+            c.execute('SELECT * FROM Cache WHERE node_id=?', [node_id])
+            for node_id, node_health, summary, cache_time in c.fetchall():
                 cache_time = arrow.get(cache_time, 'YYYY-MM-DD HH:mm:ss')
                 oldest_cache = min(cache_time, oldest_cache)
 
-                hub_health = {
+                node_health = {
                     'RED': nexus.RED, 'YELLOW': nexus.YELLOW,
                     'GREEN': nexus.GREEN, 'FAIL': nexus.RED
-                }[hub_health]
+                }[node_health]
 
-                results.append((hub_id, hub_health, summary))
+                results.append((node_id, node_health, summary))
 
         if refresh or not results: oldest_cache = None
         else: oldest_cache = oldest_cache.humanize()
@@ -148,24 +148,24 @@ class Monitor():
     def ajax_index(self):
         c = sqlite3.connect(self.db_path).cursor()
 
-        hubs_list = get_tunnel_connections(self.config['tunnel_info'])
+        nodes_list = get_bridge_connections(self.config['bridge_info'])
         oldest_cache = arrow.utcnow()
 
-        hubs = []
-        for hub_id in sorted(hubs_list):
-            c.execute('SELECT * FROM Cache WHERE hub_id=?', [hub_id])
-            for hub_id, hub_health, summary, cache_time in c.fetchall():
+        nodes = []
+        for node_id in sorted(nodes_list):
+            c.execute('SELECT * FROM Cache WHERE node_id=?', [node_id])
+            for node_id, node_health, summary, cache_time in c.fetchall():
                 cache_time = arrow.get(cache_time, 'YYYY-MM-DD HH:mm:ss')
                 oldest_cache = min(cache_time, oldest_cache)
 
-                hub_health = {
+                node_health = {
                     'RED': nexus.RED, 'YELLOW': nexus.YELLOW,
                     'GREEN': nexus.GREEN, 'FAIL': nexus.RED
-                }[hub_health]
+                }[node_health]
 
-                hubs.append((hub_id, hub_health, summary))
+                nodes.append((node_id, node_health, summary))
 
-        return render_template('ajax_index.html', hubs=hubs,
+        return render_template('ajax_index.html', nodes=nodes,
             oldest_cache=oldest_cache, nexus=nexus)
 
 
@@ -177,40 +177,40 @@ class Monitor():
     def ajax_all(self):
         self.nexus_init()
 
-        hubs_list = get_tunnel_connections(self.config['tunnel_info'])
+        nodes_list = get_bridge_connections(self.config['bridge_info'])
 
         results = []
-        for hub_id in hubs_list:
-            app.logger.info(hub_id)
+        for node_id in nodes_list:
+            app.logger.info(node_id)
 
-            data = fetch_data(hub_id, self.config)
+            data = fetch_data(node_id, self.config)
             res = assess_data(data, self.config)
 
             if res.error:
                 color = nexus.RED
-            elif res.hub_health != nexus.GREEN:
+            elif res.node_health != nexus.GREEN:
                 color = nexus.YELLOW
             else:
                 color = nexus.GREEN
 
-            results.append((res.hub_id, color, res.error or res.summary))
+            results.append((res.node_id, color, res.error or res.summary))
 
         return render_template('ajax_search.html', results=results, nexus=nexus)
 
 
     ### SHOW
 
-    def show_data(self, hub_id, driver_name):
+    def show_data(self, node_id, driver_name):
         self.nexus_init()
 
-        data = nexus.fetch_data(driver_name, hub_id=hub_id)
+        data = nexus.fetch_data(driver_name, node_id=node_id)
         if not data: abort(404)
         return Response(data, mimetype='text/plain')
 
-    def show_logs(self, hub_id, driver_name):
+    def show_logs(self, node_id, driver_name):
         self.nexus_init()
 
-        logs = nexus.fetch_logs(driver_name, hub_id=hub_id)
+        logs = nexus.fetch_logs(driver_name, node_id=node_id)
         if not logs: abort(404)
         return Response(logs, mimetype='text/plain')
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
     M = Monitor(config, os.path.join(DIR, '..', 'cache.db'))
 
-    arguments = docopt(__doc__, version='Smarthome monitor 0.4')
+    arguments = docopt(__doc__, version='Piloteur monitor 0.5')
 
     app = Flask(__name__)
 
@@ -232,16 +232,16 @@ if __name__ == '__main__':
     # app.add_url_rule("/all", 'serve_all', M.serve_all)
     # app.add_url_rule("/ajax/all/", 'ajax_all', M.ajax_all)
 
-    app.add_url_rule("/status/<hub_id>", 'serve_status', M.serve_status)
-    app.add_url_rule("/ajax/status/<hub_id>", 'ajax_status', M.ajax_status)
+    app.add_url_rule("/status/<node_id>", 'serve_status', M.serve_status)
+    app.add_url_rule("/ajax/status/<node_id>", 'ajax_status', M.ajax_status)
 
     app.add_url_rule("/search/<query>", 'serve_search', M.serve_search)
     app.add_url_rule("/ajax/search/<query>", 'ajax_search', M.ajax_search)
     app.add_url_rule("/ajax/search/<query>/refresh",
         'ajax_search_refresh', M.ajax_search_refresh)
 
-    app.add_url_rule("/show/<hub_id>/data/<driver_name>", 'show_data', M.show_data)
-    app.add_url_rule("/show/<hub_id>/logs/<driver_name>", 'show_logs', M.show_logs)
+    app.add_url_rule("/show/<node_id>/data/<driver_name>", 'show_data', M.show_data)
+    app.add_url_rule("/show/<node_id>/logs/<driver_name>", 'show_logs', M.show_logs)
 
     host, port = arguments['--listen'].split(':')
     # app.debug = True

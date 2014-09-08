@@ -2,14 +2,12 @@
     "data_location": "sensordata@power4.cs.virginia.edu:smarthome/",
     "loglevel": "INFO",
     "ssh_key": "~/.ssh/id_rsa",
-    "tunnel_info": [
+    "bridge_info": [
         "admin",
         "ec2-54-208-95-123.compute-1.amazonaws.com", 22,
-        "~smarthome/ssh_ports/"
+        "~piloteur/ssh_ports/"
     ],
-    "mailgun_domain": "mg.smarthome.qf.io",
+    "mailgun_domain": "mg.piloteur.qf.io",
     "mailgun_api_key": "key-2d67d4422436ea9080c9f17bcd1f811a",
-    "alert_mail_from": "Smarthome Alert Bot <alert@mg.smarthome.qf.io>",
-    "hub_config_path": "~/smarthome-hub-sync/config.py",
-    "checks_path": "~/smarthome-checks"
+    "alert_mail_from": "Piloteur Alert Bot <alert@mg.piloteur.qf.io>"
 }

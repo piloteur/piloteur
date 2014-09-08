@@ -1,6 +1,6 @@
 {% if results %}
     <p class="text-center lead">
-      Found {{ results|count }} hubs
+      Found {{ results|count }} nodes
     </p>
 {% endif %}
 {% if oldest_cache %}
@@ -20,7 +20,7 @@
        {% elif result[1] == nexus.RED %}
        class="danger"
        {% endif %}>
-          <td><a href="{{ url_for('serve_status', hub_id=result[0]) }}">{{ result[0] }}</a></td>
+          <td><a href="{{ url_for('serve_status', node_id=result[0]) }}">{{ result[0] }}</a></td>
           <td>{% if result[1] == nexus.GREEN %}
           GREEN
           {% elif result[1] == nexus.YELLOW %}
@@ -31,6 +31,6 @@
           <td>{{ result[2] }}</td>
       </tr>
   {% else %}
-      <tr class="danger"><td>No Hub ID found</td></tr>
+      <tr class="danger"><td>No Node ID found</td></tr>
   {% endfor %}
 </table>

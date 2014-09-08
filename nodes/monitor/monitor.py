@@ -11,7 +11,7 @@ import importlib
 import traceback
 import datetime
 
-from nexus import RED, YELLOW, GREEN, list_hub_ids
+from nexus import RED, YELLOW, GREEN, list_node_ids
 import nexus.private
 
 def void_namedtuple(ntuple):
@@ -21,13 +21,13 @@ def void_namedtuple(ntuple):
     return new
 
 NodeData = void_namedtuple(collections.namedtuple('NodeData',
-    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'config']))
+    ['node_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'config']))
 NodeResult = void_namedtuple(collections.namedtuple('NodeResult',
-    ['hub_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'summary', 'hub_health', 'drivers']))
+    ['node_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'summary', 'node_health', 'drivers']))
 
 
-def get_tunnel_connections(tunnel_info):
-    username, hostname, port, folder = tunnel_info
+def get_bridge_connections(bridge_info):
+    username, hostname, port, folder = bridge_info
 
     client = paramiko.SSHClient()
     client.load_system_host_keys()
@@ -38,52 +38,50 @@ def get_tunnel_connections(tunnel_info):
     stdin, stdout, stderr = client.exec_command(cmd)
     return [n.strip() for n in stdout.readlines()]
 
-def fetch_data(hub_id, config):
-    nexus.private.set_hub_id(hub_id)
+def fetch_data(node_id, config):
+    nexus.private.set_node_id(node_id)
 
-    if hub_id not in list_hub_ids():
-        return NodeData(hub_id=hub_id, error="Hub ID not found.")
+    if node_id not in list_node_ids():
+        return NodeData(node_id=node_id, error="Node ID not found.")
 
     classes_log = nexus.private.fetch_system_logs("classes")
     if not classes_log:
-        return NodeData(hub_id=hub_id, error="Missing classes data.")
-    remote_hub_id = classes_log.split(',')[0]
-    if not remote_hub_id == hub_id:
-        return NodeData(hub_id=hub_id, error="Mismatching hub_id?!")
+        return NodeData(node_id=node_id, error="Missing classes data.")
+    remote_node_id = classes_log.split(',')[0]
+    if not remote_node_id == node_id:
+        return NodeData(node_id=node_id, error="Mismatching node_id?!")
     classes = classes_log.split(',')[1:]
 
-    config_cmd = [os.path.expanduser(config["hub_config_path"])]
-    config_cmd.append(hub_id)
+    config_cmd = [os.path.expanduser("~/piloteur-code/nodes/endpoint/config.py")]
+    config_cmd.append(node_id)
     config_cmd.extend(classes)
     node_config = json.loads(subprocess.check_output(config_cmd))
 
     timestamp = nexus.get_timestamp()
     if timestamp is None:
-        return NodeData(hub_id=hub_id, error="Missing timesync data.")
+        return NodeData(node_id=node_id, error="Missing timesync data.")
     timestamp = arrow.get(timestamp)
 
     iwconfig_log = nexus.private.fetch_system_logs("iwconfig")
     if not iwconfig_log:
-        return NodeData(hub_id=hub_id, error="Missing iwconfig data.")
+        return NodeData(node_id=node_id, error="Missing iwconfig data.")
     wifi_quality = iwconfig_log.split(',')[1]
     if wifi_quality == 'N/A': wifi_quality = None
     else: wifi_quality = int(wifi_quality)
 
     versions_log = nexus.private.fetch_system_logs("versions")
     if not versions_log:
-        return NodeData(hub_id=hub_id, error="Missing versions data.")
+        return NodeData(node_id=node_id, error="Missing versions data.")
     versions = versions_log.split(',')
     versions = dict(zip((
         "timestamp",
         "ansible",
-        "smart-home-config",
-        "smarthome-deployment-blobs",
-        "smarthome-drivers",
-        "smarthome-hub-sync",
-        "smarthome-reverse-tunneler",
+        "piloteur-code",
+        "piloteur-config",
+        "piloteur-blobs",
     ), versions))
 
-    return NodeData(hub_id=hub_id,
+    return NodeData(node_id=node_id,
                     classes=classes,
                     config=node_config,
                     timestamp=timestamp,
@@ -93,16 +91,16 @@ def fetch_data(hub_id, config):
 def assess_data(data, config):
     if data.error:
         return NodeResult(
-            hub_id=data.hub_id,
-            hub_health=RED,
+            node_id=data.node_id,
+            node_health=RED,
             error=data.error,
         )
 
-    checks_path = os.path.expanduser(config['checks_path'])
-    if not checks_path in sys.path: sys.path.append(checks_path)
-    from driver_checks.common import data_freshness_check
+    drivers_path = os.path.expanduser("~/piloteur-code/drivers")
+    if not drivers_path in sys.path: sys.path.append(drivers_path)
+    from checks.common import data_freshness_check
 
-    hub_health = GREEN
+    node_health = GREEN
     error_message = ''
 
 
@@ -112,7 +110,7 @@ def assess_data(data, config):
     drivers = []
     for driver_name in sorted(data.config['loaded_drivers']):
         try:
-            module = importlib.import_module('driver_checks.' + driver_name)
+            module = importlib.import_module('checks.' + driver_name)
             check = module.check
         except ImportError:
             # TODO: communicate somehow that we are fallbacking
@@ -120,13 +118,13 @@ def assess_data(data, config):
             check = data_freshness_check(driver_name, red_limit)
 
         try:
-            nexus.private.set_hub_id(data.hub_id)  # TODO but better safe than sorry
-            res = check(data.hub_id)
+            nexus.private.set_node_id(data.node_id)  # TODO but better safe than sorry
+            res = check(data.node_id)
         except:
             exc_msg = traceback.format_exception_only(*sys.exc_info()[:2])[-1]
             return NodeResult(
-                hub_id=data.hub_id,
-                hub_health=RED,
+                node_id=data.node_id,
+                node_health=RED,
                 error=exc_msg,
             )
 
@@ -135,7 +133,7 @@ def assess_data(data, config):
 
         if health != GREEN:
             error_message += '"{}": {}. '.format(driver_name, message)
-        hub_health = max(hub_health, health)
+        node_health = max(node_health, health)
         drivers.append((driver_name, message, health))
 
     ########################################################################
@@ -147,7 +145,7 @@ def assess_data(data, config):
     if ansible != 'ansible 1.5.3':  # TODO unhardcode?
         health = RED
         error_message += 'Old Ansible version. '
-    hub_health = max(hub_health, health)
+    node_health = max(node_health, health)
     versions.append(('ansible', ansible, 'ansible 1.5.3', health))
 
     del data.versions['timestamp']
@@ -161,15 +159,15 @@ def assess_data(data, config):
     # WI-FI QUALITY                                                        #
     ########################################################################
     if data.wifi_quality and data.wifi_quality < 30:
-        hub_health = max(hub_health, YELLOW)
+        node_health = max(node_health, YELLOW)
         error_message += 'Weak Wi-Fi signal. '
 
 
     return NodeResult(
         drivers=drivers,
         timestamp=data.timestamp.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        hub_id=data.hub_id,
-        hub_health=hub_health,
+        node_id=data.node_id,
+        node_health=node_health,
         versions=versions,
         classes=data.classes,
         wifi_quality=data.wifi_quality,

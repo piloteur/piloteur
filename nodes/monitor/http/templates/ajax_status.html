@@ -1,11 +1,11 @@
 {% if not h.error %}
   <div class="jumbotron">
-    <h1><code>{{ h.hub_id }}</code></h1>
-    {% if h.hub_health == nexus.GREEN %}
+    <h1><code>{{ h.node_id }}</code></h1>
+    {% if h.node_health == nexus.GREEN %}
         <p><a class="btn btn-lg btn-success" role="button">Green</a></p>
-    {% elif h.hub_health == nexus.YELLOW %}
+    {% elif h.node_health == nexus.YELLOW %}
         <p><a class="btn btn-lg btn-warning" role="button">Yellow</a></p>
-    {% elif h.hub_health == nexus.RED %}
+    {% elif h.node_health == nexus.RED %}
         <p><a class="btn btn-lg btn-danger" role="button">Red</a></p>
     {% endif %}
   </div>
@@ -52,8 +52,8 @@
         {% endif %}>
             <td>
               {{ driver[0] }}
-              <a class="driver_show_link" href="{{ url_for('show_data', hub_id=h.hub_id, driver_name=driver[0]) }}">[data]</a>
-              <a class="driver_show_link" href="{{ url_for('show_logs', hub_id=h.hub_id, driver_name=driver[0]) }}">[logs]</a>
+              <a class="driver_show_link" href="{{ url_for('show_data', node_id=h.node_id, driver_name=driver[0]) }}">[data]</a>
+              <a class="driver_show_link" href="{{ url_for('show_logs', node_id=h.node_id, driver_name=driver[0]) }}">[logs]</a>
             </td>
             <td>{{ driver[1] }}</td>
         </tr>
@@ -77,8 +77,8 @@
     {% endfor %}
   </table>
 
-  <p class="hub-footer">
-    Hub timestamp: {{ h.timestamp }}
+  <p class="node-footer">
+    Node timestamp: {{ h.timestamp }}
   </p>
 {% else %}
   <table class="table table-bordered">

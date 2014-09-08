@@ -24,18 +24,12 @@
       ssh-keyscan -t ecdsa,rsa,dsa github.com >> ~/.ssh/known_hosts;
       touch {{ home }}/.ssh/.cached-host-key-github.com
 
-- name: checkout the hub repo
-  git: dest={{ hub }} repo={{ hub_repo }} depth=1 version={{ hub_rev }}
+- name: checkout the code repo
+  git: dest={{ code }} repo={{ code_repo }} depth=1 version={{ code_rev }}
 - name: checkout the config repo
   git: dest={{ config }} repo={{ config_repo }} depth=1 version={{ config_rev }}
 - name: checkout the blobs repo
   git: dest={{ blobs }} repo={{ blobs_repo }} depth=1 version={{ blobs_rev }}
-- name: checkout the drivers repo
-  git: dest={{ drivers }} repo={{ drivers_repo }} depth=1 version={{ drivers_rev }}
-- name: checkout the tunneler repo
-  git: dest={{ tunneler }} repo={{ tunneler_repo }} depth=1 version={{ tunneler_rev }}
-- name: checkout the monitor repo
-  git: dest={{ monitor }} repo={{ monitor_repo }} depth=1 version={{ monitor_rev }}
 
 ########################################################################
 #                    DEPENDENCIES INSTALLATION                         #
@@ -66,26 +60,35 @@
   cron: name="git pull" minute="*/15" job="/usr/local/bin/piloteur-git-pull"
 
 # TODO: virtualenv'ize this and wheels
+- name: install nexus
+  pip: requirements={{ code }}/nexus/requirements.txt chdir={{ code }}/nexus
+  sudo: yes
 - name: install requirements.txt
-  pip: requirements={{ monitor }}/requirements_node.txt chdir={{ monitor }}
+  pip: requirements={{ monitor }}/requirements.txt chdir={{ monitor }}
   sudo: yes
 
 # Cache the remotehost SSH host key
 - name: extract remote host
-  shell: "{{ hub }}/config.py any | jq --raw-output .remotehost"
+  shell: "{{ endpoint }}/config.py any | jq --raw-output .remotehost"
   register: remotehost
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ remotehost.stdout.strip() }}"
       ssh-keyscan -t ecdsa,rsa,dsa {{ remotehost.stdout.strip() }} >> ~/.ssh/known_hosts;
       touch {{ home }}/.ssh/.cached-host-key-{{ remotehost.stdout.strip() }}
 
-- name: install the monitor init script
-  template: src=monitor dest=/etc/init.d/monitor
+- name: install the monitor init scripts
+  template: src={{ item }} dest=/etc/init.d/{{ item }}
       owner=root group=root mode=0755
   sudo: yes
-- name: enable monitor
-  service: name=monitor enabled=yes state=started
+  with_items:
+    - http
+    - alerting
+- name: enable the init scripts
+  service: name={{ item }} enabled=yes state=started
   sudo: yes
+  with_items:
+    - http
+    - alerting
 
 - name: install iptables
   file: src=rules.v4 dest=/etc/iptables/rules.v4

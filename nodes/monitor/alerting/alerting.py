@@ -35,7 +35,7 @@ class Alerting():
         subject = self.tmpl_env.get_template('subject.jinja2').render(**data).strip()
         body = self.tmpl_env.get_template('body.jinja2').render(**data)
 
-        if data['hub_health'] == 'FAIL' or data['old_health'] == 'FAIL':
+        if data['node_health'] == 'FAIL' or data['old_health'] == 'FAIL':
             to = data['config']['system_alert_recipients']
         else:
             to = data['config']['alert_recipients']
@@ -79,27 +79,27 @@ class Alerting():
 
         self.log.debug('Logged in.')
 
-        all_hubs = nexus.list_hub_ids()
-        for hub_id in all_hubs:
-            data = fetch_data(hub_id, self.config)
+        all_nodes = nexus.list_node_ids()
+        for node_id in all_nodes:
+            data = fetch_data(node_id, self.config)
             res = assess_data(data, self.config)
 
-            hub_health = {
+            node_health = {
                 nexus.RED: 'RED', nexus.YELLOW: 'YELLOW', nexus.GREEN: 'GREEN'
-            }[res.hub_health]
+            }[res.node_health]
 
-            if res.error: hub_health = 'FAIL'
+            if res.error: node_health = 'FAIL'
 
             c = self.db.cursor()
-            c.execute('SELECT * FROM Cache WHERE hub_id=?', [res.hub_id])
+            c.execute('SELECT * FROM Cache WHERE node_id=?', [res.node_id])
             for _, old_health, old_summary, old_time in c.fetchall():
-                if old_health == hub_health: break
+                if old_health == node_health: break
 
                 a = arrow.get(old_time, 'YYYY-MM-DD HH:mm:ss')
 
                 info = {
-                    'hub_id': res.hub_id,
-                    'hub_health': hub_health,
+                    'node_id': res.node_id,
+                    'node_health': node_health,
                     'summary': res.error or res.summary,
                     'time': arrow.utcnow().format('YYYY-MM-DD HH:mm:ss ZZ'),
                     'human_old_time': a.humanize(),
@@ -109,32 +109,32 @@ class Alerting():
                     'config': data.config,
                 }
 
-                if hub_health == 'FAIL':
-                    self.log.info("{hub_id} failed: {summary} "
+                if node_health == 'FAIL':
+                    self.log.info("{node_id} failed: {summary} "
                         "[was: {old_health} - {old_time}]".format(**info))
 
                     self._send_mail(info)
                     break
 
                 # If the status went to GREEN or got worse (* -> R || G -> Y)
-                if hub_health == 'GREEN' or hub_health == 'RED' or (
-                    old_health == 'GREEN' and hub_health == 'YELLOW'):
-                    self.log.info("{hub_id} is {hub_health}: {summary} "
+                if node_health == 'GREEN' or node_health == 'RED' or (
+                    old_health == 'GREEN' and node_health == 'YELLOW'):
+                    self.log.info("{node_id} is {node_health}: {summary} "
                         "[was: {old_health} - {old_time}]".format(**info))
 
                     self._send_mail(info)
 
             self.log.debug("{} is {}: {}".format(
-                res.hub_id,
-                hub_health,
+                res.node_id,
+                node_health,
                 res.error or res.summary
             ))
 
             c.execute("""INSERT OR REPLACE INTO Cache
-                (hub_id, hub_health, summary, time)
+                (node_id, node_health, summary, time)
                 VALUES (?, ?, ?, datetime('now'));""", (
-                    res.hub_id,
-                    hub_health,
+                    res.node_id,
+                    node_health,
                     res.error or res.summary
             ))
             self.db.commit()
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     # c.execute("""CREATE TABLE IF NOT EXISTS Info
     #     (name TEXT PRIMARY KEY, value TEXT)""")
     c.execute("""CREATE TABLE IF NOT EXISTS Cache
-        (hub_id TEXT PRIMARY KEY, hub_health TEXT,
+        (node_id TEXT PRIMARY KEY, node_health TEXT,
         summary TEXT, time TIMESTAMP)""")
     conn.commit()
 

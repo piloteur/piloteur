@@ -8,13 +8,16 @@ git_pull() {
 }
 
 main() {
-    local folders=('{{ hub }}' '{{ config }}' '{{ blobs }}' '{{ drivers }}' '{{ tunneler }}')
+    local folders=('{{ code }}' '{{ config }}' '{{ blobs }}')
     local f
 
     for f in "${folders[@]}"
     do
         git_pull "$f"
     done
+
+    pkill --full "http.py"
+    pkill --full "alerting.py"
 }
 
 main

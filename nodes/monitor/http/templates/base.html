@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Smarthome health check{% endblock %}</title>
+    <title>{% block title %}Piloteur health check{% endblock %}</title>
 
     <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.0.3/css/font-awesome.css">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.1.1/css/bootstrap-theme.min.css">
@@ -23,12 +23,12 @@
     <div class="container">
       <div class="header">
         <form class="form-inline search_form" role="form">
-          <input type="text" class="form-control" id="hub_id_input" placeholder="Multiple terms supported!">
+          <input type="text" class="form-control" id="node_id_input" placeholder="Multiple terms supported!">
           <button type="submit" class="btn btn-primary">Go</button>
         </form>
 
         <a href="{{ url_for('serve_index') }}">
-          <h3 class="text-muted">Smarthome Hub health check</h3>
+          <h3 class="text-muted">Piloteur Node health check</h3>
         </a>
       </div>
 
