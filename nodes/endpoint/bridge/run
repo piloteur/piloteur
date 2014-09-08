@@ -4,10 +4,10 @@ import json
 import subprocess
 import os.path
 
-CONFIG_PATH = os.path.expanduser('~/smarthome-hub-sync/config.py')
+CONFIG_PATH = os.path.expanduser('~/piloteur-code/nodes/endpoint/config.py')
 config = json.loads(subprocess.check_output(CONFIG_PATH))
 
-with open(os.path.expanduser('~/.hub-id')) as f:
+with open(os.path.expanduser('~/.node-id')) as f:
     UUID = f.read().strip()
 
 ssh_host = "%s@%s" % (config['ssh_bridge_user'], config['ssh_bridge_host'])

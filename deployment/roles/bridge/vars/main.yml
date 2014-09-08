@@ -1,6 +1,18 @@
 ---
 home: "/home/{{ ansible_user_id }}"
-app: "{{ home }}/smarthome-reverse-tunneler"
 
-repo: "git@github.com:smart-home/smarthome-reverse-tunneler.git"
-rev: "master"
+code: "{{ home }}/piloteur-code"
+config: "{{ home }}/piloteur-config"
+blobs: "{{ home }}/piloteur-blobs"
+
+drivers: "{{ code }}/drivers"
+bridge: "{{ code }}/nodes/bridge"
+endpoint: "{{ code }}/nodes/endpoint"
+monitor: "{{ code }}/nodes/monitor"
+
+code_repo: "git@github.com:piloteur/piloteur.git"
+code_rev: "master"
+config_repo: "git@github.com:piloteur/piloteur-config.git"
+config_rev: "master"
+blobs_repo: "git@github.com:piloteur/piloteur-blobs.git"
+blobs_rev: "master"

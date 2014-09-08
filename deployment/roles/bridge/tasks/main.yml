@@ -24,8 +24,8 @@
       ssh-keyscan -t ecdsa,rsa,dsa github.com >> ~/.ssh/known_hosts;
       touch {{ home }}/.ssh/.cached-host-key-github.com
 
-- name: checkout the hub repo
-  git: dest={{ app }} repo={{ repo }} depth=1 version={{ rev }}
+- name: checkout the code repo
+  git: dest={{ code }} repo={{ code_repo }} depth=1 version={{ code_rev }}
 
 ########################################################################
 #                    DEPENDENCIES INSTALLATION                         #
@@ -37,11 +37,11 @@
   sudo_user: root
 
 ########################################################################
-#                       MAIN TUNNELER DEPENDENCIES                     #
+#                        MAIN BRIDGE DEPENDENCIES                      #
 ########################################################################
 
 - name: extract the folders that have to be created
-  shell: jq --raw-output '.ports_folder' {{ app }}/config.json
+  shell: jq --raw-output '.ports_folder' {{ bridge }}/config.json
   register: folders
 - name: mkdir
   file: path={{ item }} state=directory
@@ -49,7 +49,7 @@
 
 - name: add the ssh key and command
   authorized_key: user={{ ansible_user_id }}
-    key_options='command="{{ app }}/shell.py"'
+    key_options='command="{{ bridge }}/shell.py"'
     key="{{ lookup('file', 'smarthome-services.pub') }}"
 
 - name: workaround ansible/ansible#6881
@@ -66,4 +66,4 @@
 
 - name: create cron entry
   cron: name="run ports cleanup"
-      job=". /etc/profile; . $HOME/.profile; cd '{{ app }}'; '{{ app }}/cron.py'"
+      job=". /etc/profile; . $HOME/.profile; cd '{{ bridge }}'; '{{ bridge }}/cron.py'"
