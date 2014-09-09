@@ -3,9 +3,9 @@
 - name: mkdir
   file: path={{ item }} state=directory mode=750
   with_items:
-    - "{{ ansible_env.HOME }}/smarthome"
-    - "{{ ansible_env.HOME }}/smarthome/data"
-    - "{{ ansible_env.HOME }}/smarthome/logs"
+    - "{{ ansible_env.HOME }}/piloteur"
+    - "{{ ansible_env.HOME }}/piloteur/data"
+    - "{{ ansible_env.HOME }}/piloteur/logs"
 
 - name: upload the ssh jail script
   copy: src=rsync_host.py dest={{ ansible_env.HOME }}/rsync_host.py mode=750

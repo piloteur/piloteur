@@ -4,7 +4,7 @@
        region={{ region }}
        key_name={{ keypair_name }}
        group={{ security_group }}
-       instance_tags='{"smarthome":"{{ tag }}"}'
+       instance_tags='{"piloteur":"{{ tag }}"}'
        wait=true
   register: ec2_info
 

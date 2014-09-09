@@ -44,12 +44,12 @@ class DriversManager():
         # self.check_drivers_changes()
 
     def check_global_changes(self):
-        hub_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
+        code_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
             cwd=os.path.expanduser('~/piloteur-code'))
         config = hashlib.md5(subprocess.check_output(["./config.py"],
             cwd=os.path.expanduser('~/piloteur-code/nodes/endpoint'))).hexdigest()
 
-        fingerprint = hub_head + '\n' + config
+        fingerprint = code_head + '\n' + config
 
         if os.path.isfile(self.GEN_FINGER_PATH):
             with open(self.GEN_FINGER_PATH) as f:

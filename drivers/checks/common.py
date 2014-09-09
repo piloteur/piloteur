@@ -7,7 +7,7 @@ def data_freshness_check(driver_name, red_limit, yellow_limit=None):
     if yellow_limit is None:
         yellow_limit = red_limit / 2
 
-    def check(hub_id):
+    def check(node_id):
         sys_timestamp = arrow.get(get_timestamp())
 
         t = data_timestamp(driver_name)
