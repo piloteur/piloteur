@@ -1,6 +1,0 @@
-main_repo: "git@github.com:piloteur/piloteur.git"
-main_rev: "master"
-config_repo: "git@github.com:piloteur/piloteur-config.git"
-config_rev: "master"
-blobs_repo: "git@github.com:piloteur/piloteur-blobs.git"
-blobs_rev: "master"

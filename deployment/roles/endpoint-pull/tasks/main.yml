@@ -1,6 +1,6 @@
 # Happy reminder: THIS HAS TO BE BACKWARDS COMPATIBLE WITH ANSIBLE ALL THE WAY TO 1.5
 
-## We assume that hub-pull will run on a already configured hub,
+## We assume that this will run on a already configured endpoint,
 ## that will have recent versions of git and pip
 # - name: install dependencies
 #   apt: pkg={{ item }} state=installed update_cache=yes cache_valid_time=3600
@@ -19,6 +19,7 @@
 
 - name: checkout the blobs repo
   git: dest={{ blobs }} repo={{ blobs_repo }} depth=1 version={{ blobs_rev }}
+
 - name: install ansible
   pip: name=ansible version=1.5.3
       extra_args="--no-index --use-wheel --find-links={{ blobs }}/wheelhouse"
@@ -28,7 +29,7 @@
   copy: src=local_inventory.ini dest={{ home }}/inventory.ini mode=0644
 
 - name: mkdir
-  file: path={{ deploy }} state=directory
+  file: path={{ code }} state=directory
 
 - name: upload ansible-pull.sh
   template: src=ansible-pull.sh dest="{{ home }}/ansible-pull.sh" mode=0755

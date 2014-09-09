@@ -18,7 +18,7 @@
   sudo_user: piloteur
   sudo: yes
   vars_files:
-    - "{{ repo_overrides }}"
+    - repo_overrides.yml
   roles:
     - endpoint
 
@@ -26,6 +26,6 @@
   gather_facts: True
   remote_user: pi
   vars_files:
-    - "{{ repo_overrides }}"
+    - repo_overrides.yml
   roles:
     - endpoint-pull
