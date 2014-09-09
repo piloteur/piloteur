@@ -9,8 +9,8 @@ from . import main
 
 log = logging.getLogger('nexus.fetcher')
 
-def get_data_files(hub_id, driver_name):
-    DATA_PATH = os.path.join(main.config["data_path"], "data", hub_id)
+def get_data_files(node_id, driver_name):
+    DATA_PATH = os.path.join(main.config["data_path"], "data", node_id)
     try: listdir = main.sftp.listdir(DATA_PATH)
     except IOError: return
 
@@ -21,8 +21,8 @@ def get_data_files(hub_id, driver_name):
 
     return data_files
 
-def get_logs_files(hub_id, driver_name):
-    LOGS_PATH = os.path.join(main.config["data_path"], "logs", hub_id)
+def get_logs_files(node_id, driver_name):
+    LOGS_PATH = os.path.join(main.config["data_path"], "logs", node_id)
     LOGS_PATH = os.path.join(LOGS_PATH, driver_name + "-driver")
     try: listdir = main.sftp.listdir(LOGS_PATH)
     except IOError: return
@@ -52,29 +52,29 @@ def latest_timestamp(files):
     return mtime
 
 @main.API_call
-def fetch_data(driver_name, n=100, hub_id=None):
-    files = get_data_files(hub_id, driver_name)
+def fetch_data(driver_name, n=100, node_id=None):
+    files = get_data_files(node_id, driver_name)
     if not files: return
 
     return fetch_lines(files, n)
 
 @main.API_call
-def fetch_logs(driver_name, n=100, hub_id=None):
-    files = get_logs_files(hub_id, driver_name)
+def fetch_logs(driver_name, n=100, node_id=None):
+    files = get_logs_files(node_id, driver_name)
     if not files: return
 
     return fetch_lines(files, n)
 
 @main.API_call
-def data_timestamp(driver_name, hub_id=None):
-    files = get_data_files(hub_id, driver_name)
+def data_timestamp(driver_name, node_id=None):
+    files = get_data_files(node_id, driver_name)
     if not files: return
 
     return latest_timestamp(files)
 
 @main.API_call
-def logs_timestamp(driver_name, hub_id=None):
-    files = get_logs_files(hub_id, driver_name)
+def logs_timestamp(driver_name, node_id=None):
+    files = get_logs_files(node_id, driver_name)
     if not files: return
 
     return latest_timestamp(files)
@@ -82,8 +82,8 @@ def logs_timestamp(driver_name, hub_id=None):
 
 ### Private API
 
-def get_system_logs_files(hub_id, log_name):
-    LOGS_PATH = os.path.join(main.config["data_path"], "logs", hub_id)
+def get_system_logs_files(node_id, log_name):
+    LOGS_PATH = os.path.join(main.config["data_path"], "logs", node_id)
     LOGS_PATH = os.path.join(LOGS_PATH, log_name)
     try: listdir = main.sftp.listdir(LOGS_PATH)
     except IOError: return
@@ -96,8 +96,8 @@ def get_system_logs_files(hub_id, log_name):
     return log_files
 
 @main.API_call
-def fetch_system_logs(log_name, n=1, hub_id=None):
-    files = get_system_logs_files(hub_id, log_name)
+def fetch_system_logs(log_name, n=1, node_id=None):
+    files = get_system_logs_files(node_id, log_name)
     if not files: return
 
     return fetch_lines(files, n)

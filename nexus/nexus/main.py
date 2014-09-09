@@ -12,7 +12,7 @@ import functools
 ### Globals
 
 config = None
-hub_id = None
+node_id = None
 log = logging.getLogger('nexus')
 client = None
 sftp = None
@@ -39,10 +39,10 @@ def API_call(f):
         if config is None or sftp is None:
             raise RuntimeError("Library not initialized with init()")
         all_args = args_namer(f, args, kwargs)
-        if not all_args.get('hub_id'):
-            if hub_id is None:
-                raise RuntimeError("No hub_id passed and no check() context")
-            all_args['hub_id'] = hub_id
+        if not all_args.get('node_id'):
+            if node_id is None:
+                raise RuntimeError("No node_id passed and no check() context")
+            all_args['node_id'] = node_id
         return f(**all_args)
     return wrapper
 
@@ -57,9 +57,9 @@ def global_API_call(f):
 
 ### API functions
 
-def set_hub_id(new_hub_id):
-    global hub_id
-    hub_id = new_hub_id
+def set_node_id(new_node_id):
+    global node_id
+    node_id = new_node_id
 
 def init(new_config):
     global config
@@ -105,10 +105,10 @@ def init(new_config):
 
 def command_line():
     DOC = """
-Usage: %s [--config=<path>] <hub-id>
+Usage: %s [--config=<path>] <node-id>
 
 Options:
-    --config=<path> The path to Smarthome-NeXus JSON config
+    --config=<path> The path to the nexus JSON config
                     [default: ~/.piloteur.json]
     """ % sys.argv[0]
 
@@ -129,11 +129,11 @@ Options:
 
     log.info("The check() function would run every... %d second(s)", sys.modules['__main__'].PERIOD)
 
-    global hub_id
-    hub_id = arguments["<hub-id>"]
+    global node_id
+    node_id = arguments["<node-id>"]
 
-    log.info("Running check('%s')", hub_id)
-    results = sys.modules['__main__'].check(hub_id)
+    log.info("Running check('%s')", node_id)
+    results = sys.modules['__main__'].check(node_id)
 
     for r in results:
         t = arrow.get(r["timestamp"]).format('YYYY-MM-DD HH:mm:ss ZZ')
