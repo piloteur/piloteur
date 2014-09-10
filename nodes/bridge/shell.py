@@ -8,7 +8,7 @@ hostname = raw_input()
 list_filenames = lambda dirname: [x for x in os.listdir(dirname)
                     if os.path.isfile(os.path.join(dirname, x))]
 
-config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+config_file = os.path.expanduser('~/piloteur-config/bridge/config.json')
 with open(config_file) as f:
     config = json.load(f)
 

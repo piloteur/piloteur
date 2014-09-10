@@ -147,7 +147,7 @@ if __name__ == '__main__':
     log.setLevel(logging.INFO)
 
     DIR = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(DIR, '..', 'config.json')) as f:
+    with open(os.path.expanduser('~/piloteur-config/monitor/config.json')) as f:
         config = json.load(f)
 
     conn = sqlite3.connect(os.path.join(DIR, '..', 'cache.db'))

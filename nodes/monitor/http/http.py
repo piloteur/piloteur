@@ -217,7 +217,7 @@ class Monitor():
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(DIR, '..', 'config.json')) as f:
+    with open(os.path.expanduser('~/piloteur-config/monitor/config.json')) as f:
         config = json.load(f)
 
     M = Monitor(config, os.path.join(DIR, '..', 'cache.db'))

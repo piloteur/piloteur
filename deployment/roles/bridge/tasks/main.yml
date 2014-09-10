@@ -26,6 +26,8 @@
 
 - name: checkout the code repo
   git: dest={{ code }} repo={{ code_repo }} depth=1 version={{ code_rev }}
+- name: checkout the config repo
+  git: dest={{ config }} repo={{ config_repo }} depth=1 version={{ config_rev }}
 
 ########################################################################
 #                    DEPENDENCIES INSTALLATION                         #
@@ -41,7 +43,7 @@
 ########################################################################
 
 - name: extract the folders that have to be created
-  shell: jq --raw-output '.ports_folder' {{ bridge }}/config.json
+  shell: jq --raw-output '.ports_folder' {{ config }}/bridge/config.json
   register: folders
 - name: mkdir
   file: path={{ item }} state=directory

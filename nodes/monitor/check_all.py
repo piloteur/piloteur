@@ -7,7 +7,7 @@ from monitor import get_bridge_connections, fetch_data, assess_data
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(DIR, 'config.json')) as f:
+with open(os.path.expanduser('~/piloteur-config/monitor/config.json')) as f:
     config = json.load(f)
 
 for _ in range(5):

@@ -42,7 +42,7 @@ else:
         classes = re.split(r'[^a-z0-9-]+', f.read().strip())
 
 # TODO: un-hardcode this?
-CONFIG_DIR = os.path.expanduser('~/piloteur-config/config')
+CONFIG_DIR = os.path.expanduser('~/piloteur-config/endpoint')
 
 with open(os.path.join(CONFIG_DIR, "config.json")) as f:
     config = json.load(f)
