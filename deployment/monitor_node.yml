@@ -9,17 +9,19 @@
   remote_user: ubuntu
   sudo: yes
   tasks:
-    - name: add smarthome-services to authorized_key
-      authorized_key: user=ubuntu
-        key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
     - user: name=ubuntu password=!
+
+    - user: name=admin password=! groups=sudo
+    - name: add smarthome-services to authorized_key
+      authorized_key: user=admin
+        key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
 
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt
 
 - hosts: tag_piloteur_monitor
   gather_facts: True
-  remote_user: ubuntu
+  remote_user: admin
   # TODO: segregate this into a different user
   roles:
     - { role: unattended-upgrades, sudo: yes, email: bip@filippo.io }
