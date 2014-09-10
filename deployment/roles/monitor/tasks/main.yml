@@ -16,8 +16,8 @@
 
 - name: mkdir ~/.ssh
   file: path={{ home }}/.ssh state=directory
-- name: upload the smarthome-services id_rsa
-  copy: src=smarthome-services dest={{ home }}/.ssh/id_rsa mode=600
+- name: upload the piloteur-admin id_rsa
+  copy: src=../keys/piloteur-admin dest={{ home }}/.ssh/id_rsa mode=600
 
 - name: cache the github.com host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-github.com"

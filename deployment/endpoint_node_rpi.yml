@@ -8,9 +8,9 @@
     - user: name=piloteur
 
     - user: name=admin groups=sudo password=!
-    - name: add smarthome-services to authorized_key
+    - name: add piloteur-admin to authorized_key
       authorized_key: user=admin
-        key="{{ lookup('file', '../keys/smarthome-services.pub') }}"
+        key="{{ lookup('file', '../keys/piloteur-admin.pub') }}"
 
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt

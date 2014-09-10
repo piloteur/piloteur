@@ -11,7 +11,7 @@
 
 - hosts: localhost
   gather_facts: True
-  sudo_user: smarthome
+  sudo_user: piloteur
   sudo: yes
   vars_files:
     - ../../repo_overrides.yml
