@@ -23,9 +23,9 @@
       when: operation == 'new'
 
     # BUG: FAILING ON GROUP EMPTY - groups["tag_piloteur_{{ tag }}"] does not exist
-    - add_host: name="{{ item }}" groups=machines
-      with_items: groups["tag_piloteur_{{ tag }}"]
-      when: operation == 'update'
+    # - add_host: name="{{ item }}" groups=machines
+    #   with_items: groups["tag_piloteur_{{ tag }}"]
+    #   when: operation == 'update'
 
 - hosts: machines
   gather_facts: False
