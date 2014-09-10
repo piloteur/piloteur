@@ -11,8 +11,8 @@
   gather_facts: False
   vars:
     instance_type: "t1.micro"
-    image: "ami-d3675dba" # Debian Wheezy 7.4 PVM x86_64
-    region: "us-east-1"
+    image: "ami-709ff440" # Debian Wheezy 7.4a PVM x86_64
+    region: "us-west-2"
     tag: "bridge"
   tasks:
     - name: check for the operation
