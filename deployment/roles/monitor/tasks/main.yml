@@ -91,7 +91,7 @@
     - alerting
 
 - name: install iptables
-  file: src=rules.v4 dest=/etc/iptables/rules.v4
+  copy: src=rules.v4 dest=/etc/iptables/rules.v4
   sudo: yes
 - name: load iptables
   command: /etc/init.d/iptables-persistent reload
