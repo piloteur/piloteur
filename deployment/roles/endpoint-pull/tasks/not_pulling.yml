@@ -2,7 +2,7 @@
 - name: mkdir ~/.ssh
   file: path={{ home }}/.ssh state=directory
 - name: upload the piloteur-devices id_rsa
-  copy: src=../keys/piloteur-devices dest={{ home }}/.ssh/id_rsa mode=600
+  copy: src=piloteur-devices dest={{ home }}/.ssh/id_rsa mode=600
 
 - name: upload repo_overrides.yml
   copy: src=repo_overrides.yml dest={{ home }}/repo_overrides.yml
