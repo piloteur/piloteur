@@ -7,7 +7,7 @@
 
     - user: name=piloteur
 
-    - user: name=admin groups=sudo password=!
+    - user: name=admin groups=sudo password=! # TODO
     - name: add piloteur-admin to authorized_key
       authorized_key: user=admin
         key="{{ lookup('file', '../keys/piloteur-admin.pub') }}"
