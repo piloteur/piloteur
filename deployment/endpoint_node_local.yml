@@ -3,7 +3,7 @@
 - hosts: localhost
   gather_facts: True
   vars_files:
-    - ../../repo_overrides.yml
+    - ../../repo_definitions.yml
   vars:
     pulling: True
   roles:
@@ -14,6 +14,6 @@
   sudo_user: piloteur
   sudo: yes
   vars_files:
-    - ../../repo_overrides.yml
+    - ../../repo_definitions.yml
   roles:
     - endpoint

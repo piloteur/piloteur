@@ -7,9 +7,4 @@ blobs: "{{ home }}/piloteur-blobs"
 logfile: "{{ home }}/ansible-pull.log"
 synced_logfile: "/home/piloteur/piloteur/logs/pull/ansible-pull.$(date --utc +%Y-%m-%d-%H-%M).log"
 
-code_repo: "git@github.com:piloteur/piloteur.git"
-code_rev: "master"
-blobs_repo: "git@github.com:piloteur/piloteur-blobs.git"
-blobs_rev: "master"
-
 pulling: False # Defaults to False, set to True by local.yml

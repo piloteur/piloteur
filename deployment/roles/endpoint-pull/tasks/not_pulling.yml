@@ -4,5 +4,5 @@
 - name: upload the piloteur-devices id_rsa
   copy: src=piloteur-devices dest={{ home }}/.ssh/id_rsa mode=600
 
-- name: upload repo_overrides.yml
-  copy: src=repo_overrides.yml dest={{ home }}/repo_overrides.yml
+- name: upload repo_definitions.yml
+  copy: src=repo_definitions.yml dest={{ home }}/repo_definitions.yml

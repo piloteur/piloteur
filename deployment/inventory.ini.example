@@ -1,8 +1,0 @@
-[local]
-localhost ansible_connection=local
-
-[raspberrypi]
-192.168.1.42
-
-[sync-nodes]
-power4.cs.virginia.edu ansible_ssh_user=sensordata
