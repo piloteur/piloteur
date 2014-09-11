@@ -14,3 +14,7 @@
   authorized_key: user={{ ansible_user_id }}
     key_options='command="/usr/bin/python {{ ansible_env.HOME }}/rsync_host.py"'
     key="{{ lookup('file', 'piloteur-devices.pub') }}"
+
+- name: add piloteur-admin to authorized_key
+  authorized_key: user={{ ansible_user_id }}
+    key="{{ lookup('file', 'piloteur-admin.pub') }}"
