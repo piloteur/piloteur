@@ -1,10 +1,4 @@
-##########################
-# Usage:
-#
-# ansible-playbook -i ec2.py monitor.yml
-##########################
-
-- hosts: tag_piloteur_monitor
+- hosts: all
   gather_facts: False
   remote_user: ubuntu
   sudo: yes
@@ -22,7 +16,7 @@
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt
 
-- hosts: tag_piloteur_monitor
+- hosts: all
   gather_facts: True
   remote_user: admin
   # TODO: segregate this into a different user

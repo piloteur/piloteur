@@ -1,12 +1,11 @@
-- hosts: raspberrypi
+- hosts: all
   gather_facts: False
-  remote_user: pi
+  remote_user: {{ initial_user }}
   sudo: yes
   tasks:
-    - user: name=pi password=!
+    - user: name={{ initial_user }} password=!
 
     - user: name=piloteur
-
     - user: name=admin groups=sudo password=! # TODO
     - name: add piloteur-admin to authorized_key
       authorized_key: user=admin
@@ -15,20 +14,20 @@
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt
 
-- hosts: raspberrypi
+- hosts: all
   gather_facts: True
   remote_user: admin
   sudo_user: piloteur
   sudo: yes
   vars_files:
-    - repo_overrides.yml
+    - repo_definitions.yml
   roles:
     - endpoint
 
-- hosts: raspberrypi
+- hosts: all
   gather_facts: True
   remote_user: admin
   vars_files:
-    - repo_overrides.yml
+    - repo_definitions.yml
   roles:
     - endpoint-pull

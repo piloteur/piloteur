@@ -1,33 +1,4 @@
-##########################
-# Usage:
-#
-# ansible-playbook -i inventory.ini bridge_node.yml --extra-vars "keypair_name=... security_group=... operation=new"
-# ---
-# ansible-playbook -i ec2.py bridge_node.yml --extra-vars "operation=update"
-##########################
-
-- hosts: localhost
-  connection: local
-  gather_facts: False
-  vars:
-    instance_type: "t1.micro"
-    image: "ami-709ff440" # Debian Wheezy 7.4a PVM x86_64
-    region: "us-west-2"
-    tag: "bridge"
-  tasks:
-    - name: check for the operation
-      fail: msg="please specify a operation value of either `new` or `update`"
-      when: operation is not defined or (operation != 'new' and operation != 'update')
-
-    - include: snippet_new_instance.inc.yml
-      when: operation == 'new'
-
-    # BUG: FAILING ON GROUP EMPTY - groups["tag_piloteur_{{ tag }}"] does not exist
-    # - add_host: name="{{ item }}" groups=machines
-    #   with_items: groups["tag_piloteur_{{ tag }}"]
-    #   when: operation == 'update'
-
-- hosts: machines
+- hosts: all
   gather_facts: False
   remote_user: admin
   sudo: yes
@@ -41,7 +12,7 @@
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt
 
-- hosts: machines
+- hosts: all
   gather_facts: True
   remote_user: admin
   sudo_user: piloteur

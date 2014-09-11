@@ -1,3 +1,5 @@
-- hosts: sync-nodes
+# Kept minimal not to make assumptions on the sync backend
+
+- hosts: all
   roles:
     - sync
