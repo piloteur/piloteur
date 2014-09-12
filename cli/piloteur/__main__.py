@@ -5,6 +5,7 @@
 
 Usage:
   piloteur [options] test
+  piloteur [options] connect <node-id>
   piloteur (-h | --help)
   piloteur --version
 
@@ -26,6 +27,7 @@ from docopt import docopt
 
 from .test import test
 from .setup import setup
+from .connect import connect
 from .util import DIR
 
 def main():
@@ -51,6 +53,9 @@ def main():
 
     if arguments['test']:
         return test(config, env)
+
+    if arguments['connect']:
+        return connect(arguments['<node-id>'], config, env)
 
 
 if __name__ == '__main__':
