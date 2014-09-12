@@ -2,19 +2,14 @@
 
 import subprocess
 import os, os.path
-import json
 import time
 import re
 
 list_filenames = lambda dirname: [x for x in os.listdir(dirname)
                     if os.path.isfile(os.path.join(dirname, x))]
 
-config_file = os.path.expanduser('~/piloteur-config/bridge/config.json')
-with open(config_file) as f:
-    config = json.load(f)
-
-base_port = config['base_port']
-ports_folder = os.path.expanduser(config['ports_folder'])
+base_port = 40000
+ports_folder = os.path.expanduser("~/ssh_ports/")
 ports = set(p for p in list_filenames(ports_folder)
             if p.isdigit() and int(p) >= base_port)
 

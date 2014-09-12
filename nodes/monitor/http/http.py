@@ -148,7 +148,7 @@ class Monitor():
     def ajax_index(self):
         c = sqlite3.connect(self.db_path).cursor()
 
-        nodes_list = get_bridge_connections(self.config['bridge_info'])
+        nodes_list = get_bridge_connections(self.config['bridge_host'])
         oldest_cache = arrow.utcnow()
 
         nodes = []
@@ -177,7 +177,7 @@ class Monitor():
     def ajax_all(self):
         self.nexus_init()
 
-        nodes_list = get_bridge_connections(self.config['bridge_info'])
+        nodes_list = get_bridge_connections(self.config['bridge_host'])
 
         results = []
         for node_id in nodes_list:

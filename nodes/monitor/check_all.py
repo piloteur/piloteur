@@ -19,7 +19,7 @@ for _ in range(5):
 else:
     exit(1)
 
-nodes_list = get_bridge_connections(config['bridge_info'])
+nodes_list = get_bridge_connections(config['bridge_host'])
 
 results = []
 for node_id in nodes_list:

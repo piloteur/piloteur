@@ -42,12 +42,8 @@
 #                        MAIN BRIDGE DEPENDENCIES                      #
 ########################################################################
 
-- name: extract the folders that have to be created
-  shell: jq --raw-output '.ports_folder' {{ config }}/bridge/config.json
-  register: folders
-- name: mkdir
-  file: path={{ item }} state=directory
-  with_items: folders.stdout_lines
+- name: mkdir ~/ssh_ports/
+  file: path={{ home }}/ssh_ports/ state=directory
 
 - name: add the ssh piloteur-devices key and command
   authorized_key: user={{ ansible_user_id }}

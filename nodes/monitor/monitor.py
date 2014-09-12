@@ -26,13 +26,13 @@ NodeResult = void_namedtuple(collections.namedtuple('NodeResult',
     ['node_id', 'classes', 'timestamp', 'versions', 'wifi_quality', 'error', 'summary', 'node_health', 'drivers']))
 
 
-def get_bridge_connections(bridge_info):
-    username, hostname, port, folder = bridge_info
+def get_bridge_connections(bridge_host):
+    username, port, folder = "admin", 22, "~piloteur/ssh_ports/"
 
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, port, username)
+    client.connect(bridge_host, port, username)
 
     cmd = "grep -h . {}*".format(folder)
     stdin, stdout, stderr = client.exec_command(cmd)
