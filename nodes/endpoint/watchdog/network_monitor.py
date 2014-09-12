@@ -132,7 +132,10 @@ class NetworkMonitor():
             self.log.info('%i-th reboot; strikes_limit: %i'
                 % (reboot_num, strikes_limit))
 
-            reboot()
+            if not self.config['disable_network_reboot']:
+                reboot()
+            else:
+                self.log.warn('reboots are disabled')
 
         self.log.info('strikes:%i strikes_limit:%i reboot_num:%i'
             % (strikes, strikes_limit, reboot_num))
