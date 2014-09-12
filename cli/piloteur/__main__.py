@@ -38,7 +38,7 @@ def main():
     for k in config["paths"]:
         config["paths"][k] = os.path.expanduser(config["paths"][k])
 
-    level = logging.DEBUG if arguments['--verbose'] else logging.INFO
+    level = logging.INFO if arguments['--verbose'] else logging.WARN
     format = "[%(asctime)-15s] %(message)s"
     logging.basicConfig(format=format, level=level)
 
