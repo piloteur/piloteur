@@ -30,7 +30,6 @@ def connect(node_id, config, env):
         stdout=open(os.devnull), stderr=open(os.devnull), stdin=subprocess.PIPE)
 
     time.sleep(1)
-    print "ssh -p %s admin@127.0.0.1" % port
     subprocess.call(["ssh", "-p%s" % port, "-i", SSH_KEY,
         "-o StrictHostKeyChecking=no", "admin@127.0.0.1"])
 

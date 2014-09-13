@@ -7,6 +7,8 @@ import subprocess
 import os
 import os.path
 import paramiko
+import nexus
+import logging
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 CODE = os.path.join(DIR, '..', '..')
@@ -33,3 +35,20 @@ def open_ssh(node_name, config):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(host, 22, user, key_filename=SSH_KEY)
     return client
+
+def init_nexus(config):
+    nexus_config = {
+        "data_location": "%s@%s:piloteur/" % (
+            config["nodes"]["sync"]["user"], config["nodes"]["sync"]["host"]),
+        "ssh_key": SSH_KEY
+    }
+
+    for _ in range(5):
+        try:
+            nexus.init(nexus_config)
+        except paramiko.SSHException:
+            continue
+        break
+    else:
+        logging.error("Failed to reach the sync node")
+        exit(1)
