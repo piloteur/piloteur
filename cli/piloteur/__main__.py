@@ -13,6 +13,7 @@ Usage:
   piloteur [options] config <node-id>
   piloteur [options] check (--all | <node-id>)
   piloteur [options] list [--all] [<node-expression>]
+  piloteur [options] deploy-special [--type={monitor,sync,bridge}]
   piloteur (-h | --help)
   piloteur --version
 
@@ -44,6 +45,9 @@ Command check: Run a verbose check from the monitor.
 Command list: List the endpoints and their status from the monitor cache.
   --all              List also offline endpoints
   <node-expression>  A partially matched regex to filter the nodes
+
+Command deploy-special: Deploy a infrastructure node.
+Note: first create a box and add it to the config, run test and then this.
 """
 
 from __future__ import absolute_import
@@ -59,6 +63,7 @@ from .setup import setup
 from .endpoint import connect, sync, update
 from .logs import logs, syslog
 from .monitor import check, get_config, list_endpoints
+from .ansible import deploy_special
 from .util import DIR
 
 def main():
@@ -110,6 +115,9 @@ def main():
 
     if arguments['list']:
         return list_endpoints(arguments['<node-expression>'], arguments['--all'], config, env)
+
+    if arguments['deploy-special']:
+        return deploy_special(arguments['--type'], config, env)
 
 
 if __name__ == '__main__':

@@ -75,3 +75,9 @@ def open_bridge(node_id, config):
 
     time.sleep(1)
     return p, port
+
+def call_ansible(arguments, config):
+    ansible_path = os.path.join(config["paths"]["virtualenv"], "bin", "ansible-playbook")
+    cmd = [ansible_path]
+    cmd.extend(arguments)
+    return subprocess.check_call(cmd, cwd=DEPLOYMENT)
