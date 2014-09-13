@@ -4,9 +4,10 @@ import os.path
 import sys
 
 from nexus import GREEN, init
-from monitor import get_bridge_connections, fetch_data, assess_data
 
-DIR = os.path.dirname(os.path.realpath(__file__))
+PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PARENT)
+from monitor import get_bridge_connections, fetch_data, assess_data
 
 with open(os.path.expanduser('~/piloteur-config/monitor/config.json')) as f:
     config = json.load(f)
@@ -38,9 +39,9 @@ for node_id in nodes_list:
         color = 'GREEN'
 
     results.append({
-        "color": color,
+        "node_health": color,
         "node_id": res.node_id,
-        "result": res.error or res.summary
+        "summary": res.error or res.summary
     })
 
 print json.dumps(results)

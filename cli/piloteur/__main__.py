@@ -10,6 +10,7 @@ Usage:
   piloteur [options] syslog [--num=<lines>] <node-id> <log-name>
   piloteur [options] config <node-id>
   piloteur [options] check (--all | <node-id>)
+  piloteur [options] list [--all] [<node-expression>]
   piloteur (-h | --help)
   piloteur --version
 
@@ -27,11 +28,16 @@ Command logs: Fetch driver logs or data.
   --num=<lines>       Number of lines to tail [default: 50]
 
 Command syslog: Fetch system logs.
-  --num=<lines>       Number of lines to tail [default: 50]
+  --num=<lines>  Number of lines to tail [default: 50]
 
 Command config: Print the endpoint config.
 
-Command check: Run a verbose check on the monitor.
+Command check: Run a verbose check from the monitor.
+  --all  Run the check on all the connected endpoints
+
+Command list-endpoints: List the endpoints and their status from the monitor cache.
+  --all              List also offline endpoints
+  <node-expression>  A partially matched regex to filter the nodes
 """
 
 from __future__ import absolute_import
@@ -46,7 +52,7 @@ from .test import test
 from .setup import setup
 from .connect import connect
 from .logs import logs, syslog
-from .monitor import check, get_config
+from .monitor import check, get_config, list_endpoints
 from .util import DIR
 
 def main():
@@ -89,6 +95,9 @@ def main():
 
     if arguments['check']:
         return check(arguments['<node-id>'], config, env)
+
+    if arguments['list']:
+        return list_endpoints(arguments['<node-expression>'], arguments['--all'], config, env)
 
 
 if __name__ == '__main__':
