@@ -6,6 +6,8 @@
 Usage:
   piloteur [options] test
   piloteur [options] connect <node-id>
+  piloteur [options] update <node-id>
+  piloteur [options] sync <node-id>
   piloteur [options] logs [--type={data,logs}] [--num=<lines>] <node-id> <driver-name>
   piloteur [options] syslog [--num=<lines>] <node-id> <log-name>
   piloteur [options] config <node-id>
@@ -23,6 +25,10 @@ Options:
 
 Command connect: Open a shell on a endpoint.
 
+Command update: Run a code and config pull on the endpoint.
+
+Command sync: Run a emergency rsync on the endpoint.
+
 Command logs: Fetch driver logs or data.
   --type={data,logs}  What type of logs to fetch [default: logs]
   --num=<lines>       Number of lines to tail [default: 50]
@@ -35,7 +41,7 @@ Command config: Print the endpoint config.
 Command check: Run a verbose check from the monitor.
   --all  Run the check on all the connected endpoints
 
-Command list-endpoints: List the endpoints and their status from the monitor cache.
+Command list: List the endpoints and their status from the monitor cache.
   --all              List also offline endpoints
   <node-expression>  A partially matched regex to filter the nodes
 """
@@ -50,7 +56,7 @@ from docopt import docopt
 
 from .test import test
 from .setup import setup
-from .connect import connect
+from .endpoint import connect, sync, update
 from .logs import logs, syslog
 from .monitor import check, get_config, list_endpoints
 from .util import DIR
@@ -81,6 +87,12 @@ def main():
 
     if arguments['connect']:
         return connect(arguments['<node-id>'], config, env)
+
+    if arguments['update']:
+        return update(arguments['<node-id>'], config, env)
+
+    if arguments['sync']:
+        return sync(arguments['<node-id>'], config, env)
 
     if arguments['logs']:
         return logs(arguments['<node-id>'], arguments['<driver-name>'],

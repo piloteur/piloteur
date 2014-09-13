@@ -9,6 +9,7 @@ import os.path
 import paramiko
 import nexus
 import logging
+import time
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 CODE = os.path.join(DIR, '..', '..')
@@ -53,3 +54,24 @@ def init_nexus(config):
     else:
         logging.error("Failed to reach the sync node")
         exit(1)
+
+def open_bridge(node_id, config):
+    client = open_ssh("bridge", config)
+    cmd = 'egrep -H "^{}$" ~piloteur/ssh_ports/*'.format(node_id)
+    stdin, stdout, stderr = client.exec_command(cmd)
+
+    out = stdout.read().strip()
+    if out == "":
+        logging.error("Node ID not found on the bridge")
+        return 1
+
+    port = out.split(':')[0].rsplit('/')[-1]
+    client.close()
+
+    p = subprocess.Popen(["ssh", "-T", "-L", "%s:127.0.0.1:%s" % (port, port),
+        "-o StrictHostKeyChecking=no", "-i", SSH_KEY,
+        "admin@%s" % config["nodes"]["bridge"]],
+        stdout=open(os.devnull), stderr=open(os.devnull), stdin=subprocess.PIPE)
+
+    time.sleep(1)
+    return p, port
