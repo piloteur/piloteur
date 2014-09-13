@@ -8,6 +8,8 @@ Usage:
   piloteur [options] connect <node-id>
   piloteur [options] logs [--type={data,logs}] [--num=<lines>] <node-id> <driver-name>
   piloteur [options] syslog [--num=<lines>] <node-id> <log-name>
+  piloteur [options] config <node-id>
+  piloteur [options] check (--all | <node-id>)
   piloteur (-h | --help)
   piloteur --version
 
@@ -26,6 +28,10 @@ Command logs: Fetch driver logs or data.
 
 Command syslog: Fetch system logs.
   --num=<lines>       Number of lines to tail [default: 50]
+
+Command config: Print the endpoint config.
+
+Command check: Run a verbose check on the monitor.
 """
 
 from __future__ import absolute_import
@@ -40,6 +46,7 @@ from .test import test
 from .setup import setup
 from .connect import connect
 from .logs import logs, syslog
+from .monitor import check, get_config
 from .util import DIR
 
 def main():
@@ -76,6 +83,12 @@ def main():
     if arguments['syslog']:
         return syslog(arguments['<node-id>'], arguments['<log-name>'],
             arguments['--num'], config, env)
+
+    if arguments['config']:
+        return get_config(arguments['<node-id>'], config, env)
+
+    if arguments['check']:
+        return check(arguments['<node-id>'], config, env)
 
 
 if __name__ == '__main__':

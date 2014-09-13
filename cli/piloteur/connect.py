@@ -7,7 +7,6 @@ import logging
 import subprocess
 import os
 import time
-import sys
 
 from .util import open_ssh, SSH_KEY
 

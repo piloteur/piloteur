@@ -40,7 +40,8 @@ def init_nexus(config):
     nexus_config = {
         "data_location": "%s@%s:piloteur/" % (
             config["nodes"]["sync"]["user"], config["nodes"]["sync"]["host"]),
-        "ssh_key": SSH_KEY
+        "ssh_key": SSH_KEY,
+        "loglevel": "INFO",
     }
 
     for _ in range(5):
