@@ -26,8 +26,6 @@ def dep_call(command, config, env):
 def open_ssh(node_name, config):
     if node_name == "monitor":
         host, user = config["nodes"]["monitor"], "admin"
-    elif node_name == "sync":
-        host, user = config["nodes"]["sync"]["host"], config["nodes"]["sync"]["user"]
     elif node_name == "bridge":
         host, user = config["nodes"]["bridge"], "admin"
     elif node_name == "github":
@@ -39,8 +37,7 @@ def open_ssh(node_name, config):
 
 def init_nexus(config):
     nexus_config = {
-        "data_location": "%s@%s:piloteur/" % (
-            config["nodes"]["sync"]["user"], config["nodes"]["sync"]["host"]),
+        "sync_nodes": config["nodes"]["sync"],
         "ssh_key": SSH_KEY,
         "loglevel": "INFO",
     }

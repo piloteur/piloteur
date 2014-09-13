@@ -72,36 +72,42 @@ def init(new_config):
     if level > logging.DEBUG:
         logging.getLogger('paramiko').setLevel(logging.WARNING)
 
-    if not "data_location" in config or not ':' in config["data_location"] \
-                                     or not '@' in config["data_location"]:
-        log.error("Mandatory config option data_location not present or malformed.")
+    if not "sync_nodes" in config or not config["sync_nodes"]:
+        log.error("Mandatory config option sync_nodes not present.")
         sys.exit(1)
 
-    data_location, path = config["data_location"].rsplit(':', 1)
+    path = "piloteur/"
     config["data_path"] = path
-
     port = 22
-    if ':' in data_location:
-        data_location, port = data_location.split(':')
-        port = int(port)
-    username, hostname = data_location.split('@')
+
     key_filename = config.get("ssh_key", None)
     if key_filename:
         key_filename = os.path.expanduser(key_filename)
 
-    log.debug("hostname:%s port:%d username:%s path:%s key_filename:%s",
-        hostname, port, username, path, key_filename)
+    for sync_node in config["sync_nodes"]:
+        hostname, username = sync_node["host"], sync_node["user"]
 
-    global client
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, port, username, key_filename=key_filename)
+        log.debug("hostname:%s port:%d username:%s path:%s key_filename:%s",
+            hostname, port, username, path, key_filename)
 
-    global sftp
-    sftp = client.open_sftp()
+        global client
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    log.debug("</init>")
+        try:
+            client.connect(hostname, port, username, key_filename=key_filename)
+        except paramiko.SSHException:
+            continue
+
+        global sftp
+        sftp = client.open_sftp()
+
+        log.debug("</init>")
+
+        return
+
+    raise paramiko.SSHException
 
 def command_line():
     DOC = """
