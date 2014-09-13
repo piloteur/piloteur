@@ -58,8 +58,7 @@ import sys
 import logging
 from docopt import docopt
 
-from .test import test
-from .setup import setup
+from .setup import setup, test
 from .endpoint import connect, sync, update
 from .logs import logs, syslog
 from .monitor import check, get_config, list_endpoints
