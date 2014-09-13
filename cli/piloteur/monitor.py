@@ -18,12 +18,14 @@ def check(node_id, config, env):
     stdin, stdout, stderr = client.exec_command(cmd)
     # TODO: connect stderr and be more verbose
 
+    retcode = 0
     res = json.load(stdout)
     for r in res:
+        if r["node_health"] != "GREEN": retcode = 1
         print '[{node_id}] {node_health}... {summary}'.format(**r)
 
     client.close()
-    return 0
+    return retcode
 
 def list_endpoints(regex, also_offline, config, env):
     cmd = "python ~/piloteur-code/nodes/monitor/api/cache.py"
