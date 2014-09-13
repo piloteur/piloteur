@@ -50,4 +50,17 @@ main() {
     rm "$LOGFILE"
 }
 
-main
+main_verbose() {
+    cd "$CODE"
+
+    git_init
+    git_checkout
+    ansible_playbook
+}
+
+verbose=${1:-}
+if [[ -z "$verbose" ]]; then
+    main
+else
+    main_verbose
+fi
