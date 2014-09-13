@@ -88,25 +88,28 @@ class Syncer():
         self.iwconfig()
 
     def sync(self, local_path, remote_path):
-        rsync_cmd = ["rsync", "-avz", "--append"]
-        rsync_cmd += ["--timeout", "30"]
-        rsync_cmd += ["--chmod", self.config['remote_chmod']]
-        rsync_cmd += ["-e", 'ssh']
+        for sync_node in self.config['sync_nodes']:
+            rsync_cmd = ["rsync", "-avz", "--append"]
+            rsync_cmd += ["--timeout", "30"]
+            rsync_cmd += ["--chmod", self.config['remote_chmod']]
+            rsync_cmd += ["-e", 'ssh']
 
-        rsync_cmd += [local_path]
-        rsync_cmd += ["%s@%s:%s" % (self.config['remoteuser'],
-            self.config['remotehost'], remote_path)]
+            rsync_cmd += [local_path]
+            rsync_cmd += ["%s@%s:%s" %
+                (sync_node['user'], sync_node['host'], remote_path)]
 
-        self.log.debug('rsync command line: %s', rsync_cmd)
+            self.log.debug('rsync command line: %s', rsync_cmd)
 
-        self.log.info('Starting rsync %s -> %s...', local_path, remote_path)
-        ecode = subprocess.call(rsync_cmd)
-        if ecode == 0:
-            self.log.info('rsync finished successfully.')
-            return True
-        else:
-            self.log.error('rsync exited with status %i', ecode)
-            return False
+            self.log.info('Starting rsync %s -> %s on %s...',
+                local_path, remote_path, sync_node['host'])
+            ecode = subprocess.call(rsync_cmd)
+            if ecode == 0:
+                self.log.info('rsync finished successfully.')
+                return True
+            else:
+                self.log.error('rsync exited with status %i', ecode)
+
+        return False
 
     def after_success(self):
         data_files = listfiles(self.DATA_PATH)

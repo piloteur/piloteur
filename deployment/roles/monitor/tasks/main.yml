@@ -67,14 +67,15 @@
   pip: requirements={{ monitor }}/requirements.txt chdir={{ monitor }}
   sudo: yes
 
-# Cache the remotehost SSH host key
+# Cache the sync_nodes SSH host key
 - name: extract remote host
-  shell: "{{ endpoint }}/config.py any | jq --raw-output .remotehost"
-  register: remotehost
+  shell: "{{ endpoint }}/config.py | jq --raw-output '.sync_nodes|.[].host'"
+  register: sync_nodes
 - name: cache the remote host key
-  shell: creates="{{ home }}/.ssh/.cached-host-key-{{ remotehost.stdout.strip() }}"
-      ssh-keyscan -t ecdsa,rsa,dsa {{ remotehost.stdout.strip() }} >> ~/.ssh/known_hosts;
-      touch {{ home }}/.ssh/.cached-host-key-{{ remotehost.stdout.strip() }}
+  shell: creates="{{ home }}/.ssh/.cached-host-key-{{ item.strip() }}"
+      ssh-keyscan -t ecdsa,rsa,dsa {{ item.strip() }} >> ~/.ssh/known_hosts;
+      touch {{ home }}/.ssh/.cached-host-key-{{ item.strip() }}
+  with_items: sync_nodes.stdout_lines
 
 - name: install the monitor init scripts
   template: src={{ item }} dest=/etc/init.d/{{ item }}

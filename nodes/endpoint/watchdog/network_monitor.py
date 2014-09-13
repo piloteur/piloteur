@@ -32,7 +32,7 @@ class NetworkMonitor():
 
     def monitor_network(self):
         try:
-            s = socket.create_connection((self.config['remotehost'], 22), 5)
+            s = socket.create_connection((self.config['sync_nodes'][0]['host'], 22), 5)
             banner = s.recv(256)
             s.close()
         except socket.error as e:
@@ -95,7 +95,7 @@ class NetworkMonitor():
 
     def report_failure(self, failure):
         self.log.error('reported network failure: %s' % failure)
-        self.log.info('\n%s' % traceroute(self.config['remotehost']))
+        self.log.info('\n%s' % traceroute(self.config['sync_nodes'][0]['host']))
 
         if failure == self.REMOTE_FAILURE:
             return
