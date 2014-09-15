@@ -19,6 +19,8 @@
 - hosts: all
   gather_facts: True
   remote_user: admin
+  vars_files:
+    - repo_definitions.yml
   # TODO: segregate this into a different user
   roles:
     - { role: unattended-upgrades, sudo: yes, email: bip@filippo.io }

@@ -1,13 +1,17 @@
 - hosts: all
   gather_facts: False
-  remote_user: admin
+  remote_user: ubuntu
   sudo: yes
   tasks:
-    - user: name=piloteur
+    - user: name=ubuntu password=!
+
+    - user: name=admin password=! shell=/bin/bash
     - name: add piloteur-admin to authorized_key
       authorized_key: user=admin
         key="{{ lookup('file', '../keys/piloteur-admin.pub') }}"
-    - user: name=admin password=!
+    - name: setup sudo
+      copy: content="admin ALL=(ALL) NOPASSWD:ALL" dest=/etc/sudoers.d/piloteur
+        validate='visudo -cf %s' owner=root group=root
 
     - name: install python-apt // workaround Ansible 1.5.3 bug #6530
       shell: dpkg -s python-apt || apt-get update && apt-get install -y python-apt
@@ -15,9 +19,9 @@
 - hosts: all
   gather_facts: True
   remote_user: admin
-  sudo_user: piloteur
-  sudo: yes
   vars_files:
     - repo_definitions.yml
+  # TODO: segregate this into a different user
   roles:
-    - bridge
+    - { role: unattended-upgrades, sudo: yes, email: bip@filippo.io }
+    - config

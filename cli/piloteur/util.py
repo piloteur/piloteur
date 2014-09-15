@@ -18,18 +18,23 @@ CODE = os.path.join(DIR, '..', '..')
 DEPLOYMENT = os.path.join(CODE, 'deployment')
 SSH_KEY = os.path.join(CODE, 'keys', 'piloteur-admin')
 
-def dep_call(command, config, env):
+def dep_call(command, config, env, capture_output=True):
     cmd_env = os.environ.copy()
     cmd_env.update(env)
     cmd_env["PATH"] = (os.path.join(config["paths"]["virtualenv"], "bin")
         + ":" + cmd_env["PATH"])
-    return subprocess.check_output(command, env=cmd_env, cwd=DEPLOYMENT)
+    if capture_output:
+        return subprocess.check_output(command, env=cmd_env, cwd=DEPLOYMENT)
+    else:
+        return subprocess.check_call(command, env=cmd_env, cwd=DEPLOYMENT)
 
 def open_ssh(node_name, config):
     if node_name == "monitor":
         host, user = config["nodes"]["monitor"], "admin"
     elif node_name == "bridge":
         host, user = config["nodes"]["bridge"], "admin"
+    elif node_name == "config":
+        host, user = config["nodes"]["config"], "admin"
     elif node_name == "github":
         host, user = "github.com", "git"
     client = paramiko.SSHClient()
@@ -79,11 +84,11 @@ def open_bridge(node_id, config):
 
     return p, port
 
-def call_ansible(arguments, config):
+def call_ansible(arguments, config, env):
     ansible_path = os.path.join(config["paths"]["virtualenv"], "bin", "ansible-playbook")
     cmd = [ansible_path]
     cmd.extend(arguments)
-    return subprocess.check_call(cmd, cwd=DEPLOYMENT)
+    return dep_call(cmd, config, env, capture_output=False)
 
 def redirect_paramiko(stdout, stderr):
     while True:

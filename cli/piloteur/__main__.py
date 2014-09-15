@@ -13,7 +13,7 @@ Usage:
   piloteur [options] config <node-id>
   piloteur [options] check (--all | <node-id>)
   piloteur [options] list [--all] [<node-expression>]
-  piloteur [options] deploy-special [--type={monitor,sync,bridge}]
+  piloteur [options] deploy-special [--type={monitor,sync,bridge,config}]
   piloteur (-h | --help)
   piloteur --version
 

@@ -34,6 +34,9 @@ def setup(config):
     [monitor-nodes]
     {config[nodes][monitor]}
 
+    [config-nodes]
+    {config[nodes][config]}
+
     [raspberrypi]
     {config[addresses][rpi]}
 
@@ -113,7 +116,7 @@ def test(config, env):
 
     ### nodes
     logging.info("Testing infrastructure nodes...")
-    for node_name in ("monitor", "bridge"):
+    for node_name in ("monitor", "bridge", "config"):
         try: open_ssh(node_name, config).close()
         except:
             logging.error("ERROR: Failed to log into %s", node_name)
