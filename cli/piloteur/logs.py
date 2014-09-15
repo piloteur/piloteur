@@ -13,9 +13,9 @@ def logs(node_id, driver_name, log_type, num, config, env):
     init_nexus(config)
 
     if log_type == "logs":
-        logs = nexus.fetch_logs(driver_name, n=num, node_id=node_id)
+        logs = nexus.fetch_logs(driver_name, n=int(num), node_id=node_id)
     elif log_type == "data":
-        logs = nexus.fetch_data(driver_name, n=num, node_id=node_id)
+        logs = nexus.fetch_data(driver_name, n=int(num), node_id=node_id)
     else:
         logging.error("The type can only be data or logs")
         return 1
@@ -27,10 +27,10 @@ def logs(node_id, driver_name, log_type, num, config, env):
     print logs
     return 0
 
-def syslog(node_id, log_name, num, config, env)
+def syslog(node_id, log_name, num, config, env):
     init_nexus(config)
 
-    logs = nexus.private.fetch_system_logs(log_name, n=num, node_id=node_id)
+    logs = nexus.private.fetch_system_logs(log_name, n=int(num), node_id=node_id)
 
     if not logs:
         logging.error("Logs or node not found")

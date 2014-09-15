@@ -10,6 +10,8 @@ import paramiko
 import nexus
 import logging
 import time
+import sys
+import select
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 CODE = os.path.join(DIR, '..', '..')
@@ -60,17 +62,21 @@ def open_bridge(node_id, config):
     out = stdout.read().strip()
     if out == "":
         logging.error("Node ID not found on the bridge")
-        return 1
+        sys.exit(1)
 
     port = out.split(':')[0].rsplit('/')[-1]
     client.close()
 
-    p = subprocess.Popen(["ssh", "-T", "-L", "%s:127.0.0.1:%s" % (port, port),
+    p = subprocess.Popen(["ssh", "-v", "-T", "-L", "%s:127.0.0.1:%s" % (port, port),
         "-o StrictHostKeyChecking=no", "-i", SSH_KEY,
         "admin@%s" % config["nodes"]["bridge"]],
-        stdout=open(os.devnull), stderr=open(os.devnull), stdin=subprocess.PIPE)
+        stderr=subprocess.PIPE, stdout=open(os.devnull), stdin=subprocess.PIPE)
 
-    time.sleep(1)
+    while True:
+        line = p.stderr.readline()
+        if 'Entering interactive session.' in line:
+            break
+
     return p, port
 
 def call_ansible(arguments, config):
@@ -78,3 +84,18 @@ def call_ansible(arguments, config):
     cmd = [ansible_path]
     cmd.extend(arguments)
     return subprocess.check_call(cmd, cwd=DEPLOYMENT)
+
+def redirect_paramiko(stdout, stderr):
+    while True:
+        if stdout.channel.recv_ready():
+            rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
+            if len(rl) > 0:
+                sys.stdout.write(stdout.channel.recv(1024))
+        if stderr.channel.recv_ready():
+            rl, wl, xl = select.select([stderr.channel], [], [], 0.0)
+            if len(rl) > 0:
+                sys.stderr.write(stderr.channel.recv(1024))
+        if stdout.channel.exit_status_ready():
+            break
+
+    return stdout.channel.recv_exit_status()

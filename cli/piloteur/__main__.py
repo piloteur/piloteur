@@ -35,12 +35,10 @@ Command logs: Fetch driver logs or data.
   --num=<lines>       Number of lines to tail [default: 50]
 
 Command syslog: Fetch system logs.
-  --num=<lines>  Number of lines to tail [default: 50]
 
 Command config: Print the endpoint config.
 
 Command check: Run a verbose check from the monitor.
-  --all  Run the check on all the connected endpoints
 
 Command list: List the endpoints and their status from the monitor cache.
   --all              List also offline endpoints

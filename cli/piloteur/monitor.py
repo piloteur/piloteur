@@ -9,14 +9,15 @@ import nexus
 import nexus.private
 import re
 
-from .util import open_ssh, init_nexus
+from .util import open_ssh, init_nexus, redirect_paramiko
 
 def check(node_id, config, env):
     cmd = "python ~/piloteur-code/nodes/monitor/api/check.py"
     if node_id: cmd += " " + node_id
     client = open_ssh("bridge", config)
     stdin, stdout, stderr = client.exec_command(cmd)
-    # TODO: connect stderr and be more verbose
+    redirect_paramiko(None, stderr)
+    # TODO: be more verbose
 
     retcode = 0
     res = json.load(stdout)

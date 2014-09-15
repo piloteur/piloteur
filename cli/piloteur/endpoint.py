@@ -3,12 +3,10 @@
 
 from __future__ import absolute_import
 
-import logging
+import paramiko
 import subprocess
-import os
-import time
 
-from .util import open_ssh, SSH_KEY
+from .util import open_bridge, SSH_KEY, redirect_paramiko
 
 def connect(node_id, config, env):
     p, port = open_bridge(node_id, config)
@@ -27,12 +25,12 @@ def update(node_id, config, env):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect("127.0.0.1", int(port), "admin", key_filename=SSH_KEY)
 
-    stdin, stdout, stderr = client.exec_command("~/ansible-pull.sh")
-    # TODO: connect stderr and wait
+    stdin, stdout, stderr = client.exec_command("~/ansible-pull.sh verbose")
+    retcode = redirect_paramiko(stdout, stderr)
 
     p.terminate()
 
-    return 0
+    return retcode
 
 def sync(node_id, config, env):
     p, port = open_bridge(node_id, config)
@@ -44,8 +42,8 @@ def sync(node_id, config, env):
     stdin, stdout, stderr = client.exec_command(
         "cd /home/piloteur/piloteur-code/nodes/endpoint && "
         "sudo -u piloteur /home/piloteur/ENV/bin/python sync.py")
-    # TODO: connect stderr and wait
+    retcode = redirect_paramiko(stdout, stderr)
 
     p.terminate()
 
-    return 0
+    return retcode
