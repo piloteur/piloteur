@@ -48,7 +48,7 @@
 
 - name: extract the drivers names
   shell: >
-      {{ endpoint }}/config.py | jq --raw-output '.loaded_drivers|.[]'
+      jq --raw-output '.loaded_drivers|.[]' < {{ home }}/config.json
   register: driver_names
 
 - name: create the drivers virtualenvs and install drivers requirements.txt

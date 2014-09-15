@@ -34,6 +34,44 @@
 
 
 ########################################################################
+#           GENERATE/GET/INSTALL THE NODE-ID AND THE CLASSES           #
+########################################################################
+
+- name: generate node unique UUID if not existing
+  shell: creates={{ home }}/.node-id
+      uuidgen > {{ home }}/.node-id
+  when: user_node_id is not defined
+
+- name: check the user_node_id/1
+  shell: executable=/bin/bash [[ {{ user_node_id }} =~ ^[a-z0-9-]+$ ]]
+  when: user_node_id is defined
+  register: result
+  ignore_errors: True
+- name: check the user_node_id/2
+  fail: msg="invalid characters in the user_node_id"
+  when: result|failed
+
+- name: install the user_node_id
+  copy: content={{ user_node_id }} dest={{ home }}/.node-id
+  when: user_node_id is defined
+
+# - name: get the node unique UUID
+#   command: "cat {{ home }}/.node-id"
+#   register: node_id
+# - debug: >
+#     msg="node-id: {{ node_id.stdout }}"
+
+- name: ensure .node-classes exists
+  file: path={{ home }}/.node-classes state=touch
+- name: install the node classes
+  copy: content={{ node_classes }} dest={{ home }}/.node-classes
+  when: node_classes is defined
+
+- name: install the config token
+  copy: content={{ config_token }} dest={{ home }}/.config-token
+
+
+########################################################################
 #                    DEPENDENCIES INSTALLATION                         #
 ########################################################################
 
@@ -70,40 +108,11 @@
   pip: virtualenv={{ home }}/ENV/ requirements={{ endpoint }}/requirements.txt
       extra_args="--no-index --use-wheel --find-links={{ blobs }}/wheelhouse"
 
-
-########################################################################
-#           GENERATE/GET/INSTALL THE NODE-ID AND THE CLASSES           #
-########################################################################
-
-- name: generate node unique UUID if not existing
-  shell: creates={{ home }}/.node-id
-      uuidgen > {{ home }}/.node-id
-  when: user_node_id is not defined
-
-- name: check the user_node_id/1
-  shell: executable=/bin/bash [[ {{ user_node_id }} =~ ^[a-z0-9-]+$ ]]
-  when: user_node_id is defined
-  register: result
-  ignore_errors: True
-- name: check the user_node_id/2
-  fail: msg="invalid characters in the user_node_id"
-  when: result|failed
-
-- name: install the user_node_id
-  copy: content={{ user_node_id }} dest={{ home }}/.node-id
-  when: user_node_id is defined
-
-# - name: get the node unique UUID
-#   command: "cat {{ home }}/.node-id"
-#   register: node_id
-# - debug: >
-#     msg="node-id: {{ node_id.stdout }}"
-
-- name: ensure .node-classes exists
-  file: path={{ home }}/.node-classes state=touch
-- name: install the node classes
-  copy: content={{ node_classes }} dest={{ home }}/.node-classes
-  when: node_classes is defined
+- name: run config_pull
+  command: {{ endpoint }}/pull_config.py "{{ config_node_addr }}"
+- name: create config_pull cron entry
+  cron: name="config_pull"
+      job="{{ endpoint }}/pull_config.py '{{ config_node_addr }}'"
 
 
 ########################################################################
@@ -126,7 +135,7 @@
 ########################################################################
 
 - name: extract bridge host
-  shell: "{{ endpoint }}/config.py | jq --raw-output .ssh_bridge_host"
+  shell: "jq --raw-output .ssh_bridge_host < {{ home }}/config.json"
   register: ssh_bridge_host
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ ssh_bridge_host.stdout.strip() }}"
@@ -154,7 +163,7 @@
 
 # Cache the sync_nodes SSH host key
 - name: extract remote host
-  shell: "{{ endpoint }}/config.py | jq --raw-output '.sync_nodes|.[].host'"
+  shell: "jq --raw-output '.sync_nodes|.[].host' < {{ home }}/config.json"
   register: sync_nodes
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ item.strip() }}"
@@ -165,7 +174,7 @@
 # Create folders
 - name: extract the folders that have to be created
   shell: >
-      {{ endpoint }}/config.py | jq --raw-output '[.logs_path+(.logging_modules|.[]), .logs_path+(.loaded_drivers|.[])+"-driver", .logs_path, .data_path]|.[]'
+      jq --raw-output '[.logs_path+(.logging_modules|.[]), .logs_path+(.loaded_drivers|.[])+"-driver", .logs_path, .data_path]|.[]' < {{ home }}/config.json
   register: folders
 - name: mkdir
   file: path={{ item }} state=directory
