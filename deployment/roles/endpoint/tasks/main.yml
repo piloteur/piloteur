@@ -67,8 +67,12 @@
   copy: content={{ node_classes }} dest={{ home }}/.node-classes
   when: node_classes is defined
 
+- local_action: command gen_token.py "{{ node_id }},{{ node_classes }}"
+  register: config_token
+  when: user_node_id is defined and node_classes is defined
 - name: install the config token
-  copy: content={{ config_token }} dest={{ home }}/.config-token
+  copy: content={{ config_token.stdout.strip() }} dest={{ home }}/.config-token
+  when: user_node_id is defined and node_classes is defined
 
 
 ########################################################################
@@ -110,9 +114,11 @@
 
 - name: run config_pull
   command: {{ endpoint }}/pull_config.py "{{ config_node_addr }}"
+  when: config_node_addr is defined
 - name: create config_pull cron entry
   cron: name="config_pull"
       job="{{ endpoint }}/pull_config.py '{{ config_node_addr }}'"
+  when: config_node_addr is defined
 
 
 ########################################################################
