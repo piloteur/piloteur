@@ -67,7 +67,8 @@ class Watchdog():
 
 
 def main():
-    config = json.loads(subprocess.check_output('./config.py'))
+    with open(os.path.expanduser('~/config.json')) as f:
+        config = json.load(f)
 
     s = Watchdog(config)
     s.run()

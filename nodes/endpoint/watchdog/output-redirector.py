@@ -1,6 +1,5 @@
 import datetime
 import json
-import subprocess
 import sys
 import os.path
 
@@ -8,7 +7,8 @@ import os.path
 Usage: output-redirector {-d|-l} name
 """
 
-config = json.loads(subprocess.check_output('./config.py'))
+with open(os.path.expanduser('~/config.json')) as f:
+    config = json.load(f)
 
 driver_name = sys.argv[2]
 

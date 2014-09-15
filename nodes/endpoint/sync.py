@@ -226,7 +226,8 @@ class Syncer():
 
 
 def main():
-    config = json.loads(subprocess.check_output('./config.py'))
+    with open(os.path.expanduser('~/config.json')) as f:
+        config = json.load(f)
 
     s = Syncer(config)
     s.run()

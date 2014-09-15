@@ -46,8 +46,8 @@ class DriversManager():
     def check_global_changes(self):
         code_head = subprocess.check_output(["git", "rev-parse", "HEAD"],
             cwd=os.path.expanduser('~/piloteur-code'))
-        config = hashlib.md5(subprocess.check_output(["./config.py"],
-            cwd=os.path.expanduser('~/piloteur-code/nodes/endpoint'))).hexdigest()
+        with open(os.path.expanduser('~/config.json')) as f:
+            config = hashlib.md5(f.read()).hexdigest()
 
         fingerprint = code_head + '\n' + config
 

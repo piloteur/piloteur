@@ -4,8 +4,9 @@ import json
 import subprocess
 import os.path
 
-CONFIG_PATH = os.path.expanduser('~/piloteur-code/nodes/endpoint/config.py')
-config = json.loads(subprocess.check_output(CONFIG_PATH))
+CONFIG_PATH = os.path.expanduser('~/config.json')
+with open(CONFIG_PATH) as f:
+    config = json.load(f)
 
 with open(os.path.expanduser('~/.node-id')) as f:
     UUID = f.read().strip()
