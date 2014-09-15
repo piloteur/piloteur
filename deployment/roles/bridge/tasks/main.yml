@@ -26,8 +26,6 @@
 
 - name: checkout the code repo
   git: dest={{ code }} repo={{ code_repo }} depth=1 version={{ code_rev }}
-- name: checkout the config repo
-  git: dest={{ config }} repo={{ config_repo }} depth=1 version={{ config_rev }}
 
 ########################################################################
 #                    DEPENDENCIES INSTALLATION                         #

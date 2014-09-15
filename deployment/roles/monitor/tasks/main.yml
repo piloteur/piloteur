@@ -69,7 +69,7 @@
 
 # Cache the sync_nodes SSH host key
 - name: extract remote host
-  shell: "{{ endpoint }}/config.py | jq --raw-output '.sync_nodes|.[].host'"
+  shell: "jq --raw-output '.sync_nodes|.[].host' < {{ config }}/endpoint/config.json"
   register: sync_nodes
 - name: cache the remote host key
   shell: creates="{{ home }}/.ssh/.cached-host-key-{{ item.strip() }}"

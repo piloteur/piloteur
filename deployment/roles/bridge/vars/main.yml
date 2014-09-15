@@ -2,7 +2,6 @@
 home: "/home/{{ ansible_user_id }}"
 
 code: "{{ home }}/piloteur-code"
-config: "{{ home }}/piloteur-config"
 blobs: "{{ home }}/piloteur-blobs"
 
 drivers: "{{ code }}/drivers"

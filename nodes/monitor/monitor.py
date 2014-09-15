@@ -1,8 +1,6 @@
 from __future__ import absolute_import, print_function, division, unicode_literals
 
-import subprocess
 import os.path
-import json
 import arrow
 import collections
 import paramiko
@@ -13,6 +11,10 @@ import datetime
 
 from nexus import RED, YELLOW, GREEN, list_node_ids
 import nexus.private
+
+CONFIG_NODE = os.path.expanduser('~/piloteur-code/nodes/config')
+sys.path.append(CONFIG_NODE)
+import config
 
 def void_namedtuple(ntuple):
     void = ntuple._make([None] * len(ntuple._fields))
@@ -38,7 +40,7 @@ def get_bridge_connections(bridge_host):
     stdin, stdout, stderr = client.exec_command(cmd)
     return [n.strip() for n in stdout.readlines()]
 
-def fetch_data(node_id, config):
+def fetch_data(node_id, c):
     nexus.private.set_node_id(node_id)
 
     if node_id not in list_node_ids():
@@ -52,10 +54,7 @@ def fetch_data(node_id, config):
         return NodeData(node_id=node_id, error="Mismatching node_id?!")
     classes = classes_log.split(',')[1:]
 
-    config_cmd = [os.path.expanduser("~/piloteur-code/nodes/endpoint/config.py")]
-    config_cmd.append(node_id)
-    config_cmd.extend(classes)
-    node_config = json.loads(subprocess.check_output(config_cmd))
+    node_config = config.make_config(node_id, classes)
 
     timestamp = nexus.get_timestamp()
     if timestamp is None:
@@ -88,7 +87,7 @@ def fetch_data(node_id, config):
                     versions=versions,
                     wifi_quality=wifi_quality)
 
-def assess_data(data, config):
+def assess_data(data, c):
     if data.error:
         return NodeResult(
             node_id=data.node_id,
