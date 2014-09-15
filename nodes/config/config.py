@@ -5,6 +5,8 @@ import json
 import copy
 import os
 
+CONFIG_DIR = os.path.expanduser('~/piloteur-config/endpoint')
+
 def dmerge(d1, d2):
     if not isinstance(d2, dict):
         return d2
@@ -16,9 +18,9 @@ def dmerge(d1, d2):
             result[k] = copy.deepcopy(v)
     return result
 
-def gen_paths(CONFIG_DIR):
+def gen_paths(config_dir):
     paths = {}
-    for root, dirs, files in os.walk(CONFIG_DIR):
+    for root, dirs, files in os.walk(config_dir):
         foldername = os.path.basename(root)
         if not "config.%s.json" % foldername in files:
             continue
@@ -29,14 +31,11 @@ def gen_paths(CONFIG_DIR):
             paths[foldername] = os.path.join(root, "config.%s.json" % foldername)
     return paths
 
-def make_config(UUID, classes):
-    # TODO: un-hardcode this?
-    CONFIG_DIR = os.path.expanduser('~/piloteur-config/endpoint')
-
-    with open(os.path.join(CONFIG_DIR, "config.json")) as f:
+def make_config(UUID, classes, config_dir=CONFIG_DIR):
+    with open(os.path.join(config_dir, "config.json")) as f:
         config = json.load(f)
 
-    config_paths = gen_paths(CONFIG_DIR)
+    config_paths = gen_paths(config_dir)
     for name in classes + [UUID]:
         if not config_paths.get(name): continue
         new_config_path = config_paths[name]

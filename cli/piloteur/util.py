@@ -9,7 +9,6 @@ import os.path
 import paramiko
 import nexus
 import logging
-import time
 import sys
 import select
 
@@ -17,6 +16,7 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 CODE = os.path.join(DIR, '..', '..')
 DEPLOYMENT = os.path.join(CODE, 'deployment')
 SSH_KEY = os.path.join(CODE, 'keys', 'piloteur-admin')
+CONFIG_NODE = os.path.join(CODE, 'nodes', 'config')
 
 def dep_call(command, config, env, capture_output=True):
     cmd_env = os.environ.copy()
@@ -49,6 +49,8 @@ def init_nexus(config):
         "loglevel": "INFO",
     }
 
+    logging.info("Logging in to the sync node...")
+
     for _ in range(5):
         try:
             nexus.init(nexus_config)
@@ -58,6 +60,8 @@ def init_nexus(config):
     else:
         logging.error("Failed to reach the sync node")
         exit(1)
+
+    logging.info("Logged in.")
 
 def open_bridge(node_id, config):
     client = open_ssh("bridge", config)

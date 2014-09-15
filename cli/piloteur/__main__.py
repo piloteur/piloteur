@@ -58,8 +58,8 @@ from docopt import docopt
 
 from .setup import setup, test
 from .endpoint import connect, sync, update
-from .logs import logs, syslog
-from .monitor import check, get_config, list_endpoints
+from .nexus import logs, syslog, get_config
+from .monitor import check, list_endpoints
 from .ansible import deploy_special
 from .util import DIR
 
