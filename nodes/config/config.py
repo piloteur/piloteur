@@ -19,23 +19,28 @@ def dmerge(d1, d2):
     return result
 
 def gen_paths(config_dir):
-    paths = {}
+    config_paths, wlan_paths = {}, {}
     for root, dirs, files in os.walk(config_dir):
         foldername = os.path.basename(root)
-        if not "config.%s.json" % foldername in files:
-            continue
-        if foldername in paths:
-            paths[foldername] = None
-            # TODO: log an error here
-        else:
-            paths[foldername] = os.path.join(root, "config.%s.json" % foldername)
-    return paths
+        if "config.%s.json" % foldername in files:
+            if foldername in config_paths:
+                config_paths[foldername] = None
+                # TODO: log an error here
+            else:
+                config_paths[foldername] = os.path.join(root, "config.%s.json" % foldername)
+        if "wlan.%s.cfg" % foldername in files:
+            if foldername in wlan_paths:
+                wlan_paths[foldername] = None
+                # TODO: log an error here
+            else:
+                wlan_paths[foldername] = os.path.join(root, "wlan.%s.cfg" % foldername)
+    return config_paths, wlan_paths
 
 def make_config(UUID, classes, config_dir=CONFIG_DIR):
     with open(os.path.join(config_dir, "config.json")) as f:
         config = json.load(f)
 
-    config_paths = gen_paths(config_dir)
+    config_paths, _ = gen_paths(config_dir)
     for name in classes + [UUID]:
         if not config_paths.get(name): continue
         new_config_path = config_paths[name]
@@ -47,6 +52,19 @@ def make_config(UUID, classes, config_dir=CONFIG_DIR):
     config["node-classes"] = classes
 
     return config
+
+def make_wlan_cfg(UUID, classes, config_dir=CONFIG_DIR):
+    with open(os.path.join(CONFIG_DIR, "wlan.cfg")) as f:
+        cfg = f.read()
+
+    _, wlan_paths = gen_paths(config_dir)
+
+    for name in classes + [UUID]:
+        if not wlan_paths.get(name): continue
+        cfg_path = wlan_paths[name]
+        cfg = open(cfg_path).read()
+
+    return cfg
 
 
 # with open(os.path.expanduser('~/.node-id')) as f:

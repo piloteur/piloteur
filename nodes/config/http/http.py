@@ -63,6 +63,19 @@ class Config():
         result = json.dumps(result, indent=4)
         return Response(result, mimetype='application/json')
 
+    def get_wlan(self, token):
+        parts = token.split(',')
+        if len(parts) < 2: abort(400)
+
+        UUID = parts[0]
+        sig = parts[-1].encode()
+        classes = parts[1:-1]
+
+        if not check_sig(','.join(parts[:-1]), sig): abort(403)
+
+        result = config.make_wlan_cfg(UUID, classes)
+        return Response(result, mimetype='text/plain')
+
 
 if __name__ == '__main__':
     # DIR = os.path.dirname(os.path.abspath(__file__))
@@ -76,6 +89,7 @@ if __name__ == '__main__':
     app = Flask(__name__)
 
     app.add_url_rule("/v1/<token>/config.json", 'get_config', C.get_config)
+    app.add_url_rule("/v1/<token>/wlan.cfg", 'get_wlan', C.get_wlan)
 
     host, port = arguments['--listen'].split(':')
     # app.debug = True

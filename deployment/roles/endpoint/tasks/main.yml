@@ -115,10 +115,12 @@
 - name: run config_pull
   command: {{ endpoint }}/pull_config.py "{{ config_node_addr }}"
   when: config_node_addr is defined
+  # TODO
 - name: create config_pull cron entry
   cron: name="config_pull"
       job="{{ endpoint }}/pull_config.py '{{ config_node_addr }}'"
   when: config_node_addr is defined
+  # TODO
 
 
 ########################################################################
