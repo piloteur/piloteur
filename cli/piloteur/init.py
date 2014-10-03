@@ -96,7 +96,7 @@ def init():
     N = Network()
 
     print
-    N.net_name = ask("Pick a name for your network", "smarthome")
+    N.net_name = ask("Pick a name for your network", "")
 
     print
     N.root_folder = ask("Choose a folder to store your network configuration",
@@ -113,7 +113,6 @@ def init():
 
     os.makedirs(N.root_folder)
     os.makedirs(os.path.join(N.root_folder, "keys"))
-    os.makedirs(os.path.join(N.root_folder, "ENV"))
 
     _("=> Generating keys and placing them in %s" % os.path.join(N.root_folder, "keys"))
     gen_key(os.path.join(N.root_folder, "keys", "%s-devices" % N.net_name))
@@ -208,6 +207,7 @@ def init():
     print
     N.mailgun_domain = ask("Enter the Mailgun domain for alerts", "")
     N.mailgun_key = ask("Enter the Mailgun API key", "key-xxxxxxxxxx")
+    _("Alerts will come from: Piloteur Alert Bot <alert@%s>" % N.mailgun_domain)
 
     print
     N.alert_recipients = [e.strip() for e in
@@ -286,17 +286,26 @@ def init():
 
     print
     _("""
-    A repository has been created at the following location
-    %s
-    Please push it to GitHub and make sure that ONLY the -admin key can access it
-    """ % os.path.join(N.root_folder, "piloteur-config"))
+        A repository has been created at the following location
+        %s
+        Please push it to GitHub and make sure that ONLY the following key can access it
+        %s
+    """ % (
+        os.path.join(N.root_folder, "piloteur-config"),
+        os.path.join(N.root_folder, "keys", "%s-admin.pub" % N.net_name)
+    ))
     N.config_repo = ask("Enter the ssh clone URL for the config repo",
         "git@github.com:xxx/piloteur-config.git")
 
     print
     _("""
-    Make sure that the -devices key has READ-ONLY access to the main and blobs repos
-    """)
+    Make sure that the both the following keys have READ-ONLY access to the main and blobs repos
+    %s
+    %s
+    """ % (
+        os.path.join(N.root_folder, "keys", "%s-admin.pub" % N.net_name),
+        os.path.join(N.root_folder, "keys", "%s-devices.pub" % N.net_name)
+    ))
     N.code_repo = ask("Enter the ssh clone URL for the main piloteur repo",
         "git@github.com:piloteur/piloteur.git")
     N.blobs_repo = ask("Enter the ssh clone URL for the piloteur blobs repo",
@@ -349,10 +358,6 @@ def init():
     _("=> Setting up the environment")
     setup(config)
 
-    print
-    _("=> Testing the environment")
-    test(config, env)
-
     from .ansible import deploy_special
 
     print
@@ -369,8 +374,14 @@ def init():
     deploy_special('monitor', config, env)
 
     print
+    _("=> Testing the environment")
+    if test(config, env) != 0: return
+
+    print
     _("""
     ## Success!
     From now on use the following argument with the piloteur command:
     --config=%s
-    """ % os.path.join(N.root_folder, "cli-config.json"))
+
+    The monitor interface is at http://%s/
+    """ % (os.path.join(N.root_folder, "cli-config.json"), N.monitor_node))

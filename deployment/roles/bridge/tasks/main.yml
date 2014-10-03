@@ -60,8 +60,9 @@
     line="ClientAliveCountMax 4"
   sudo_user: root
 
-- name: restart sshd
-  service: name=sshd state=restarted
+- name: restart ssh
+  service: name=ssh state=restarted
+  sudo_user: root
 
 - name: create cron entry
   cron: name="run ports cleanup"
