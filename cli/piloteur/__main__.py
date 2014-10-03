@@ -4,6 +4,7 @@
 """Piloteur command line management tool.
 
 Usage:
+  piloteur init
   piloteur [options] test
   piloteur [options] connect <node-id>
   piloteur [options] update <node-id>
@@ -18,11 +19,12 @@ Usage:
   piloteur --version
 
 Options:
-  --config=<config>  Path to the config.
-                     Defaults to config.yml in the "cli" folder.
+  --config=<config>  Path to the cli-config.json.
   -v --verbose       Print debug output.
   -h --help          Show this screen.
   --version          Show version.
+
+Command init: Interactively setup a network.
 
 Command connect: Open a shell on a endpoint.
 
@@ -50,7 +52,7 @@ Note: first create a box and add it to the config, run test and then this.
 
 from __future__ import absolute_import
 
-import yaml
+import json
 import os.path
 import sys
 import logging
@@ -61,21 +63,29 @@ from .endpoint import connect, sync, update
 from .nexus import logs, syslog, get_config
 from .monitor import check, list_endpoints
 from .ansible import deploy_special
-from .util import DIR
+from .init import init
+# from .util import DIR
 
 def main():
     arguments = docopt(__doc__, version='Piloteur CLI 1.0')
 
-    config_path = arguments['--config'] or os.path.join(DIR, '..', 'config.yml')
-    with open(config_path) as f:
-        config = yaml.load(f)
-
-    for k in config["paths"]:
-        config["paths"][k] = os.path.expanduser(config["paths"][k])
-
     level = logging.INFO if arguments['--verbose'] else logging.WARN
     format = "[%(asctime)-15s] %(message)s"
     logging.basicConfig(format=format, level=level)
+
+    if arguments['init']:
+        return init()
+
+    config_path = arguments['--config'] # or os.path.join(DIR, '..', 'config.json')
+    with open(config_path) as f:
+        config = json.load(f)
+
+    for k in config["paths"]:
+        if type(config["paths"][k]) == dict:
+            for x in config["paths"][k]:
+                config["paths"][k][x] = os.path.expanduser(config["paths"][k][x])
+        else:
+            config["paths"][k] = os.path.expanduser(config["paths"][k])
 
     setup(config)
 

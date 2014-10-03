@@ -8,7 +8,9 @@ PyYAML==3.11
 # arrow==0.4.4
 # python-dateutil==2.2
 # six==1.8.0
+recordtype==1.1
+boto==2.32.1
 
 -r ../nexus/requirements.txt
-
+-e ../nexus
 -e .

@@ -91,6 +91,12 @@ def setup(config):
     else:
         logging.info("virtualenv exists, skipping")
 
+    ### keys
+    os.symlink(config["paths"]["keys"]["admin"], os.path.join(CODE, "keys", "piloteur-admin"))
+    os.symlink(config["paths"]["keys"]["admin"] + '.pub', os.path.join(CODE, "keys", "piloteur-admin") + '.pub')
+    os.symlink(config["paths"]["keys"]["devices"], os.path.join(CODE, "keys", "piloteur-devices"))
+    os.symlink(config["paths"]["keys"]["devices"] + '.pub', os.path.join(CODE, "keys", "piloteur-devices") + '.pub')
+
 def test(config, env):
     ### ec2.py
     logging.info("Testing ec2.py...")

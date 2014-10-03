@@ -11,7 +11,7 @@ with open(CONFIG_PATH) as f:
 with open(os.path.expanduser('~/.node-id')) as f:
     UUID = f.read().strip()
 
-ssh_host = "%s@%s" % (config['ssh_bridge_user'], config['ssh_bridge_host'])
+ssh_host = "piloteur@%s" % config['ssh_bridge_host']
 
 p = subprocess.Popen(['ssh', ssh_host], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 port = p.communicate(input=UUID)[0].strip()
