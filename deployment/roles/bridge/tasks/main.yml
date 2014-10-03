@@ -60,6 +60,9 @@
     line="ClientAliveCountMax 4"
   sudo_user: root
 
+- name: restart sshd
+  service: name=sshd state=restarted
+
 - name: create cron entry
   cron: name="run ports cleanup"
       job=". /etc/profile; . $HOME/.profile; cd '{{ bridge }}'; '{{ bridge }}/cron.py'"
