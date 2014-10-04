@@ -1,5 +1,6 @@
 # Kept minimal not to make assumptions on the sync backend
 
 - hosts: all
+  remote_user: "{{ initial_user }}"
   roles:
     - sync

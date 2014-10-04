@@ -40,20 +40,20 @@
 - name: generate node unique UUID if not existing
   shell: creates={{ home }}/.node-id
       uuidgen > {{ home }}/.node-id
-  when: user_node_id is not defined
+  when: node_id is not defined
 
-- name: check the user_node_id/1
-  shell: executable=/bin/bash [[ {{ user_node_id }} =~ ^[a-z0-9-]+$ ]]
-  when: user_node_id is defined
+- name: check the node_id/1
+  shell: executable=/bin/bash [[ {{ node_id }} =~ ^[a-z0-9-]+$ ]]
+  when: node_id is defined
   register: result
   ignore_errors: True
-- name: check the user_node_id/2
-  fail: msg="invalid characters in the user_node_id"
+- name: check the node_id/2
+  fail: msg="invalid characters in the node_id"
   when: result|failed
 
-- name: install the user_node_id
-  copy: content={{ user_node_id }} dest={{ home }}/.node-id
-  when: user_node_id is defined
+- name: install the node_id
+  copy: content={{ node_id }} dest={{ home }}/.node-id
+  when: node_id is defined
 
 # - name: get the node unique UUID
 #   command: "cat {{ home }}/.node-id"
@@ -67,12 +67,13 @@
   copy: content={{ node_classes }} dest={{ home }}/.node-classes
   when: node_classes is defined
 
-- local_action: command gen_token.py "{{ node_id }},{{ node_classes }}"
+- local_action: command ./gen_token.py "{{ node_id }},{{ node_classes }}"
   register: config_token
-  when: user_node_id is defined and node_classes is defined
+  when: node_id is defined and node_classes is defined
+  sudo: no
 - name: install the config token
   copy: content={{ config_token.stdout.strip() }} dest={{ home }}/.config-token
-  when: user_node_id is defined and node_classes is defined
+  when: node_id is defined and node_classes is defined
 
 
 ########################################################################
@@ -113,7 +114,7 @@
       extra_args="--no-index --use-wheel --find-links={{ blobs }}/wheelhouse"
 
 - name: run config_pull
-  command: {{ endpoint }}/pull_config.py "{{ config_node_addr }}"
+  command: "{{ endpoint }}/pull_config.py {{ config_node_addr }}"
   when: config_node_addr is defined
   # TODO
 - name: create config_pull cron entry
