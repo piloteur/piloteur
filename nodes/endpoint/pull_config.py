@@ -11,4 +11,4 @@ PATH = os.path.expanduser('~/config.json')
 with open(os.path.expanduser('~/.config-token')) as f:
     TOKEN = f.read().strip()
 
-urllib.urlretrieve("%s/v1/%s/config.json", PATH)
+urllib.urlretrieve("%s/v1/%s/config.json" % (ADDR, TOKEN), PATH)
