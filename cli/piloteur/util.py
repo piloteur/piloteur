@@ -115,15 +115,15 @@ def call_ansible(arguments, config, env):
 
 def redirect_paramiko(stdout, stderr):
     while True:
-        if stdout.channel.recv_ready():
+        if stdout and stdout.channel.recv_ready():
             rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
             if len(rl) > 0:
                 sys.stdout.write(stdout.channel.recv(1024))
-        if stderr.channel.recv_ready():
+        if stderr and stderr.channel.recv_ready():
             rl, wl, xl = select.select([stderr.channel], [], [], 0.0)
             if len(rl) > 0:
                 sys.stderr.write(stderr.channel.recv(1024))
-        if stdout.channel.exit_status_ready():
+        if (stdout and stdout.channel.exit_status_ready()) or (stderr and stderr.channel.exit_status_ready()):
             break
 
-    return stdout.channel.recv_exit_status()
+    return (stdout and stdout.channel.exit_status_ready()) or (stderr and stderr.channel.exit_status_ready())

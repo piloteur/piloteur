@@ -7,16 +7,16 @@ import logging
 import json
 import re
 
-from .util import open_ssh, redirect_paramiko
+from .util import open_ssh
 
 def check(node_id, config, env):
     cmd = "python ~/piloteur-code/nodes/monitor/api/check.py"
     if node_id: cmd += " " + node_id
-    client = open_ssh("bridge", config)
+    client = open_ssh("monitor", config)
     stdin, stdout, stderr = client.exec_command(cmd)
-    redirect_paramiko(None, stderr)
     # TODO: be more verbose
 
+    logging.info(stderr.read())
     retcode = 0
     res = json.load(stdout)
     for r in res:

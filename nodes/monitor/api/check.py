@@ -3,7 +3,7 @@ import paramiko
 import os.path
 import sys
 
-from nexus import GREEN, init
+from nexus import GREEN, YELLOW, init
 
 PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PARENT)
@@ -32,11 +32,13 @@ for node_id in nodes_list:
     res = assess_data(data, config)
 
     if res.error:
-        color = 'RED'
-    elif res.node_health != GREEN:
+        color = 'FAIL'
+    elif res.node_health == GREEN:
+        color = 'GREEN'
+    elif res.node_health == YELLOW:
         color = 'YELLOW'
     else:
-        color = 'GREEN'
+        color = 'RED'
 
     results.append({
         "node_health": color,
