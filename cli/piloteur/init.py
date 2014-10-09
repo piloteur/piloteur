@@ -12,6 +12,8 @@ import json
 import boto.ec2
 from recordtype import recordtype
 
+from .util import AMI_MAP
+
 Network = recordtype('Network', [
     "net_name",
     "root_folder",
@@ -33,25 +35,6 @@ Network = recordtype('Network', [
     "config_repo",
     "blobs_repo",
 ], default=None)
-
-AMI_MAP = {
-    "us-east-1": {
-        "ubuntu": "ami-9eaa1cf6",
-        "debian": "ami-9844f0f0"
-    },
-    "us-west-1": {
-        "ubuntu": "ami-076e6542",
-        "debian": "ami-5faca41a"
-    },
-    "us-west-2": {
-        "ubuntu": "ami-3d50120d",
-        "debian": "ami-d70341e7"
-    },
-    "eu-west-1": {
-        "ubuntu": "ami-f0b11187",
-        "debian": "ami-3051f047"
-    },
-}
 
 def _(s): print(textwrap.dedent(s).strip())
 

@@ -18,6 +18,25 @@ DEPLOYMENT = os.path.join(CODE, 'deployment')
 SSH_KEY = os.path.join(CODE, 'keys', 'piloteur-admin')
 CONFIG_NODE = os.path.join(CODE, 'nodes', 'config')
 
+AMI_MAP = {
+    "us-east-1": {
+        "ubuntu": "ami-9eaa1cf6",
+        "debian": "ami-ee44f086"
+    },
+    "us-west-1": {
+        "ubuntu": "ami-076e6542",
+        "debian": "ami-dfaca49a"
+    },
+    "us-west-2": {
+        "ubuntu": "ami-3d50120d",
+        "debian": "ami-d30042e3"
+    },
+    "eu-west-1": {
+        "ubuntu": "ami-f0b11187",
+        "debian": "ami-1050f167"
+    },
+}
+
 def dep_call(command, config, env, capture_output=True):
     cmd_env = os.environ.copy()
     cmd_env.update(env)

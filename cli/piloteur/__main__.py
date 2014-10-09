@@ -5,16 +5,17 @@
 
 Usage:
   piloteur init
-  piloteur [options] test
-  piloteur [options] connect <node-id>
-  piloteur [options] update <node-id>
-  piloteur [options] sync <node-id>
-  piloteur [options] logs [--type={data,logs}] [--num=<lines>] <node-id> <driver-name>
-  piloteur [options] syslog [--num=<lines>] <node-id> <log-name>
-  piloteur [options] config <node-id>
-  piloteur [options] check (--all | <node-id>)
-  piloteur [options] list [--all] [<node-expression>]
-  piloteur [options] deploy-special [--type={monitor,sync,bridge,config}]
+  piloteur [-v] --config=<config> test
+  piloteur [-v] --config=<config> create --endpoint --node-id=<node-id> --node-classes=<classes> (--on=rpi --at=<host> | --on=ec2 [--aws-type=<aws-type>])
+  piloteur [-v] --config=<config> create --type={monitor,sync,bridge,config} (--on=arbitrary --at=<host> | --on=ec2 [--aws-type=<aws-type>])
+  piloteur [-v] --config=<config> connect <node-id>
+  piloteur [-v] --config=<config> update <node-id>
+  piloteur [-v] --config=<config> sync <node-id>
+  piloteur [-v] --config=<config> logs [--type={data,logs}] [--num=<lines>] <node-id> <driver-name>
+  piloteur [-v] --config=<config> syslog [--num=<lines>] <node-id> <log-name>
+  piloteur [-v] --config=<config> config <node-id>
+  piloteur [-v] --config=<config> check (--all | <node-id>)
+  piloteur [-v] --config=<config> list [--all] [<node-expression>]
   piloteur (-h | --help)
   piloteur --version
 
@@ -25,6 +26,16 @@ Options:
   --version          Show version.
 
 Command init: Interactively setup a network.
+
+Command test: Check if the environment is set up properly.
+
+Command create: Create a new node.
+  --on=<strategy>   ec2 (will create the instance), rpi or arbitrary
+  --at=<ip>         If not deploying to EC2, this is the target box
+                    For non-endpoints, specify the user too: user@host
+  --node-id=<node-id>        Endpoint node-id
+  --node-classes=<classes>   Endpoint node-classes, comma separated
+  --aws-type=<aws-type>      EC2 instance type [default: t2.micro]
 
 Command connect: Open a shell on a endpoint.
 
@@ -45,9 +56,6 @@ Command check: Run a verbose check from the monitor.
 Command list: List the endpoints and their status from the monitor cache.
   --all              List also offline endpoints
   <node-expression>  A partially matched regex to filter the nodes
-
-Command deploy-special: Deploy a infrastructure node.
-Note: first create a box and add it to the config, run test and then this.
 """
 
 from __future__ import absolute_import
@@ -62,7 +70,7 @@ from .setup import setup, test
 from .endpoint import connect, sync, update
 from .nexus import logs, syslog, get_config
 from .monitor import check, list_endpoints
-from .ansible import deploy_special
+from .ansible import create_infra, create_endpoint
 from .init import init
 # from .util import DIR
 
@@ -75,6 +83,10 @@ def main():
 
     if arguments['init']:
         return init()
+
+    if not arguments['--config']:
+        print "Please specify a --config"
+        return 1
 
     config_path = arguments['--config'] # or os.path.join(DIR, '..', 'config.json')
     with open(config_path) as f:
@@ -96,6 +108,15 @@ def main():
 
     if arguments['test']:
         return test(config, env)
+
+    if arguments['create']:
+        if arguments['--endpoint']:
+            return create_endpoint(arguments['--on'], arguments['--at'],
+                arguments['--node-id'], arguments['--node-classes'],
+                arguments['--aws-type'], config, env)
+        return create_infra(arguments['--type'], arguments['--on'],
+            arguments['--at'], arguments['--aws-type'],
+            config, env)
 
     if arguments['connect']:
         return connect(arguments['<node-id>'], config, env)
@@ -122,9 +143,6 @@ def main():
 
     if arguments['list']:
         return list_endpoints(arguments['<node-expression>'], arguments['--all'], config, env)
-
-    if arguments['deploy-special']:
-        return deploy_special(arguments['--type'], config, env)
 
 
 if __name__ == '__main__':
