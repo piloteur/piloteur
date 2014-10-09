@@ -190,7 +190,7 @@ class Syncer():
         VERSIONS_PATH = os.path.join(self.LOGS_PATH, "versions/versions-log.%s.csv" % self.LOG_HOUR)
 
         versions = []
-        for repo in ("piloteur-code", "piloteur-config", "piloteur-blobs"):
+        for repo in ("piloteur-code", "piloteur-blobs"):
             versions.append(subprocess.check_output(["git", "rev-parse", "HEAD"],
                 cwd=os.path.expanduser("~/" + repo)).strip())
 

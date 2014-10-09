@@ -76,7 +76,6 @@ def fetch_data(node_id, c):
         "timestamp",
         "ansible",
         "piloteur-code",
-        "piloteur-config",
         "piloteur-blobs",
     ), versions))
 
