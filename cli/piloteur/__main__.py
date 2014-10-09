@@ -16,6 +16,7 @@ Usage:
   piloteur [-v] --config=<config> config <node-id>
   piloteur [-v] --config=<config> check (--all | <node-id>)
   piloteur [-v] --config=<config> list [--all] [<node-expression>]
+  piloteur --config=<config> nexus_config
   piloteur (-h | --help)
   piloteur --version
 
@@ -56,6 +57,8 @@ Command check: Run a verbose check from the monitor.
 Command list: List the endpoints and their status from the monitor cache.
   --all              List also offline endpoints
   <node-expression>  A partially matched regex to filter the nodes
+
+Command nexus_config: Print the path of the nexus command line config
 """
 
 from __future__ import absolute_import
@@ -72,7 +75,7 @@ from .nexus import logs, syslog, get_config
 from .monitor import check, list_endpoints
 from .ansible import create_infra, create_endpoint
 from .init import init
-# from .util import DIR
+from .util import CODE
 
 def main():
     arguments = docopt(__doc__, version='Piloteur CLI 1.0')
@@ -143,6 +146,10 @@ def main():
 
     if arguments['list']:
         return list_endpoints(arguments['<node-expression>'], arguments['--all'], config, env)
+
+    if arguments['nexus_config']:
+        print os.path.join(CODE, "nexus", "config.json")
+        return 0
 
 
 if __name__ == '__main__':

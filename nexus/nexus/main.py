@@ -129,11 +129,9 @@ Options:
 
     init(config)
 
-    if not hasattr(sys.modules['__main__'], 'PERIOD') or not hasattr(sys.modules['__main__'], 'check'):
-        log.error("PERIOD global or check function not found.")
+    if not hasattr(sys.modules['__main__'], 'check'):
+        log.error("check function not found.")
         sys.exit(1)
-
-    log.info("The check() function would run every... %d second(s)", sys.modules['__main__'].PERIOD)
 
     global node_id
     node_id = arguments["<node-id>"]

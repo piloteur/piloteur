@@ -11,8 +11,9 @@ import logging
 import subprocess
 import os
 import nexus
+import json
 
-from .util import init_nexus, dep_call, open_ssh, CODE, DEPLOYMENT
+from .util import init_nexus, dep_call, open_ssh, CODE, DEPLOYMENT, SSH_KEY
 
 def setup(config):
     ### repo_definitions.yml
@@ -97,6 +98,16 @@ def setup(config):
     os.symlink(config["paths"]["keys"]["admin"] + '.pub', os.path.join(CODE, "keys", "piloteur-admin") + '.pub')
     os.symlink(config["paths"]["keys"]["devices"], os.path.join(CODE, "keys", "piloteur-devices"))
     os.symlink(config["paths"]["keys"]["devices"] + '.pub', os.path.join(CODE, "keys", "piloteur-devices") + '.pub')
+
+    # nexus config
+    # TODO: make nexus just accept cli config
+    nexus_config = {
+        "sync_nodes": config["nodes"]["sync"],
+        "ssh_key": SSH_KEY,
+        "loglevel": "INFO",
+    }
+    with open(os.path.join(CODE, "nexus", "config.json"), 'w') as f:
+        json.dump(nexus_config, f)
 
 def test(config, env):
     ### ec2.py
