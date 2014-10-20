@@ -83,8 +83,9 @@
 ## (apt moved to the top)
 
 - name: get the pip installer
-  get_url: url=https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-      dest={{ home }}/get-pip.py owner=root group=root mode=0755
+  get_url: url=https://raw.githubusercontent.com/pypa/pip/08ebc0a8bd5ea5e407caef8b5b0c265bdd7f5876/contrib/get-pip.py
+      dest={{ home }}/get-pip.py owner=root group=root mode=0755 validate_certs=no
+      sha256sum=d43dc33a5670d69dd14a9be1f2b2fa27ebf124ec1b212a47425331040f742a9b
   sudo_user: root
 - name: install pip
   command: python {{ home }}/get-pip.py

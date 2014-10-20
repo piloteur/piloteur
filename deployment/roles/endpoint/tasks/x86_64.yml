@@ -1,6 +1,7 @@
 ---
 ############################# INSTALL JQ ################################
 - name: x86_64 | install jq
-  get_url: url=https://github.com/stedolan/jq/raw/gh-pages/download/linux64/jq
-      dest=/usr/local/bin/jq owner=root group=root mode=0755
+  get_url: url=https://raw.githubusercontent.com/stedolan/jq/63e80b8dbddf670139f754072004d6fb5e24876d/download/linux64/jq
+      dest=/usr/local/bin/jq owner=root group=root mode=0755 validate_certs=no
+      sha256sum=b9b63aa4b3cc85df8bdca884effb69d66e9ebd717454a9e212d9423ffe3e955f
   sudo_user: root
