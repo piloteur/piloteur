@@ -127,3 +127,7 @@ def redirect_paramiko(stdout, stderr):
             break
 
     return (stdout and stdout.channel.exit_status_ready()) or (stderr and stderr.channel.exit_status_ready())
+
+def confirm(msg):
+    resp = raw_input(msg)
+    return resp.lower() in ('y', 'yes')

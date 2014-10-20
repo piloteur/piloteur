@@ -12,6 +12,8 @@ Usage:
   piloteur [-v] --config=<config> connect <node-id>
   piloteur [-v] --config=<config> update <node-id>
   piloteur [-v] --config=<config> sync <node-id>
+  piloteur [-v] --config=<config> decommission [--yes] <node-id>
+  piloteur [-v] --config=<config> batch_decommission [--yes] <filename>
   piloteur [-v] --config=<config> logs [--type={data,logs}] [--num=<lines> | --hour=YYYY-MM-DD-HH] <node-id> <driver-name>
   piloteur [-v] --config=<config> syslog [--num=<lines> | --hour=YYYY-MM-DD-HH] <node-id> <log-name>
   piloteur [-v] --config=<config> config <node-id>
@@ -55,6 +57,12 @@ Command update: Run a Ansible update (soft redeploy) on the endpoint.
 
 Command sync: Run a emergency rsync on the endpoint.
 
+Command decommission: Disable and shut down the endpoint. IRREVERSIBLE.
+  --yes     Don't ask for confirmation.
+
+Command batch_decommission: Decommission all the endpoints listed in a file.
+One node_id per line.
+
 Command logs: Fetch driver logs or data.
   --type={data,logs}  What type of logs to fetch [default: logs]
   --num=<lines>       Number of (most recent) lines to tail [default: 50]
@@ -83,7 +91,7 @@ import logging
 from docopt import docopt
 
 from .setup import setup, test
-from .endpoint import connect, sync, update
+from .endpoint import connect, sync, update, decommission, batch_decommission
 from .nexus import logs, syslog, get_config
 from .monitor import check, list_endpoints
 from .ansible import create_infra, create_endpoint, create_csv
@@ -170,6 +178,14 @@ def main():
 
     if arguments['sync']:
         return sync(arguments['<node-id>'], config, env)
+
+    if arguments['decommission']:
+        return decommission(arguments['<node-id>'], arguments['--yes'],
+            config, env)
+
+    if arguments['batch_decommission']:
+        return batch_decommission(arguments['<node-id>'], arguments['--yes'],
+            config, env)
 
     if arguments['logs']:
         return logs(arguments['<node-id>'], arguments['<driver-name>'],
