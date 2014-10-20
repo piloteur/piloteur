@@ -52,18 +52,28 @@ def latest_timestamp(files):
     return mtime
 
 @main.API_call
-def fetch_data(driver_name, n=100, node_id=None):
+def fetch_data(driver_name, n=100, h=None, node_id=None):
     files = get_data_files(node_id, driver_name)
     if not files: return
 
-    return fetch_lines(files, n)
+    if not h: return fetch_lines(files, n)
+
+    for filename in files:
+        if filename.split('.')[-2] == h:
+            with main.sftp.open(filename) as f:
+                return f.read()
 
 @main.API_call
-def fetch_logs(driver_name, n=100, node_id=None):
+def fetch_logs(driver_name, n=100, h=None, node_id=None):
     files = get_logs_files(node_id, driver_name)
     if not files: return
 
-    return fetch_lines(files, n)
+    if not h: return fetch_lines(files, n)
+
+    for filename in files:
+        if filename.split('.')[-2] == h:
+            with main.sftp.open(filename) as f:
+                return f.read()
 
 @main.API_call
 def data_timestamp(driver_name, node_id=None):
@@ -96,8 +106,13 @@ def get_system_logs_files(node_id, log_name):
     return log_files
 
 @main.API_call
-def fetch_system_logs(log_name, n=1, node_id=None):
+def fetch_system_logs(log_name, n=1, h=None, node_id=None):
     files = get_system_logs_files(node_id, log_name)
     if not files: return
 
-    return fetch_lines(files, n)
+    if not h: return fetch_lines(files, n)
+
+    for filename in files:
+        if filename.split('.')[-2] == h:
+            with main.sftp.open(filename) as f:
+                return f.read()

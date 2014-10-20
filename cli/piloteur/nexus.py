@@ -15,16 +15,21 @@ from .util import init_nexus, CONFIG_NODE
 sys.path.append(CONFIG_NODE)
 import config as c
 
-def logs(node_id, driver_name, log_type, num, config, env):
+def logs(node_id, driver_name, log_type, num, hour, config, env):
     init_nexus(config)
 
     if log_type == "logs":
-        logs = nexus.fetch_logs(driver_name, n=int(num), node_id=node_id)
+        fetcher = nexus.fetch_logs
     elif log_type == "data":
-        logs = nexus.fetch_data(driver_name, n=int(num), node_id=node_id)
+        fetcher = nexus.fetch_data
     else:
         logging.error("The type can only be data or logs")
         return 1
+
+    if hour:
+        logs = fetcher(driver_name, h=hour, node_id=node_id)
+    else:
+        logs = fetcher(driver_name, n=int(num), node_id=node_id)
 
     if not logs:
         logging.error("Logs or node not found")
@@ -33,10 +38,13 @@ def logs(node_id, driver_name, log_type, num, config, env):
     print logs
     return 0
 
-def syslog(node_id, log_name, num, config, env):
+def syslog(node_id, log_name, num, hour, config, env):
     init_nexus(config)
 
-    logs = nexus.private.fetch_system_logs(log_name, n=int(num), node_id=node_id)
+    if hour:
+        logs = nexus.private.fetch_system_logs(log_name, h=hour, node_id=node_id)
+    else:
+        logs = nexus.private.fetch_system_logs(log_name, n=int(num), node_id=node_id)
 
     if not logs:
         logging.error("Logs or node not found")

@@ -11,8 +11,8 @@ Usage:
   piloteur [-v] --config=<config> connect <node-id>
   piloteur [-v] --config=<config> update <node-id>
   piloteur [-v] --config=<config> sync <node-id>
-  piloteur [-v] --config=<config> logs [--type={data,logs}] [--num=<lines>] <node-id> <driver-name>
-  piloteur [-v] --config=<config> syslog [--num=<lines>] <node-id> <log-name>
+  piloteur [-v] --config=<config> logs [--type={data,logs}] [--num=<lines> | --hour=YYYY-MM-DD-HH] <node-id> <driver-name>
+  piloteur [-v] --config=<config> syslog [--num=<lines> | --hour=YYYY-MM-DD-HH] <node-id> <log-name>
   piloteur [-v] --config=<config> config <node-id>
   piloteur [-v] --config=<config> check (--all | <node-id>)
   piloteur [-v] --config=<config> list [--include-offline] [<node-expression>]
@@ -51,7 +51,8 @@ Command sync: Run a emergency rsync on the endpoint.
 
 Command logs: Fetch driver logs or data.
   --type={data,logs}  What type of logs to fetch [default: logs]
-  --num=<lines>       Number of lines to tail [default: 50]
+  --num=<lines>       Number of (most recent) lines to tail [default: 50]
+  --hour=<hour>       The hour of logs to retrieve in YYYY-MM-DD-HH format
 
 Command syslog: Fetch system logs.
 
@@ -162,11 +163,12 @@ def main():
 
     if arguments['logs']:
         return logs(arguments['<node-id>'], arguments['<driver-name>'],
-            arguments['--type'], arguments['--num'], config, env)
+            arguments['--type'], arguments['--num'], arguments['--hour'],
+            config, env)
 
     if arguments['syslog']:
         return syslog(arguments['<node-id>'], arguments['<log-name>'],
-            arguments['--num'], config, env)
+            arguments['--num'], arguments['--hour'], config, env)
 
     if arguments['config']:
         return get_config(arguments['<node-id>'], config, env)

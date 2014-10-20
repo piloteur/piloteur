@@ -130,15 +130,19 @@ A JSON configuration file looks like this (without comments):
 
 In all calls, if `hub_id` is not specified it will default to the value `check()` was called with.
 
-### fetch_data(driver_name, n=100, hub_id=None)
+### fetch_data(driver_name, n=100, h=None, hub_id=None)
 
 `fetch_data` will return the *n* most recent lines from data files with the passed *driver_name* (following the common naming convention).
 
+If *h* is specified instead, in format YYYY-MM-DD-HH, it will fetch all the lines logged during that hour.
+
 Returns `None` if not found.
 
-### fetch_logs(driver_name, n=100, hub_id=None)
+### fetch_logs(driver_name, n=100, h=None, hub_id=None)
 
 `fetch_logs` will return the *n* most recent lines from log files with the passed *driver_name* (following the common naming convention).
+
+If *h* is specified instead, in format YYYY-MM-DD-HH, it will fetch all the lines logged during that hour.
 
 Returns `None` if not found.
 
