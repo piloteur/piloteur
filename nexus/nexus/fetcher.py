@@ -59,7 +59,7 @@ def fetch_data(driver_name, n=100, h=None, node_id=None):
     if not h: return fetch_lines(files, n)
 
     for filename in files:
-        if filename.split('.')[-2] == h:
+        if filename.split('.')[-2].endswith(h):
             with main.sftp.open(filename) as f:
                 return f.read()
 
@@ -71,7 +71,7 @@ def fetch_logs(driver_name, n=100, h=None, node_id=None):
     if not h: return fetch_lines(files, n)
 
     for filename in files:
-        if filename.split('.')[-2] == h:
+        if filename.split('.')[-2].endswith(h):
             with main.sftp.open(filename) as f:
                 return f.read()
 
@@ -113,6 +113,6 @@ def fetch_system_logs(log_name, n=1, h=None, node_id=None):
     if not h: return fetch_lines(files, n)
 
     for filename in files:
-        if filename.split('.')[-2] == h:
+        if filename.split('.')[-2].endswith(h):
             with main.sftp.open(filename) as f:
                 return f.read()
