@@ -184,7 +184,7 @@ def main():
             config, env)
 
     if arguments['batch_decommission']:
-        return batch_decommission(arguments['<node-id>'], arguments['--yes'],
+        return batch_decommission(arguments['<filename>'], arguments['--yes'],
             config, env)
 
     if arguments['logs']:

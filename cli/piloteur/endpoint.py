@@ -34,9 +34,9 @@ def update(node_id, config, env):
 
 def decommission(node_id, yes, config, env):
     if not yes and not confirm("Sure you want to disable endpoint %s? "
-        "You won't be able to revert this remotely. (y/n)" % node_id): return
+        "You won't be able to revert this remotely. (y/n) " % node_id): return
 
-    if sync(node_id, config, env) != 0: return 1
+    sync(node_id, config, env)
 
     p, port = open_bridge(node_id, config)
 
