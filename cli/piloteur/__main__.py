@@ -6,8 +6,8 @@
 Usage:
   piloteur init
   piloteur [-v] --config=<config> test
-  piloteur [-v] --config=<config> create --endpoint --node-id=<node-id> --node-classes=<classes> (--on=rpi --at=<host> | --on=ec2 [--aws-type=<aws-type>])
-  piloteur [-v] --config=<config> create --type={monitor,sync,bridge,config} (--on=arbitrary --at=<host> | --on=ec2 [--aws-type=<aws-type>])
+  piloteur [-v] --config=<config> create_endpoint --node-id=<node-id> --node-classes=<classes> --on={rpi,ec2} [--at=<ip>] [--aws-type=<aws-type>]
+  piloteur [-v] --config=<config> create_node --type={monitor,sync,bridge,config} --on={arbitrary,ec2} [--at=<host>] [--aws-type=<aws-type>]
   piloteur [-v] --config=<config> connect <node-id>
   piloteur [-v] --config=<config> update <node-id>
   piloteur [-v] --config=<config> sync <node-id>
@@ -15,7 +15,7 @@ Usage:
   piloteur [-v] --config=<config> syslog [--num=<lines>] <node-id> <log-name>
   piloteur [-v] --config=<config> config <node-id>
   piloteur [-v] --config=<config> check (--all | <node-id>)
-  piloteur [-v] --config=<config> list [--all] [<node-expression>]
+  piloteur [-v] --config=<config> list [--include-offline] [<node-expression>]
   piloteur --config=<config> nexus_config
   piloteur (-h | --help)
   piloteur --version
@@ -30,17 +30,22 @@ Command init: Interactively setup a network.
 
 Command test: Check if the environment is set up properly.
 
-Command create: Create a new node.
-  --on=<strategy>   ec2 (will create the instance), rpi or arbitrary
-  --at=<ip>         If not deploying to EC2, this is the target box
-                    For non-endpoints, specify the user too: user@host
+Command create_endpoint: Create a new endpoint.
+  --on=<strategy>            "ec2" (will create the instance) or "rpi"
+  --at=<ip>                  IP address for the "rpi" strategy
+  --aws-type=<aws-type>      Instance type for the "ec2" strategy [default: t2.micro]
   --node-id=<node-id>        Endpoint node-id
   --node-classes=<classes>   Endpoint node-classes, comma separated
-  --aws-type=<aws-type>      EC2 instance type [default: t2.micro]
 
-Command connect: Open a shell on a endpoint.
+Command create_node: Create a new infrastructure node.
+#  --type={monitor,sync,bridge,config}      The node type to deploy.
+#  --on=<strategy>            "ec2" (will create the instance) or "arbitrary"
+#  --at=<ip>                  User and IP for the "arbitrary" strategy [ex: ubuntu@1.1.1.1]
+#  --aws-type=<aws-type>      Instance type for the "ec2" strategy [default: t2.micro]
 
-Command update: Run a code and config pull on the endpoint.
+Command connect: Open a shell on an endpoint.
+
+Command update: Run a Ansible update (soft redeploy) on the endpoint.
 
 Command sync: Run a emergency rsync on the endpoint.
 
@@ -52,10 +57,11 @@ Command syslog: Fetch system logs.
 
 Command config: Print the endpoint config.
 
-Command check: Run a verbose check from the monitor.
+Command check: Run a verbose uncached check from the monitor.
+  --all     Run on all the online endpoints
 
 Command list: List the endpoints and their status from the monitor cache.
-  --all              List also offline endpoints
+  --include-offline  List also offline endpoints
   <node-expression>  A partially matched regex to filter the nodes
 
 Command nexus_config: Print the path of the nexus command line config
@@ -112,14 +118,38 @@ def main():
     if arguments['test']:
         return test(config, env)
 
-    if arguments['create']:
-        if arguments['--endpoint']:
-            return create_endpoint(arguments['--on'], arguments['--at'],
-                arguments['--node-id'], arguments['--node-classes'],
-                arguments['--aws-type'], config, env)
+    if arguments['create_endpoint']:
+        if arguments['--on'] == 'ec2':
+            if not arguments['--aws-type']:
+                print >> sys.stderr, __doc__
+                sys.exit(1)
+        elif arguments['--on'] == 'rpi':
+            if not arguments['--at'] or '@' in arguments['--at']:
+                print >> sys.stderr, __doc__
+                sys.exit(1)
+        else:
+            print >> sys.stderr, __doc__
+            sys.exit(1)
+
+        return create_endpoint(arguments['--on'], arguments['--at'],
+            arguments['--node-id'], arguments['--node-classes'],
+            arguments['--aws-type'], config, env)
+
+    if arguments['create_node']:
+        if arguments['--on'] == 'ec2':
+            if not arguments['--aws-type']:
+                print >> sys.stderr, __doc__
+                sys.exit(1)
+        elif arguments['--on'] == 'arbitrary':
+            if not arguments['--at'] or '@' not in arguments['--at']:
+                print >> sys.stderr, __doc__
+                sys.exit(1)
+        else:
+            print >> sys.stderr, __doc__
+            sys.exit(1)
+
         return create_infra(arguments['--type'], arguments['--on'],
-            arguments['--at'], arguments['--aws-type'],
-            config, env)
+            arguments['--at'], arguments['--aws-type'], config, env)
 
     if arguments['connect']:
         return connect(arguments['<node-id>'], config, env)
@@ -145,7 +175,7 @@ def main():
         return check(arguments['<node-id>'], config, env)
 
     if arguments['list']:
-        return list_endpoints(arguments['<node-expression>'], arguments['--all'], config, env)
+        return list_endpoints(arguments['<node-expression>'], arguments['--include-offline'], config, env)
 
     if arguments['nexus_config']:
         print os.path.join(CODE, "nexus", "config.json")
