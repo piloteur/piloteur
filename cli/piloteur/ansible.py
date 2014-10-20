@@ -7,6 +7,7 @@ import os
 import boto.ec2
 import time
 import logging
+import csv
 
 from .util import call_ansible, AMI_MAP
 
@@ -64,3 +65,28 @@ def create_infra(node_type, on, at, aws_type, config, env):
     ], config, env)
 
     print "Successfully created a %s: %s" % (node_type, host)
+
+def create_csv(on, filename, config, env):
+    l = []
+    with open(filename) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) != 3:
+                logging.error("Bad format")
+                return 1
+            l.append(row)
+
+    for row in l:
+        row[1] = ','.join(row[1].split(' '))
+
+        if on == "rpi":
+            logging.info("Creating endpoint %s with classes %s at %s", *row)
+            create_endpoint(on, row[2], row[0], row[1], None, config, env)
+
+        elif on == "ec2":
+            logging.info("Creating endpoint %s with classes %s type %s", *row)
+            create_endpoint(on, None, row[0], row[1], row[2], config, env)
+
+        else: return 1
+
+    return 0

@@ -7,6 +7,7 @@ Usage:
   piloteur init
   piloteur [-v] --config=<config> test
   piloteur [-v] --config=<config> create_endpoint --node-id=<node-id> --node-classes=<classes> --on={rpi,ec2} [--at=<ip>] [--aws-type=<aws-type>]
+  piloteur [-v] --config=<config> create_csv --on={rpi,ec2} <filename>
   piloteur [-v] --config=<config> create_node --type={monitor,sync,bridge,config} --on={arbitrary,ec2} [--at=<host>] [--aws-type=<aws-type>]
   piloteur [-v] --config=<config> connect <node-id>
   piloteur [-v] --config=<config> update <node-id>
@@ -36,6 +37,11 @@ Command create_endpoint: Create a new endpoint.
   --aws-type=<aws-type>      Instance type for the "ec2" strategy [default: t2.micro]
   --node-id=<node-id>        Endpoint node-id
   --node-classes=<classes>   Endpoint node-classes, comma separated
+
+Command create_csv: Create endpoints in bulk.
+The csv format depends on the strategy: (no header, comma delimiter, " quote)
+rpi - node_id,node_classes (space separated),IP_address
+ec2 - node_id,node_classes (space separated),instance_type
 
 Command create_node: Create a new infrastructure node.
 #  --type={monitor,sync,bridge,config}      The node type to deploy.
@@ -80,7 +86,7 @@ from .setup import setup, test
 from .endpoint import connect, sync, update
 from .nexus import logs, syslog, get_config
 from .monitor import check, list_endpoints
-from .ansible import create_infra, create_endpoint
+from .ansible import create_infra, create_endpoint, create_csv
 from .init import init
 from .util import CODE
 
@@ -135,6 +141,10 @@ def main():
         return create_endpoint(arguments['--on'], arguments['--at'],
             arguments['--node-id'], arguments['--node-classes'],
             arguments['--aws-type'], config, env)
+
+    if arguments['create_csv']:
+        return create_csv(arguments['--on'], arguments['<filename>'],
+            config, env)
 
     if arguments['create_node']:
         if arguments['--on'] == 'ec2':
